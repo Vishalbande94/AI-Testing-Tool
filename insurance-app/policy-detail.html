@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Policy Detail — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content" id="mainContent">
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  </main>
+</div>
+
+<!-- CANCEL MODAL -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Cancel Policy</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <p>Are you sure you want to cancel this policy?</p>
+        <div class="alert alert-info small"><i class="bi bi-info-circle me-2"></i>Refund will be processed on pro-rata basis within 7 business days.</div>
+        <div id="refundAmount" class="fw-bold text-success"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">No, Keep Policy</button>
+        <button class="btn btn-danger" onclick="confirmCancel()">Yes, Cancel Policy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser();
+
+  const params = new URLSearchParams(window.location.search);
+  const policyId = params.get('id');
+  const policy = policyId ? App.getPolicy(policyId) : null;
+  const user = App.currentUser();
+  const main = document.getElementById('mainContent');
+  const icons = { Motor:'🚗', Health:'❤️', Home:'🏠', Travel:'✈️' };
+  const statusMap = { Active:'badge-active', Expired:'badge-expired', Cancelled:'badge-rejected' };
+
+  if (!policy || policy.userId !== user.id) {
+    main.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><p>Policy not found. <a href="policies.html">Back to policies</a></p></div>';
+  } else {
+    const days = App.daysLeft(policy.endDate);
+    const claims = App.getClaims(user.id).filter(c => c.policyId === policyId);
+
+    let extraDetails = '';
+    if (policy.vehicleData) {
+      const v = policy.vehicleData;
+      extraDetails = `<div class="col-6"><span class="text-muted">Vehicle</span><br><strong>${v.year||''} ${v.make||''} ${v.model||''}</strong></div>
+        <div class="col-6"><span class="text-muted">Reg. Number</span><br><strong>${v.regNum||'-'}</strong></div>
+        <div class="col-6"><span class="text-muted">Fuel Type</span><br><strong>${v.fuelType||'-'}</strong></div>`;
+    } else if (policy.homeData) {
+      const h = policy.homeData;
+      extraDetails = `<div class="col-6"><span class="text-muted">Property Type</span><br><strong>${h.propertyType||'-'}</strong></div>
+        <div class="col-6"><span class="text-muted">Cover Type</span><br><strong>${h.coverType||'-'}</strong></div>
+        <div class="col-6"><span class="text-muted">City</span><br><strong>${h.city||'-'}</strong></div>`;
+    } else if (policy.travelData) {
+      const t = policy.travelData;
+      extraDetails = `<div class="col-6"><span class="text-muted">Destination</span><br><strong>${t.destination||'-'}</strong></div>
+        <div class="col-6"><span class="text-muted">Trip Type</span><br><strong>${t.tripType||'-'}</strong></div>`;
+    }
+
+    main.innerHTML = `
+      <div class="mb-3"><a href="policies.html" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back to Policies</a></div>
+      <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+          <div class="page-title">${icons[policy.type]||'📋'} ${policy.type} Insurance</div>
+          <div class="page-subtitle">${policy.id} &nbsp;·&nbsp; <span class="status-badge ${statusMap[policy.status]||''}">${policy.status}</span></div>
+        </div>
+        <div class="d-flex gap-2">
+          ${policy.status==='Active' ? `<a href="claims.html?policyId=${policyId}" class="btn btn-outline-danger btn-sm">File Claim</a>` : ''}
+          ${policy.status==='Active' && days<=60 && days>0 ? `<button class="btn btn-warning btn-sm">Renew</button>` : ''}
+          ${policy.status==='Active' ? `<button class="btn btn-outline-secondary btn-sm" onclick="showCancel()">Cancel</button>` : ''}
+          <a href="documents.html" class="btn btn-outline-primary btn-sm"><i class="bi bi-download me-1"></i>Download</a>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card mb-4">
+            <div class="card-header fw-bold">Policy Details</div>
+            <div class="card-body">
+              <div class="row g-3 small">
+                <div class="col-6"><span class="text-muted">Policy Number</span><br><strong>${policy.id}</strong></div>
+                <div class="col-6"><span class="text-muted">Plan</span><br><strong>${policy.plan}</strong></div>
+                <div class="col-6"><span class="text-muted">Start Date</span><br><strong>${App.formatDate(policy.startDate)}</strong></div>
+                <div class="col-6"><span class="text-muted">End Date</span><br><strong>${App.formatDate(policy.endDate)}</strong></div>
+                <div class="col-6"><span class="text-muted">Sum Insured</span><br><strong>${App.formatCurrency(policy.sumInsured)}</strong></div>
+                <div class="col-6"><span class="text-muted">Annual Premium</span><br><strong>${App.formatCurrency(policy.premium)}</strong></div>
+                ${extraDetails}
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-header fw-bold">Nominee Details</div>
+            <div class="card-body">
+              <div class="row g-3 small">
+                <div class="col-6"><span class="text-muted">Nominee Name</span><br><strong>${policy.nominee||'-'}</strong></div>
+                <div class="col-6"><span class="text-muted">Relationship</span><br><strong>${policy.nomineeRel||'-'}</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header fw-bold">Claims on this Policy</div>
+            <div class="card-body p-0">
+              ${claims.length === 0
+                ? '<div class="p-4 text-center text-muted small">No claims filed on this policy.</div>'
+                : `<table class="table table-hover mb-0">
+                    <thead><tr><th>Claim ID</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                    <tbody>${claims.map(c=>`<tr>
+                      <td>${c.id}</td><td>${App.formatDate(c.filedDate)}</td>
+                      <td>${App.formatCurrency(c.amount)}</td>
+                      <td><span class="status-badge badge-${c.status==='Approved'?'approved':c.status==='Rejected'?'rejected':'review'}">${c.status}</span></td>
+                    </tr>`).join('')}</tbody>
+                  </table>`
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="premium-box mb-4">
+            <div style="opacity:.8;font-size:.85rem">Annual Premium</div>
+            <div class="amount">${App.formatCurrency(policy.premium)}</div>
+            ${policy.status==='Active' ? `<div class="mt-2 small" style="opacity:.8">${days > 0 ? `${days} days remaining` : 'Policy expired'}</div>` : ''}
+          </div>
+          <div class="card">
+            <div class="card-header fw-bold">Quick Actions</div>
+            <div class="card-body d-grid gap-2">
+              <a href="documents.html" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-pdf me-2"></i>Download Policy PDF</a>
+              ${policy.status==='Active' ? `<a href="claims.html?policyId=${policyId}" class="btn btn-outline-danger btn-sm"><i class="bi bi-shield-exclamation me-2"></i>File a Claim</a>` : ''}
+              <a href="payments.html" class="btn btn-outline-success btn-sm"><i class="bi bi-receipt me-2"></i>View Payment History</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function showCancel() {
+    const days = App.daysLeft(policy.endDate);
+    const refund = Math.round(policy.premium * (days / 365));
+    document.getElementById('refundAmount').textContent = `Estimated Refund: ${App.formatCurrency(refund)}`;
+    new bootstrap.Modal(document.getElementById('cancelModal')).show();
+  }
+
+  function confirmCancel() {
+    App.updatePolicy(policyId, { status: 'Cancelled' });
+    bootstrap.Modal.getInstance(document.getElementById('cancelModal')).hide();
+    App.toast('Policy cancellation requested. Refund will be processed in 7 business days.', 'success');
+    setTimeout(() => window.location.href = 'policies.html', 2000);
+  }
+</script>
+</body>
+</html>

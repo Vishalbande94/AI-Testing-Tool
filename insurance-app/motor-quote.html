@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Motor Insurance Quote — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="mb-3"><a href="get-quote.html" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back to Quote Types</a></div>
+    <div class="page-title">🚗 Motor Insurance Quote</div>
+    <div class="page-subtitle">Enter your vehicle details to get instant quotes</div>
+
+    <!-- STEP 1: VEHICLE DETAILS -->
+    <div id="step1">
+      <div class="card mt-3">
+        <div class="card-header"><strong>Step 1 of 2 — Vehicle Details</strong></div>
+        <div class="card-body">
+          <form id="motorForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Vehicle Type <span class="text-danger">*</span></label>
+                <select id="vehicleType" class="form-select" required>
+                  <option value="">Select type</option>
+                  <option>Two-Wheeler</option>
+                  <option>Four-Wheeler</option>
+                  <option>Commercial</option>
+                </select>
+                <div class="invalid-feedback">Please select vehicle type.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Registration Number <span class="text-danger">*</span></label>
+                <input type="text" id="regNum" class="form-control" placeholder="e.g. MH12AB1234" maxlength="10" style="text-transform:uppercase">
+                <div class="invalid-feedback" id="regNumErr">Enter valid registration number (e.g. MH12AB1234).</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Vehicle Make <span class="text-danger">*</span></label>
+                <select id="make" class="form-select" required onchange="populateModels()">
+                  <option value="">Select make</option>
+                  <option>Maruti Suzuki</option><option>Hyundai</option><option>Honda</option>
+                  <option>Tata</option><option>Mahindra</option><option>Toyota</option>
+                  <option>Bajaj</option><option>TVS</option><option>Hero</option>
+                </select>
+                <div class="invalid-feedback">Please select vehicle make.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Vehicle Model <span class="text-danger">*</span></label>
+                <select id="model" class="form-select" required>
+                  <option value="">Select make first</option>
+                </select>
+                <div class="invalid-feedback">Please select vehicle model.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Manufacturing Year <span class="text-danger">*</span></label>
+                <select id="year" class="form-select" required>
+                  <option value="">Select year</option>
+                </select>
+                <div class="invalid-feedback">Please select manufacturing year.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Fuel Type <span class="text-danger">*</span></label>
+                <select id="fuelType" class="form-select" required>
+                  <option value="">Select fuel type</option>
+                  <option>Petrol</option><option>Diesel</option><option>Electric</option><option>CNG</option>
+                </select>
+                <div class="invalid-feedback">Please select fuel type.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Previous Insurance Expiry</label>
+                <input type="date" id="prevExpiry" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">No Claim Bonus (NCB) %</label>
+                <select id="ncb" class="form-select">
+                  <option value="0">0% (New / No claim history)</option>
+                  <option value="20">20% (1 year claim-free)</option>
+                  <option value="25">25% (2 years claim-free)</option>
+                  <option value="35">35% (3 years claim-free)</option>
+                  <option value="45">45% (4 years claim-free)</option>
+                  <option value="50">50% (5+ years claim-free)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">City of Registration <span class="text-danger">*</span></label>
+                <select id="city" class="form-select" required>
+                  <option value="">Select city</option>
+                  <option>Mumbai</option><option>Delhi</option><option>Bangalore</option>
+                  <option>Chennai</option><option>Pune</option><option>Hyderabad</option>
+                  <option>Ahmedabad</option><option>Kolkata</option>
+                </select>
+                <div class="invalid-feedback">Please select city.</div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button type="submit" class="btn btn-primary px-4"><i class="bi bi-arrow-right me-2"></i>Get Quotes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: PLAN SELECTION -->
+    <div id="step2" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="fw-bold mb-0">Choose Your Plan</h5>
+          <p class="text-muted small" id="vehicleSummary"></p>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('step1').classList.remove('d-none');document.getElementById('step2').classList.add('d-none')">Edit Details</button>
+      </div>
+      <div class="row g-3" id="planCards"></div>
+
+      <div class="card mt-4">
+        <div class="card-header fw-bold">Optional Add-ons</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4 addon-check">
+              <input class="form-check-input me-2" type="checkbox" id="addonZero" onchange="updateTotal()">
+              <label for="addonZero" class="fw-bold">Zero Depreciation <span class="text-primary">+₹1,200</span></label>
+              <p class="text-muted small mb-0">Full claim without depreciation deduction</p>
+            </div>
+            <div class="col-md-4 addon-check">
+              <input class="form-check-input me-2" type="checkbox" id="addonRoad" onchange="updateTotal()">
+              <label for="addonRoad" class="fw-bold">Roadside Assistance <span class="text-primary">+₹500</span></label>
+              <p class="text-muted small mb-0">24/7 towing, fuel, flat tyre assistance</p>
+            </div>
+            <div class="col-md-4 addon-check">
+              <input class="form-check-input me-2" type="checkbox" id="addonEngine" onchange="updateTotal()">
+              <label for="addonEngine" class="fw-bold">Engine Protection <span class="text-primary">+₹800</span></label>
+              <p class="text-muted small mb-0">Coverage for engine damage due to flooding</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="premium-box mt-4">
+        <div class="row align-items-center">
+          <div class="col">
+            <div style="opacity:.8;font-size:.9rem">Total Premium (incl. GST)</div>
+            <div class="amount" id="totalPremium">₹0</div>
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-warning btn-lg fw-bold me-2" onclick="buyNow()">Buy Now</button>
+            <button class="btn btn-outline-light" onclick="saveQuote()">Save Quote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser();
+
+  const models = {
+    'Maruti Suzuki':['Swift','Dzire','Baleno','Alto','Vitara Brezza'],
+    'Hyundai':['i10','i20','Creta','Verna','Venue'],
+    'Honda':['City','Amaze','Jazz','WR-V','Activa'],
+    'Tata':['Nexon','Altroz','Punch','Tiago','Harrier'],
+    'Mahindra':['Scorpio','XUV500','Thar','Bolero','XUV300'],
+    'Toyota':['Innova','Fortuner','Glanza','Urban Cruiser'],
+    'Bajaj':['Pulsar','Avenger','Dominar','Platina'],
+    'TVS':['Apache','Jupiter','Ntorq','Star City'],
+    'Hero':['Splendor','HF Deluxe','Passion','Glamour']
+  };
+
+  function populateModels() {
+    const make = document.getElementById('make').value;
+    const sel = document.getElementById('model');
+    sel.innerHTML = '<option value="">Select model</option>';
+    (models[make]||[]).forEach(m => sel.innerHTML += `<option>${m}</option>`);
+  }
+
+  // Populate years
+  const yearSel = document.getElementById('year');
+  for (let y = new Date().getFullYear(); y >= new Date().getFullYear()-20; y--) {
+    yearSel.innerHTML += `<option>${y}</option>`;
+  }
+
+  let selectedPlan = null;
+  const plans = [
+    { name:'Third Party', base:2094, description:'Mandatory by law. Covers damage to third-party property/person.', features:['Third-party liability ✓','Own damage ✗','Theft ✗','Natural calamities ✗'], badge:null },
+    { name:'Standard', base:6500, description:'Covers own damage plus third-party liability.', features:['Third-party liability ✓','Own damage ✓','Theft ✓','Natural calamities ✗'], badge:'Popular' },
+    { name:'Comprehensive', base:12500, description:'Complete protection — own damage, theft, calamities & third-party.', features:['Third-party liability ✓','Own damage ✓','Theft ✓','Natural calamities ✓'], badge:'Best Value' },
+  ];
+
+  function renderPlans(ncbPct) {
+    const container = document.getElementById('planCards');
+    container.innerHTML = plans.map((p,i) => {
+      const discounted = Math.round(p.base * (1 - ncbPct/100));
+      const gst = Math.round(discounted * 0.18);
+      return `<div class="col-md-4">
+        <div class="plan-card ${i===1?'selected':''}" id="plan_${i}" onclick="selectPlan(${i}, ${discounted+gst})">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="plan-name">${p.name}</div>
+            ${p.badge ? `<span class="plan-badge">${p.badge}</span>` : ''}
+          </div>
+          <div class="plan-price">₹${(discounted+gst).toLocaleString('en-IN')}<span>/year</span></div>
+          ${ncbPct > 0 ? `<div class="text-success small mt-1">NCB Discount: ${ncbPct}% applied</div>` : ''}
+          <hr>
+          <p class="small text-muted">${p.description}</p>
+          <ul class="list-unstyled small">
+            ${p.features.map(f => `<li>${f.includes('✓') ? '<i class="bi bi-check-circle-fill text-success me-2"></i>' : '<i class="bi bi-x-circle text-secondary me-2"></i>'}${f.replace(' ✓','').replace(' ✗','')}</li>`).join('')}
+          </ul>
+        </div>
+      </div>`;
+    }).join('');
+    selectedPlan = { idx:1, premium: Math.round(plans[1].base*(1-ncbPct/100)*1.18) };
+    updateTotal();
+  }
+
+  function selectPlan(idx, premium) {
+    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('plan_'+idx).classList.add('selected');
+    selectedPlan = { idx, name: plans[idx].name, premium, plan: plans[idx].name };
+    updateTotal();
+  }
+
+  function updateTotal() {
+    if (!selectedPlan) return;
+    let total = selectedPlan.premium;
+    if (document.getElementById('addonZero')?.checked) total += 1200;
+    if (document.getElementById('addonRoad')?.checked) total += 500;
+    if (document.getElementById('addonEngine')?.checked) total += 800;
+    document.getElementById('totalPremium').textContent = App.formatCurrency(total);
+    selectedPlan.total = total;
+  }
+
+  document.getElementById('motorForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let valid = true;
+    ['vehicleType','make','model','year','fuelType','city'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value) { el.classList.add('is-invalid'); valid = false; }
+      else el.classList.remove('is-invalid');
+    });
+
+    const reg = document.getElementById('regNum').value.trim().toUpperCase();
+    if (!/^[A-Z]{2}\d{2}[A-Z]{1,2}\d{4}$/.test(reg)) {
+      document.getElementById('regNum').classList.add('is-invalid');
+      valid = false;
+    } else {
+      document.getElementById('regNum').classList.remove('is-invalid');
+    }
+
+    if (!valid) return;
+
+    const ncb = parseInt(document.getElementById('ncb').value);
+    document.getElementById('vehicleSummary').textContent =
+      `${document.getElementById('year').value} ${document.getElementById('make').value} ${document.getElementById('model').value} | ${document.getElementById('regNum').value} | ${document.getElementById('fuelType').value}`;
+
+    renderPlans(ncb);
+    document.getElementById('step1').classList.add('d-none');
+    document.getElementById('step2').classList.remove('d-none');
+
+    // Store quote data
+    window._quoteData = {
+      vehicleType: document.getElementById('vehicleType').value,
+      regNum: reg,
+      make: document.getElementById('make').value,
+      model: document.getElementById('model').value,
+      year: document.getElementById('year').value,
+      fuelType: document.getElementById('fuelType').value,
+      city: document.getElementById('city').value,
+      ncb
+    };
+  });
+
+  function getAddons() {
+    const addons = [];
+    if (document.getElementById('addonZero')?.checked) addons.push('Zero Depreciation');
+    if (document.getElementById('addonRoad')?.checked) addons.push('Roadside Assistance');
+    if (document.getElementById('addonEngine')?.checked) addons.push('Engine Protection');
+    return addons;
+  }
+
+  function saveQuote() {
+    const user = App.currentUser();
+    const q = {
+      id: App.genId('QT'),
+      userId: user.id,
+      type: 'Motor',
+      plan: selectedPlan.name,
+      sumInsured: 500000,
+      premium: selectedPlan.total,
+      vehicleData: window._quoteData,
+      addons: getAddons(),
+      createdAt: new Date().toISOString()
+    };
+    App.saveQuote(q);
+    App.toast('Quote saved successfully!', 'success');
+  }
+
+  function buyNow() {
+    const user = App.currentUser();
+    const q = {
+      id: App.genId('QT'),
+      userId: user.id,
+      type: 'Motor',
+      plan: selectedPlan.name,
+      sumInsured: 500000,
+      premium: selectedPlan.total,
+      vehicleData: window._quoteData,
+      addons: getAddons(),
+      createdAt: new Date().toISOString()
+    };
+    const saved = App.saveQuote(q);
+    window.location.href = `checkout.html?quoteId=${saved.id}`;
+  }
+</script>
+</body>
+</html>

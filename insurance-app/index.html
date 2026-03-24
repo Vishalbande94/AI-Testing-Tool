@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>InsureAI — Smart Insurance Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Insure<span>AI</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="#products">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="#claims">Claims</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <a href="login.html" class="btn btn-outline-light btn-sm">Login</a>
+        <a href="register.html" class="btn btn-warning btn-sm fw-bold">Get Started</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="badge-pill"><i class="bi bi-stars me-1"></i> AI-Powered Insurance Platform</div>
+        <h1>Smart Insurance<br>for the <span style="color:#ffd54f">Digital Age</span></h1>
+        <p class="mt-3 mb-4">Get instant quotes, manage policies, and file claims — all in one place.<br>Powered by AI to save you time and money.</p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="get-quote.html" class="btn btn-warning btn-lg fw-bold px-4">Get a Free Quote</a>
+          <a href="register.html" class="btn btn-outline-light btn-lg px-4">Create Account</a>
+        </div>
+        <div class="mt-4 d-flex gap-4 flex-wrap" style="font-size:.9rem; opacity:.85">
+          <span><i class="bi bi-shield-check me-1"></i> 10,000+ Policies</span>
+          <span><i class="bi bi-clock me-1"></i> Instant Issuance</span>
+          <span><i class="bi bi-headset me-1"></i> 24/7 Support</span>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center mt-4 mt-lg-0">
+        <div class="p-4 rounded-3" style="background:rgba(255,255,255,.1)">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.15)">
+                <div style="font-size:2rem">🚗</div><div class="fw-bold mt-1">Motor</div><div style="font-size:.8rem;opacity:.8">From ₹2,094/yr</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.15)">
+                <div style="font-size:2rem">❤️</div><div class="fw-bold mt-1">Health</div><div style="font-size:.8rem;opacity:.8">From ₹5,000/yr</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.15)">
+                <div style="font-size:2rem">🏠</div><div class="fw-bold mt-1">Home</div><div style="font-size:.8rem;opacity:.8">From ₹3,500/yr</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.15)">
+                <div style="font-size:2rem">✈️</div><div class="fw-bold mt-1">Travel</div><div style="font-size:.8rem;opacity:.8">From ₹800/trip</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products" class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Our Insurance Products</h2>
+      <p class="text-muted">Comprehensive coverage tailored for every need</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="card product-card p-4 h-100" onclick="window.location.href='motor-quote.html'">
+          <div class="product-icon icon-motor"><i class="bi bi-car-front"></i></div>
+          <h5 class="fw-bold">Motor Insurance</h5>
+          <p class="text-muted small">Protect your vehicle against accidents, theft & third-party liability.</p>
+          <ul class="list-unstyled small text-muted mt-2">
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Accidental damage</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Theft protection</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Third-party cover</li>
+          </ul>
+          <a href="motor-quote.html" class="btn btn-outline-primary btn-sm mt-auto">Get Quote →</a>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card product-card p-4 h-100" onclick="window.location.href='health-quote.html'">
+          <div class="product-icon icon-health"><i class="bi bi-heart-pulse"></i></div>
+          <h5 class="fw-bold">Health Insurance</h5>
+          <p class="text-muted small">Cashless hospitalization & comprehensive health coverage for you and family.</p>
+          <ul class="list-unstyled small text-muted mt-2">
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Cashless hospitalization</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Pre & post hospitalization</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Day care procedures</li>
+          </ul>
+          <a href="health-quote.html" class="btn btn-outline-success btn-sm mt-auto">Get Quote →</a>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card product-card p-4 h-100" onclick="window.location.href='home-quote.html'">
+          <div class="product-icon icon-home"><i class="bi bi-house-heart"></i></div>
+          <h5 class="fw-bold">Home Insurance</h5>
+          <p class="text-muted small">Protect your home structure and contents from fire, flood & burglary.</p>
+          <ul class="list-unstyled small text-muted mt-2">
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Fire & natural disasters</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Burglary & theft</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Contents coverage</li>
+          </ul>
+          <a href="home-quote.html" class="btn btn-outline-warning btn-sm mt-auto">Get Quote →</a>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card product-card p-4 h-100" onclick="window.location.href='travel-quote.html'">
+          <div class="product-icon icon-travel"><i class="bi bi-airplane"></i></div>
+          <h5 class="fw-bold">Travel Insurance</h5>
+          <p class="text-muted small">Safe travels with coverage for medical emergencies, trip cancellation & baggage loss.</p>
+          <ul class="list-unstyled small text-muted mt-2">
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Medical emergency abroad</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Trip cancellation</li>
+            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Baggage & passport loss</li>
+          </ul>
+          <a href="travel-quote.html" class="btn btn-outline-primary btn-sm mt-auto" style="border-color:#6a1b9a;color:#6a1b9a">Get Quote →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section id="why" class="py-5" style="background:#f8f9fa">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Why Choose InsureAI?</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4 text-center">
+        <div style="font-size:2.5rem;color:#0d47a1">⚡</div>
+        <h5 class="fw-bold mt-2">Instant Quotes</h5>
+        <p class="text-muted small">Get accurate quotes in under 60 seconds. No paperwork, no waiting.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div style="font-size:2.5rem;color:#0d47a1">🤖</div>
+        <h5 class="fw-bold mt-2">AI-Powered Assistance</h5>
+        <p class="text-muted small">Our AI helps you choose the right plan, file claims, and track status.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div style="font-size:2.5rem;color:#0d47a1">🔒</div>
+        <h5 class="fw-bold mt-2">100% Secure</h5>
+        <p class="text-muted small">Bank-grade security. Your data and payments are always safe with us.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-4" style="background:#0d47a1;color:rgba(255,255,255,.8)">
+  <div class="container d-flex flex-wrap justify-content-between align-items-center">
+    <div><strong style="color:#fff;font-size:1.1rem">Insure<span style="color:#ffd54f">AI</span></strong><br><small>Demo Application — For Testing Purposes Only</small></div>
+    <div class="d-flex gap-3 mt-2 mt-md-0" style="font-size:.85rem">
+      <a href="#" style="color:rgba(255,255,255,.7)">Privacy Policy</a>
+      <a href="#" style="color:rgba(255,255,255,.7)">Terms of Use</a>
+      <a href="#" style="color:rgba(255,255,255,.7)">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (App.isLoggedIn()) {
+    document.querySelector('.navbar-nav')?.insertAdjacentHTML('beforeend',
+      '<li class="nav-item"><a class="nav-link fw-bold" href="dashboard.html"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>');
+  }
+</script>
+</body>
+</html>

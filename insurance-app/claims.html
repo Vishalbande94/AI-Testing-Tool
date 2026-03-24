@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claims — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <div class="page-title">Claims</div>
+        <div class="page-subtitle">File new claims and track existing ones</div>
+      </div>
+      <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#newClaimModal">
+        <i class="bi bi-plus me-1"></i>File New Claim
+      </button>
+    </div>
+
+    <!-- CLAIMS TABLE -->
+    <div class="card">
+      <div class="card-header fw-bold"><i class="bi bi-list-check me-2"></i>All Claims</div>
+      <div class="card-body p-0" id="claimsTable"></div>
+    </div>
+  </main>
+</div>
+
+<!-- NEW CLAIM MODAL -->
+<div class="modal fade" id="newClaimModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-shield-exclamation me-2"></i>File a New Claim</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="claimForm" novalidate>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Policy <span class="text-danger">*</span></label>
+              <select id="claimPolicy" class="form-select" required>
+                <option value="">Select active policy</option>
+              </select>
+              <div class="invalid-feedback">Please select a policy.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Claim Type <span class="text-danger">*</span></label>
+              <select id="claimType" class="form-select" required>
+                <option value="">Select</option>
+                <option>Cashless</option><option>Reimbursement</option>
+              </select>
+              <div class="invalid-feedback">Required.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Date of Incident <span class="text-danger">*</span></label>
+              <input type="date" id="incidentDate" class="form-control" required>
+              <div class="invalid-feedback" id="incidentDateErr">Date must be within the policy period.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Estimated Claim Amount (₹) <span class="text-danger">*</span></label>
+              <input type="number" id="claimAmount" class="form-control" placeholder="Enter amount" min="1" required>
+              <div class="invalid-feedback">Enter a valid amount.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description of Incident <span class="text-danger">*</span></label>
+              <textarea id="claimDesc" class="form-control" rows="3" maxlength="500" placeholder="Describe what happened (max 500 characters)" required></textarea>
+              <div class="d-flex justify-content-between">
+                <div class="invalid-feedback">Description is required (min 20 characters).</div>
+                <small class="text-muted" id="descCount">0/500</small>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Supporting Documents</label>
+              <input type="file" id="claimDocs" class="form-control" multiple accept=".pdf,.jpg,.jpeg,.png">
+              <small class="text-muted">PDF/JPG, max 5MB each, max 5 files</small>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" onclick="submitClaim()">Submit Claim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLAIM DETAIL MODAL -->
+<div class="modal fade" id="claimDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Claim Details</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="claimDetailBody"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser(); setActiveSidebarLink();
+
+  const user = App.currentUser();
+
+  // Populate active policies dropdown
+  const activePolicies = App.getPolicies(user.id).filter(p => p.status === 'Active');
+  const sel = document.getElementById('claimPolicy');
+  activePolicies.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.id} — ${p.type} (${p.plan})</option>`);
+
+  // Pre-select policy from URL
+  const params = new URLSearchParams(window.location.search);
+  const prePolicy = params.get('policyId');
+  if (prePolicy) { sel.value = prePolicy; }
+
+  // Character counter
+  document.getElementById('claimDesc').addEventListener('input', function() {
+    document.getElementById('descCount').textContent = this.value.length + '/500';
+  });
+
+  function renderClaims() {
+    const claims = App.getClaims(user.id);
+    const container = document.getElementById('claimsTable');
+    if (claims.length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="bi bi-shield-check"></i><p>No claims filed yet. Click "File New Claim" if you need to raise one.</p></div>';
+      return;
+    }
+    const statusMap = { 'Submitted':'badge-pending','Under Review':'badge-review','Approved':'badge-approved','Rejected':'badge-rejected','Additional Info Required':'badge-pending' };
+    container.innerHTML = `<div class="table-responsive"><table class="table table-hover mb-0">
+      <thead><tr><th>Claim ID</th><th>Policy</th><th>Type</th><th>Incident Date</th><th>Filed Date</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+      <tbody>${claims.map(c=>`<tr>
+        <td class="fw-bold">${c.id}</td>
+        <td>${c.policyType}</td>
+        <td>${c.type}</td>
+        <td>${App.formatDate(c.incidentDate)}</td>
+        <td>${App.formatDate(c.filedDate)}</td>
+        <td>${App.formatCurrency(c.amount)}</td>
+        <td><span class="status-badge ${statusMap[c.status]||'badge-pending'}">${c.status}</span></td>
+        <td><button class="btn btn-sm btn-outline-primary" onclick="viewClaim('${c.id}')">Track</button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  }
+  renderClaims();
+
+  function submitClaim() {
+    let valid = true;
+    ['claimPolicy','claimType','incidentDate','claimAmount','claimDesc'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value || (id==='claimDesc' && el.value.length < 20)) { el.classList.add('is-invalid'); valid=false; }
+      else el.classList.remove('is-invalid');
+    });
+
+    const policyId = document.getElementById('claimPolicy').value;
+    const incDate = document.getElementById('incidentDate').value;
+    if (policyId && incDate) {
+      const policy = App.getPolicy(policyId);
+      if (policy && (incDate < policy.startDate || incDate > policy.endDate)) {
+        document.getElementById('incidentDate').classList.add('is-invalid');
+        document.getElementById('incidentDateErr').textContent = 'Date must be within policy period (' + App.formatDate(policy.startDate) + ' – ' + App.formatDate(policy.endDate) + ').';
+        valid = false;
+      }
+    }
+    if (!valid) return;
+
+    const policy = App.getPolicy(policyId);
+    const claim = {
+      id: App.genId('CLM'),
+      userId: user.id,
+      policyId,
+      policyType: policy?.type || 'Insurance',
+      incidentDate: document.getElementById('incidentDate').value,
+      filedDate: new Date().toISOString().split('T')[0],
+      type: document.getElementById('claimType').value,
+      description: document.getElementById('claimDesc').value,
+      amount: parseInt(document.getElementById('claimAmount').value),
+      status: 'Submitted',
+      statusHistory: [{ status:'Submitted', date: new Date().toISOString().split('T')[0] }]
+    };
+    App.addClaim(claim);
+
+    bootstrap.Modal.getInstance(document.getElementById('newClaimModal')).hide();
+    App.toast(`Claim submitted! Reference: ${claim.id}`, 'success');
+    document.getElementById('claimForm').reset();
+    renderClaims();
+  }
+
+  function viewClaim(claimId) {
+    const c = App.getClaim(claimId);
+    if (!c) return;
+    const statusMap = { 'Submitted':'badge-pending','Under Review':'badge-review','Approved':'badge-approved','Rejected':'badge-rejected','Additional Info Required':'badge-pending' };
+    const steps = ['Submitted','Under Review','Approved'];
+
+    document.getElementById('claimDetailBody').innerHTML = `
+      <div class="row g-3 mb-4">
+        <div class="col-6"><span class="text-muted small">Claim ID</span><br><strong>${c.id}</strong></div>
+        <div class="col-6"><span class="text-muted small">Policy</span><br><strong>${c.policyId}</strong></div>
+        <div class="col-6"><span class="text-muted small">Type</span><br><strong>${c.type}</strong></div>
+        <div class="col-6"><span class="text-muted small">Amount</span><br><strong>${App.formatCurrency(c.amount)}</strong></div>
+        <div class="col-12"><span class="text-muted small">Description</span><br><strong>${c.description}</strong></div>
+        <div class="col-6"><span class="text-muted small">Current Status</span><br><span class="status-badge ${statusMap[c.status]||'badge-pending'}">${c.status}</span></div>
+      </div>
+      <h6 class="fw-bold">Status Timeline</h6>
+      <div class="timeline mt-3">
+        ${(c.statusHistory||[]).map((h,i) => `<div class="timeline-item done">
+          <div class="tl-label">${h.status}</div>
+          <div class="tl-date">${App.formatDate(h.date)}</div>
+        </div>`).join('')}
+        ${steps.filter(s => !c.statusHistory?.some(h=>h.status===s)).map(s=>`<div class="timeline-item">
+          <div class="tl-label text-muted">${s} (Pending)</div>
+        </div>`).join('')}
+      </div>
+      ${c.status==='Additional Info Required' ? `<div class="mt-3"><label class="form-label fw-bold">Upload Additional Documents</label>
+        <input type="file" class="form-control" multiple accept=".pdf,.jpg">
+        <button class="btn btn-primary btn-sm mt-2">Upload & Submit</button></div>` : ''}`;
+
+    new bootstrap.Modal(document.getElementById('claimDetailModal')).show();
+  }
+
+  // Auto-open new claim modal if URL has #new
+  if (window.location.hash === '#new') {
+    new bootstrap.Modal(document.getElementById('newClaimModal')).show();
+  }
+</script>
+</body>
+</html>

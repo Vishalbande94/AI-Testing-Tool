@@ -1,0 +1,22 @@
+{
+  "name": "playwrightpractice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "perf": "npx playwright test --config=playwright.perf.config.js",
+    "perf:load": "npx playwright test tests/performance/page-load.perf.js --config=playwright.perf.config.js",
+    "perf:cwv": "npx playwright test tests/performance/core-web-vitals.perf.js --config=playwright.perf.config.js",
+    "perf:concurrent": "npx playwright test tests/performance/concurrent-users.perf.js --config=playwright.perf.config.js",
+    "perf:report": "npx playwright test tests/performance/generate-report.js --config=playwright.perf.config.js",
+    "perf:all": "npm run perf:load && npm run perf:cwv && npm run perf:concurrent && npm run perf:report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.1",
+    "serve": "^14.2.6"
+  }
+}

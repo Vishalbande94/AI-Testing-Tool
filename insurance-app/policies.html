@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Policies — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div>
+        <div class="page-title">My Policies</div>
+        <div class="page-subtitle">Manage all your insurance policies</div>
+      </div>
+      <a href="get-quote.html" class="btn btn-primary"><i class="bi bi-plus me-1"></i>New Policy</a>
+    </div>
+
+    <!-- FILTER TABS -->
+    <ul class="nav nav-tabs mb-4" id="policyTabs">
+      <li class="nav-item"><button class="nav-link active" onclick="filterPolicies('All',this)">All</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterPolicies('Active',this)">Active</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterPolicies('Expired',this)">Expired</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterPolicies('Motor',this)">Motor</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterPolicies('Health',this)">Health</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterPolicies('Home',this)">Home</button></li>
+      <li class="nav-item"><button class="nav-link" onclick="filterPolicies('Travel',this)">Travel</button></li>
+    </ul>
+
+    <div id="policiesContainer"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser(); setActiveSidebarLink();
+
+  const user = App.currentUser();
+  let allPolicies = App.getPolicies(user.id);
+
+  const icons = { Motor:'🚗', Health:'❤️', Home:'🏠', Travel:'✈️' };
+  const statusMap = { Active:'badge-active', Expired:'badge-expired', Cancelled:'badge-rejected' };
+
+  function renderPolicies(list) {
+    const container = document.getElementById('policiesContainer');
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-state"><i class="bi bi-file-earmark-x"></i><p>No policies found. <a href="get-quote.html">Get a quote!</a></p></div>`;
+      return;
+    }
+    container.innerHTML = `<div class="row g-3">${list.map(p => {
+      const days = App.daysLeft(p.endDate);
+      const renewWarning = p.status === 'Active' && days <= 30 && days > 0
+        ? `<div class="mt-2 small ${days<=7?'text-danger':'text-warning'} fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>${days} days to renewal</div>` : '';
+      return `<div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div class="d-flex align-items-center gap-2">
+                <span style="font-size:1.8rem">${icons[p.type]||'📋'}</span>
+                <div>
+                  <div class="fw-bold">${p.type} Insurance</div>
+                  <div class="text-muted small">${p.id}</div>
+                </div>
+              </div>
+              <span class="status-badge ${statusMap[p.status]||'badge-pending'}">${p.status}</span>
+            </div>
+            <div class="row g-2 small">
+              <div class="col-6"><span class="text-muted">Plan</span><br><strong>${p.plan}</strong></div>
+              <div class="col-6"><span class="text-muted">Sum Insured</span><br><strong>${App.formatCurrency(p.sumInsured)}</strong></div>
+              <div class="col-6"><span class="text-muted">Start Date</span><br><strong>${App.formatDate(p.startDate)}</strong></div>
+              <div class="col-6"><span class="text-muted">End Date</span><br><strong>${App.formatDate(p.endDate)}</strong></div>
+              <div class="col-6"><span class="text-muted">Premium</span><br><strong>${App.formatCurrency(p.premium)}/yr</strong></div>
+              <div class="col-6"><span class="text-muted">Nominee</span><br><strong>${p.nominee||'-'}</strong></div>
+            </div>
+            ${renewWarning}
+            <div class="d-flex gap-2 mt-3">
+              <a href="policy-detail.html?id=${p.id}" class="btn btn-sm btn-outline-primary flex-grow-1">View Details</a>
+              ${p.status==='Active' && days <= 60 && days > 0 ? `<a href="checkout.html?renew=${p.id}" class="btn btn-sm btn-warning">Renew</a>` : ''}
+              ${p.status==='Active' ? `<a href="claims.html?policyId=${p.id}" class="btn btn-sm btn-outline-danger">File Claim</a>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  function filterPolicies(filter, btn) {
+    document.querySelectorAll('#policyTabs .nav-link').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    let filtered = allPolicies;
+    if (filter !== 'All') {
+      filtered = allPolicies.filter(p => p.status === filter || p.type === filter);
+    }
+    renderPolicies(filtered);
+  }
+
+  renderPolicies(allPolicies);
+</script>
+</body>
+</html>

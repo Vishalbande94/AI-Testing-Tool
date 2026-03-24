@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documents — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="page-title">Documents & Downloads</div>
+    <div class="page-subtitle mb-4">Download your policy documents, receipts, and claim letters</div>
+
+    <div class="card">
+      <div class="card-header fw-bold"><i class="bi bi-folder2-open me-2"></i>My Documents</div>
+      <div class="card-body p-0" id="docsContainer"></div>
+    </div>
+
+    <!-- DEMO NOTICE -->
+    <div class="mt-4 p-3 rounded-3" style="background:#fff3cd;border:1px solid #ffc107">
+      <i class="bi bi-info-circle me-2 text-warning"></i>
+      <strong>Demo Mode:</strong> Document downloads will generate a simulated PDF preview. In production, actual PDF documents would be generated server-side.
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser(); setActiveSidebarLink();
+
+  const user = App.currentUser();
+  const policies = App.getPolicies(user.id);
+  const payments = App.getPayments(user.id);
+  const claims = App.getClaims(user.id);
+
+  const docTypes = [
+    { icon:'bi-file-earmark-pdf text-danger', label:'Policy Document' },
+    { icon:'bi-receipt text-success', label:'Premium Receipt' },
+    { icon:'bi-arrow-repeat text-primary', label:'Renewal Notice' }
+  ];
+
+  const container = document.getElementById('docsContainer');
+  if (policies.length === 0) {
+    container.innerHTML = '<div class="empty-state"><i class="bi bi-folder-x"></i><p>No documents available yet. <a href="get-quote.html">Buy a policy</a> to get started.</p></div>';
+  } else {
+    let rows = '';
+    policies.forEach(p => {
+      docTypes.forEach(dt => {
+        rows += `<tr>
+          <td><i class="bi ${dt.icon} fs-4 me-2"></i> ${dt.label}</td>
+          <td>${p.id}</td>
+          <td>${p.type} — ${p.plan}</td>
+          <td>${App.formatDate(p.startDate)}</td>
+          <td><button class="btn btn-sm btn-outline-primary" onclick="previewDoc('${p.id}','${dt.label}')">
+            <i class="bi bi-eye me-1"></i>Preview
+          </button>
+          <button class="btn btn-sm btn-primary ms-1" onclick="downloadDoc('${p.id}','${dt.label}')">
+            <i class="bi bi-download me-1"></i>Download
+          </button></td>
+        </tr>`;
+      });
+    });
+
+    claims.filter(c=>c.status==='Approved').forEach(c => {
+      rows += `<tr>
+        <td><i class="bi bi-file-earmark-check text-success fs-4 me-2"></i> Claim Settlement Letter</td>
+        <td>${c.id}</td>
+        <td>${c.policyType} Claim</td>
+        <td>${App.formatDate(c.filedDate)}</td>
+        <td><button class="btn btn-sm btn-outline-primary" onclick="previewDoc('${c.id}','Claim Settlement Letter')">Preview</button>
+            <button class="btn btn-sm btn-primary ms-1" onclick="downloadDoc('${c.id}','Claim Settlement Letter')">Download</button></td>
+      </tr>`;
+    });
+
+    container.innerHTML = `<div class="table-responsive"><table class="table table-hover mb-0">
+      <thead><tr><th>Document Type</th><th>Reference ID</th><th>Details</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  }
+
+  function previewDoc(id, type) {
+    App.toast(`Opening ${type} for ${id}... (Demo: PDF viewer would open here)`, 'success');
+  }
+
+  function downloadDoc(id, type) {
+    // Simulate download with a text blob
+    const content = `InsureAI — ${type}\n\nReference: ${id}\nCustomer: ${user.name}\nDate: ${new Date().toLocaleDateString()}\n\nThis is a demo document generated for testing purposes.\nIn production, this would be a properly formatted PDF.\n\n--- InsureAI Demo Platform ---`;
+    const blob = new Blob([content], { type:'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${type.replace(/ /g,'_')}_${id}.txt`;
+    a.click();
+    App.toast(`${type} downloaded!`, 'success');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Insurance Quote — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="mb-3"><a href="get-quote.html" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back</a></div>
+    <div class="page-title">🏠 Home Insurance Quote</div>
+    <div class="page-subtitle">Protect your home from fire, flood, burglary and more</div>
+
+    <div id="step1">
+      <div class="card mt-3">
+        <div class="card-header fw-bold">Property Details</div>
+        <div class="card-body">
+          <form id="homeForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Property Type <span class="text-danger">*</span></label>
+                <select id="propertyType" class="form-select" required>
+                  <option value="">Select</option>
+                  <option>Owned</option><option>Rented</option>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Construction Type <span class="text-danger">*</span></label>
+                <select id="constructionType" class="form-select" required>
+                  <option value="">Select</option>
+                  <option>RCC (Pucca)</option><option>Other</option>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Property Age (years) <span class="text-danger">*</span></label>
+                <input type="number" id="propAge" class="form-control" placeholder="e.g. 5" min="0" max="50" required>
+                <div class="invalid-feedback">Enter valid age (0–50 years).</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Built-up Area (sq. ft.) <span class="text-danger">*</span></label>
+                <input type="number" id="area" class="form-control" placeholder="e.g. 1200" min="200" required>
+                <div class="invalid-feedback">Enter valid area (min 200 sq.ft).</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Property Value (₹) <span class="text-danger">*</span></label>
+                <input type="number" id="propValue" class="form-control" placeholder="e.g. 5000000" min="100000" required>
+                <div class="invalid-feedback">Enter estimated property value.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">City <span class="text-danger">*</span></label>
+                <select id="city" class="form-select" required>
+                  <option value="">Select</option>
+                  <option>Mumbai</option><option>Delhi</option><option>Bangalore</option>
+                  <option>Chennai</option><option>Pune</option><option>Hyderabad</option>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">PIN Code <span class="text-danger">*</span></label>
+                <input type="text" id="pin" class="form-control" placeholder="6-digit PIN" maxlength="6" required>
+                <div class="invalid-feedback">Enter valid 6-digit PIN code.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Cover Type <span class="text-danger">*</span></label>
+                <select id="coverType" class="form-select" required>
+                  <option value="">Select</option>
+                  <option>Structure Only</option>
+                  <option>Contents Only</option>
+                  <option>Structure + Contents</option>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button type="submit" class="btn btn-warning px-4 fw-bold">Get Home Quotes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="step2" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="fw-bold mb-0">Home Insurance Plans</h5>
+          <p class="text-muted small" id="homeSummary"></p>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('step1').classList.remove('d-none');document.getElementById('step2').classList.add('d-none')">Edit</button>
+      </div>
+      <div class="row g-3" id="homePlans"></div>
+      <div class="premium-box mt-4">
+        <div class="row align-items-center">
+          <div class="col">
+            <div style="opacity:.8;font-size:.9rem">Selected Plan Premium (incl. GST)</div>
+            <div class="amount" id="homeTotal">₹0</div>
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-warning btn-lg fw-bold me-2" onclick="buyHomeNow()">Buy Now</button>
+            <button class="btn btn-outline-light" onclick="saveHomeQuote()">Save Quote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser();
+
+  let selectedHomePlan = null;
+
+  document.getElementById('homeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let valid = true;
+    ['propertyType','constructionType','city','coverType'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value) { el.classList.add('is-invalid'); valid = false; }
+      else el.classList.remove('is-invalid');
+    });
+
+    const age = parseInt(document.getElementById('propAge').value);
+    const area = parseInt(document.getElementById('area').value);
+    const val = parseInt(document.getElementById('propValue').value);
+    const pin = document.getElementById('pin').value;
+
+    if (isNaN(age)||age<0||age>50) { document.getElementById('propAge').classList.add('is-invalid'); valid=false; }
+    if (isNaN(area)||area<200) { document.getElementById('area').classList.add('is-invalid'); valid=false; }
+    if (isNaN(val)||val<100000) { document.getElementById('propValue').classList.add('is-invalid'); valid=false; }
+    if (!/^\d{6}$/.test(pin)) { document.getElementById('pin').classList.add('is-invalid'); valid=false; }
+
+    if (!valid) return;
+
+    window._homeData = {
+      propertyType: document.getElementById('propertyType').value,
+      constructionType: document.getElementById('constructionType').value,
+      propAge: age, area, propValue: val,
+      city: document.getElementById('city').value,
+      pin, coverType: document.getElementById('coverType').value
+    };
+
+    document.getElementById('homeSummary').textContent =
+      `${window._homeData.propertyType} | ${area} sq.ft | ${window._homeData.coverType} | ${window._homeData.city}`;
+
+    const plans = [
+      { name:'Basic', rate:0.0005, features:['Fire & lightning','Natural calamities','Burglary & theft','Exclusion: Flood'] },
+      { name:'Standard', rate:0.0008, features:['Fire & lightning','Natural calamities','Flood & storm','Burglary & theft'] },
+      { name:'Comprehensive', rate:0.0012, features:['All Standard covers','Earthquake','Terrorism cover','Loss of rent','Liability cover'] }
+    ];
+
+    const container = document.getElementById('homePlans');
+    container.innerHTML = plans.map((p,i) => {
+      const prem = Math.round(val * p.rate * 1.18);
+      return `<div class="col-md-4">
+        <div class="plan-card ${i===1?'selected':''}" id="home_${i}" onclick="selectHomePlan(${i},${prem},'${p.name}')">
+          <div class="plan-name">${p.name}</div>
+          <div class="plan-price mt-2">₹${prem.toLocaleString('en-IN')}<span>/year</span></div>
+          <hr>
+          <ul class="list-unstyled small">
+            ${p.features.map(f=>`<li><i class="bi bi-check-circle-fill text-success me-2"></i>${f}</li>`).join('')}
+          </ul>
+        </div>
+      </div>`;
+    }).join('');
+
+    const defPrem = Math.round(val * plans[1].rate * 1.18);
+    selectedHomePlan = { idx:1, name:'Standard', premium: defPrem };
+    document.getElementById('homeTotal').textContent = App.formatCurrency(defPrem);
+    document.getElementById('step1').classList.add('d-none');
+    document.getElementById('step2').classList.remove('d-none');
+  });
+
+  function selectHomePlan(idx, premium, name) {
+    document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+    document.getElementById('home_'+idx).classList.add('selected');
+    selectedHomePlan = { idx, name, premium };
+    document.getElementById('homeTotal').textContent = App.formatCurrency(premium);
+  }
+
+  function saveHomeQuote() {
+    const user = App.currentUser();
+    const q = { id:App.genId('QT'), userId:user.id, type:'Home', plan:selectedHomePlan.name,
+      sumInsured:window._homeData.propValue, premium:selectedHomePlan.premium,
+      homeData:window._homeData, createdAt:new Date().toISOString() };
+    App.saveQuote(q); App.toast('Quote saved!','success');
+  }
+
+  function buyHomeNow() {
+    const user = App.currentUser();
+    const q = { id:App.genId('QT'), userId:user.id, type:'Home', plan:selectedHomePlan.name,
+      sumInsured:window._homeData.propValue, premium:selectedHomePlan.premium,
+      homeData:window._homeData, createdAt:new Date().toISOString() };
+    const saved = App.saveQuote(q);
+    window.location.href = `checkout.html?quoteId=${saved.id}`;
+  }
+</script>
+</body>
+</html>

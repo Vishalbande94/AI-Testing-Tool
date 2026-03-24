@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="mb-3"><a href="get-quote.html" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back</a></div>
+    <div class="page-title">Checkout — Buy Policy</div>
+
+    <div class="row g-4">
+      <!-- FORM STEPS -->
+      <div class="col-lg-7">
+        <!-- Step 1: Nominee -->
+        <div class="card mb-4" id="nomineeCard">
+          <div class="card-header"><strong><span class="badge bg-primary me-2">1</span>Nominee Details</strong></div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nominee Name <span class="text-danger">*</span></label>
+                <input type="text" id="nomineeName" class="form-control" placeholder="Full name" required>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Relationship <span class="text-danger">*</span></label>
+                <select id="nomineeRel" class="form-select" required>
+                  <option value="">Select</option>
+                  <option>Spouse</option><option>Father</option><option>Mother</option>
+                  <option>Son</option><option>Daughter</option><option>Sibling</option>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nominee Date of Birth <span class="text-danger">*</span></label>
+                <input type="date" id="nomineeDob" class="form-control" required>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Communication Address <span class="text-danger">*</span></label>
+                <input type="text" id="address" class="form-control" placeholder="Full address" required>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">KYC Document Type <span class="text-danger">*</span></label>
+                <select id="kycType" class="form-select" required>
+                  <option value="">Select</option>
+                  <option>PAN Card</option><option>Aadhaar</option>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">KYC Number <span class="text-danger">*</span></label>
+                <input type="text" id="kycNum" class="form-control" placeholder="KYC document number" required>
+                <div class="invalid-feedback" id="kycErr">Required.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Payment -->
+        <div class="card">
+          <div class="card-header"><strong><span class="badge bg-primary me-2">2</span>Payment Method</strong></div>
+          <div class="card-body">
+            <div class="mb-3">
+              <div class="d-flex flex-wrap gap-2">
+                <label class="d-flex align-items-center gap-2 border rounded-2 px-3 py-2 cursor-pointer" style="cursor:pointer">
+                  <input type="radio" name="payMethod" value="Credit Card" checked onchange="showPayFields()"> Credit Card
+                </label>
+                <label class="d-flex align-items-center gap-2 border rounded-2 px-3 py-2" style="cursor:pointer">
+                  <input type="radio" name="payMethod" value="Debit Card" onchange="showPayFields()"> Debit Card
+                </label>
+                <label class="d-flex align-items-center gap-2 border rounded-2 px-3 py-2" style="cursor:pointer">
+                  <input type="radio" name="payMethod" value="Net Banking" onchange="showPayFields()"> Net Banking
+                </label>
+                <label class="d-flex align-items-center gap-2 border rounded-2 px-3 py-2" style="cursor:pointer">
+                  <input type="radio" name="payMethod" value="UPI" onchange="showPayFields()"> UPI
+                </label>
+                <label class="d-flex align-items-center gap-2 border rounded-2 px-3 py-2" style="cursor:pointer">
+                  <input type="radio" name="payMethod" value="Wallet" onchange="showPayFields()"> Wallet
+                </label>
+              </div>
+            </div>
+            <div id="cardFields">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Card Number <span class="text-danger">*</span></label>
+                  <input type="text" id="cardNum" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Expiry (MM/YY) <span class="text-danger">*</span></label>
+                  <input type="text" id="cardExp" class="form-control" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">CVV <span class="text-danger">*</span></label>
+                  <input type="password" id="cardCvv" class="form-control" placeholder="3 digits" maxlength="3">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Card Holder Name <span class="text-danger">*</span></label>
+                  <input type="text" id="cardName" class="form-control" placeholder="Name on card">
+                </div>
+              </div>
+            </div>
+            <div id="upiField" class="d-none">
+              <label class="form-label">UPI ID <span class="text-danger">*</span></label>
+              <input type="text" id="upiId" class="form-control" placeholder="yourname@upi">
+            </div>
+            <div id="netbankField" class="d-none">
+              <label class="form-label">Select Bank <span class="text-danger">*</span></label>
+              <select id="bankName" class="form-select">
+                <option value="">Select bank</option>
+                <option>HDFC Bank</option><option>ICICI Bank</option><option>SBI</option>
+                <option>Axis Bank</option><option>Kotak Bank</option>
+              </select>
+            </div>
+            <div id="walletField" class="d-none">
+              <label class="form-label">Select Wallet <span class="text-danger">*</span></label>
+              <select id="walletName" class="form-select">
+                <option>Paytm</option><option>PhonePe</option><option>Amazon Pay</option>
+              </select>
+            </div>
+
+            <div class="mt-4">
+              <button class="btn btn-success btn-lg w-100 fw-bold" id="payBtn" onclick="processPayment()">
+                <i class="bi bi-lock-fill me-2"></i>Pay Securely — <span id="payAmount"></span>
+              </button>
+              <p class="text-center text-muted small mt-2"><i class="bi bi-shield-lock me-1"></i>Secured by 256-bit SSL Encryption</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDER SUMMARY -->
+      <div class="col-lg-5">
+        <div class="card sticky-top" style="top:80px">
+          <div class="card-header fw-bold"><i class="bi bi-receipt me-2"></i>Order Summary</div>
+          <div class="card-body" id="orderSummary">
+            <div class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm"></div> Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+          <div style="font-size:4rem">🎉</div>
+          <h4 class="fw-bold mt-2 text-success">Payment Successful!</h4>
+          <p class="text-muted">Your policy has been issued successfully.</p>
+          <div class="bg-light rounded-2 p-3 mb-3">
+            <div class="text-muted small">Policy Number</div>
+            <div class="fw-bold fs-5" id="newPolicyNum"></div>
+            <div class="text-muted small mt-2">Transaction ID</div>
+            <div class="fw-bold" id="newTxnId"></div>
+          </div>
+          <p class="small text-muted">Policy document has been sent to your registered email.</p>
+          <a href="policies.html" class="btn btn-primary w-100">View My Policies</a>
+          <a href="dashboard.html" class="btn btn-outline-secondary w-100 mt-2">Go to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser();
+
+  const params = new URLSearchParams(window.location.search);
+  const quoteId = params.get('quoteId');
+  const quote = quoteId ? App.getQuote(quoteId) : null;
+  const user = App.currentUser();
+
+  if (!quote) { document.querySelector('.main-content').innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><p>Invalid quote. <a href="get-quote.html">Get a new quote</a></p></div>'; }
+  else {
+    const gst = Math.round(quote.premium * 0.18 / 1.18);
+    const base = quote.premium - gst;
+    document.getElementById('orderSummary').innerHTML = `
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Insurance Type</span><strong>${quote.type} Insurance</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Plan</span><strong>${quote.plan}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Sum Insured</span><strong>${App.formatCurrency(quote.sumInsured)}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Policy Period</span><strong>1 Year</strong>
+        </div>
+      </div>
+      <hr>
+      <div class="d-flex justify-content-between mb-1">
+        <span class="text-muted">Base Premium</span><span>${App.formatCurrency(base)}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">GST (18%)</span><span>${App.formatCurrency(gst)}</span>
+      </div>
+      <hr>
+      <div class="d-flex justify-content-between fw-bold fs-5">
+        <span>Total Amount</span><span class="text-primary">${App.formatCurrency(quote.premium)}</span>
+      </div>`;
+    document.getElementById('payAmount').textContent = App.formatCurrency(quote.premium);
+  }
+
+  function showPayFields() {
+    const method = document.querySelector('input[name="payMethod"]:checked').value;
+    document.getElementById('cardFields').classList.add('d-none');
+    document.getElementById('upiField').classList.add('d-none');
+    document.getElementById('netbankField').classList.add('d-none');
+    document.getElementById('walletField').classList.add('d-none');
+    if (method === 'Credit Card' || method === 'Debit Card') document.getElementById('cardFields').classList.remove('d-none');
+    else if (method === 'UPI') document.getElementById('upiField').classList.remove('d-none');
+    else if (method === 'Net Banking') document.getElementById('netbankField').classList.remove('d-none');
+    else if (method === 'Wallet') document.getElementById('walletField').classList.remove('d-none');
+  }
+
+  function formatCard(el) {
+    let v = el.value.replace(/\D/g,'').slice(0,16);
+    el.value = v.replace(/(.{4})/g,'$1 ').trim();
+  }
+
+  function processPayment() {
+    let valid = true;
+    ['nomineeName','nomineeRel','nomineeDob','address','kycType','kycNum'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value) { el.classList.add('is-invalid'); valid=false; }
+      else el.classList.remove('is-invalid');
+    });
+    if (!valid) { document.getElementById('nomineeCard').scrollIntoView({behavior:'smooth'}); return; }
+
+    const btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing Payment...';
+
+    setTimeout(() => {
+      // Create policy
+      const today = new Date();
+      const endDate = new Date(today);
+      endDate.setFullYear(endDate.getFullYear() + 1);
+
+      const policyId = 'POL' + Date.now().toString().slice(-9);
+      const txnId = 'TXN' + Date.now().toString().slice(-9);
+      const method = document.querySelector('input[name="payMethod"]:checked').value;
+
+      const policy = {
+        id: policyId, userId: user.id, type: quote.type, plan: quote.plan,
+        sumInsured: quote.sumInsured, premium: quote.premium,
+        startDate: today.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+        status: 'Active',
+        nominee: document.getElementById('nomineeName').value,
+        nomineeRel: document.getElementById('nomineeRel').value,
+        vehicleData: quote.vehicleData || null,
+        healthData: quote.healthData || null,
+        homeData: quote.homeData || null,
+        travelData: quote.travelData || null,
+        createdAt: new Date().toISOString()
+      };
+      App.addPolicy(policy);
+
+      const payment = {
+        id: txnId, userId: user.id, policyId, policyType: quote.type,
+        date: today.toISOString().split('T')[0], amount: quote.premium,
+        method, status: 'Success', txnRef: 'REF' + Math.random().toString(36).slice(2,10).toUpperCase()
+      };
+      App.addPayment(payment);
+
+      document.getElementById('newPolicyNum').textContent = policyId;
+      document.getElementById('newTxnId').textContent = txnId;
+
+      new bootstrap.Modal(document.getElementById('successModal')).show();
+    }, 2000);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Health Insurance Quote — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="mb-3"><a href="get-quote.html" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back</a></div>
+    <div class="page-title">❤️ Health Insurance Quote</div>
+    <div class="page-subtitle">Comprehensive health coverage for you and your family</div>
+
+    <div id="step1">
+      <div class="card mt-3">
+        <div class="card-header fw-bold">Step 1 of 2 — Member Details</div>
+        <div class="card-body">
+          <form id="healthForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Plan Type <span class="text-danger">*</span></label>
+                <select id="planType" class="form-select" required onchange="toggleMembers()">
+                  <option value="">Select</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Family Floater">Family Floater</option>
+                </select>
+                <div class="invalid-feedback">Please select plan type.</div>
+              </div>
+              <div class="col-md-4" id="memberCountDiv" style="display:none">
+                <label class="form-label">Number of Members</label>
+                <select id="memberCount" class="form-select" onchange="renderMemberAges()">
+                  <option value="2">2</option><option value="3">3</option>
+                  <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Sum Insured <span class="text-danger">*</span></label>
+                <select id="sumInsured" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="300000">₹3 Lakh</option>
+                  <option value="500000">₹5 Lakh</option>
+                  <option value="1000000">₹10 Lakh</option>
+                  <option value="1500000">₹15 Lakh</option>
+                  <option value="2500000">₹25 Lakh</option>
+                  <option value="5000000">₹50 Lakh</option>
+                </select>
+                <div class="invalid-feedback">Please select sum insured.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">City <span class="text-danger">*</span></label>
+                <select id="city" class="form-select" required>
+                  <option value="">Select city</option>
+                  <option>Mumbai</option><option>Delhi</option><option>Bangalore</option>
+                  <option>Chennai</option><option>Pune</option><option>Hyderabad</option>
+                </select>
+                <div class="invalid-feedback">Please select city.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Any Pre-existing Disease?</label>
+                <select id="ped" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+            </div>
+            <div id="memberAges" class="mt-3"></div>
+            <div id="pedNote" class="alert alert-warning mt-3 d-none">
+              <i class="bi bi-info-circle me-2"></i><strong>Pre-existing Disease Waiting Period:</strong> Conditions declared will have a 2-4 year waiting period before claims can be made.
+            </div>
+            <div class="mt-4">
+              <button type="submit" class="btn btn-success px-4">Get Health Quotes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="step2" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="fw-bold mb-0">Health Insurance Plans</h5>
+          <p class="text-muted small" id="healthSummary"></p>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('step1').classList.remove('d-none');document.getElementById('step2').classList.add('d-none')">Edit</button>
+      </div>
+      <div class="row g-3" id="healthPlans"></div>
+      <div class="premium-box mt-4">
+        <div class="row align-items-center">
+          <div class="col">
+            <div style="opacity:.8;font-size:.9rem">Selected Plan Premium (incl. GST)</div>
+            <div class="amount" id="healthTotal">₹0</div>
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-warning btn-lg fw-bold me-2" onclick="buyHealthNow()">Buy Now</button>
+            <button class="btn btn-outline-light" onclick="saveHealthQuote()">Save Quote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser();
+
+  function toggleMembers() {
+    const pt = document.getElementById('planType').value;
+    const div = document.getElementById('memberCountDiv');
+    div.style.display = pt === 'Family Floater' ? 'block' : 'none';
+    if (pt === 'Individual') renderMemberAges(1);
+    else renderMemberAges();
+  }
+
+  function renderMemberAges(count) {
+    const n = count || parseInt(document.getElementById('memberCount')?.value || 1);
+    const labels = ['Self','Spouse','Child 1','Child 2','Child 3','Parent'];
+    let html = '<div class="row g-2">';
+    for (let i=0; i<n; i++) {
+      html += `<div class="col-md-2"><label class="form-label small">${labels[i]||'Member '+(i+1)} Age</label>
+        <input type="number" class="form-control form-control-sm member-age" id="age_${i}" placeholder="Age" min="1" max="99" required></div>`;
+    }
+    html += '</div>';
+    document.getElementById('memberAges').innerHTML = html;
+  }
+
+  document.getElementById('ped').addEventListener('change', function() {
+    document.getElementById('pedNote').classList.toggle('d-none', this.value === 'No');
+  });
+
+  let selectedHealthPlan = null;
+  const healthPlans = [
+    { name:'Silver', multiplier:0.8, features:['Cashless at 3,000+ hospitals','Pre/post hospitalization 30/60 days','Ambulance cover','Day care procedures','Room rent: Shared'] },
+    { name:'Gold', multiplier:1.0, features:['Cashless at 5,000+ hospitals','Pre/post hospitalization 60/90 days','Ambulance cover','Day care procedures','Room rent: Single AC'] },
+    { name:'Platinum', multiplier:1.35, features:['Cashless at 7,000+ hospitals','Pre/post hospitalization 90/180 days','Air ambulance cover','Day care procedures','Room rent: No limit'] }
+  ];
+
+  function calculateHealthPremium(sumInsured, ages, planMultiplier) {
+    const baseAge = Math.max(...ages);
+    let base = 5000;
+    if (baseAge > 45) base += 3000;
+    if (baseAge > 60) base += 6000;
+    base += (ages.length - 1) * 2000;
+    const factor = sumInsured / 500000;
+    return Math.round(base * factor * planMultiplier * 1.18);
+  }
+
+  document.getElementById('healthForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let valid = true;
+    ['planType','sumInsured','city'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value) { el.classList.add('is-invalid'); valid = false; }
+      else el.classList.remove('is-invalid');
+    });
+
+    const ageInputs = document.querySelectorAll('.member-age');
+    const ages = [];
+    ageInputs.forEach(inp => {
+      const v = parseInt(inp.value);
+      if (!v || v < 1 || v > 99) { inp.classList.add('is-invalid'); valid = false; }
+      else { inp.classList.remove('is-invalid'); ages.push(v); }
+    });
+    if (!valid) return;
+
+    const si = parseInt(document.getElementById('sumInsured').value);
+    const planType = document.getElementById('planType').value;
+    document.getElementById('healthSummary').textContent =
+      `${planType} | ${ages.length} member(s) | Sum Insured: ₹${(si/100000).toFixed(0)} Lakh`;
+
+    const container = document.getElementById('healthPlans');
+    container.innerHTML = healthPlans.map((p,i) => {
+      const prem = calculateHealthPremium(si, ages, p.multiplier);
+      return `<div class="col-md-4">
+        <div class="plan-card ${i===1?'selected':''}" id="hp_${i}" onclick="selectHealthPlan(${i}, ${prem}, '${p.name}')">
+          <div class="plan-name">${p.name}</div>
+          <div class="plan-price mt-2">₹${prem.toLocaleString('en-IN')}<span>/year</span></div>
+          <hr>
+          <ul class="list-unstyled small">
+            ${p.features.map(f=>`<li><i class="bi bi-check-circle-fill text-success me-2"></i>${f}</li>`).join('')}
+          </ul>
+        </div>
+      </div>`;
+    }).join('');
+
+    selectedHealthPlan = { idx:1, name:'Gold', premium: calculateHealthPremium(si, ages, healthPlans[1].multiplier) };
+    document.getElementById('healthTotal').textContent = App.formatCurrency(selectedHealthPlan.premium);
+    window._healthData = { planType, sumInsured: si, ages, ped: document.getElementById('ped').value };
+
+    document.getElementById('step1').classList.add('d-none');
+    document.getElementById('step2').classList.remove('d-none');
+  });
+
+  function selectHealthPlan(idx, premium, name) {
+    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('hp_'+idx).classList.add('selected');
+    selectedHealthPlan = { idx, name, premium };
+    document.getElementById('healthTotal').textContent = App.formatCurrency(premium);
+  }
+
+  function saveHealthQuote() {
+    const user = App.currentUser();
+    const q = { id:App.genId('QT'), userId:user.id, type:'Health', plan:selectedHealthPlan.name,
+      sumInsured:window._healthData.sumInsured, premium:selectedHealthPlan.premium,
+      healthData:window._healthData, createdAt:new Date().toISOString() };
+    App.saveQuote(q);
+    App.toast('Quote saved!','success');
+  }
+
+  function buyHealthNow() {
+    const user = App.currentUser();
+    const q = { id:App.genId('QT'), userId:user.id, type:'Health', plan:selectedHealthPlan.name,
+      sumInsured:window._healthData.sumInsured, premium:selectedHealthPlan.premium,
+      healthData:window._healthData, createdAt:new Date().toISOString() };
+    const saved = App.saveQuote(q);
+    window.location.href = `checkout.html?quoteId=${saved.id}`;
+  }
+</script>
+</body>
+</html>

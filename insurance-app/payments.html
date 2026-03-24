@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payments — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="page-title">Payment History</div>
+    <div class="page-subtitle mb-4">View all your premium payments and download receipts</div>
+
+    <div class="row g-3 mb-4" id="payStats"></div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-bold"><i class="bi bi-receipt me-2"></i>All Transactions</span>
+        <input type="text" id="searchTxn" class="form-control form-control-sm w-auto" placeholder="Search by ID or type..." oninput="filterPayments()">
+      </div>
+      <div class="card-body p-0" id="paymentsTable"></div>
+    </div>
+  </main>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Payment Receipt</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="receiptBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer me-2"></i>Print Receipt</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser(); setActiveSidebarLink();
+
+  const user = App.currentUser();
+  let allPayments = App.getPayments(user.id);
+
+  const total = allPayments.reduce((s,p)=>s+p.amount,0);
+  const success = allPayments.filter(p=>p.status==='Success');
+
+  document.getElementById('payStats').innerHTML = `
+    <div class="col-md-3">
+      <div class="stat-card" style="background:linear-gradient(135deg,#0d47a1,#1976d2)">
+        <div class="stat-value">${success.length}</div>
+        <div class="stat-label">Successful Payments</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card" style="background:linear-gradient(135deg,#1b5e20,#2e7d32)">
+        <div class="stat-value">${App.formatCurrency(total)}</div>
+        <div class="stat-label">Total Premium Paid</div>
+      </div>
+    </div>`;
+
+  const methodIcon = { 'Credit Card':'💳','Debit Card':'💳','UPI':'📱','Net Banking':'🏦','Wallet':'👛','EMI':'📆' };
+
+  function renderPayments(list) {
+    const container = document.getElementById('paymentsTable');
+    if (list.length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="bi bi-receipt-cutoff"></i><p>No transactions found.</p></div>';
+      return;
+    }
+    container.innerHTML = `<div class="table-responsive"><table class="table table-hover mb-0">
+      <thead><tr><th>Transaction ID</th><th>Policy</th><th>Type</th><th>Date</th><th>Method</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+      <tbody>${list.map(p=>`<tr>
+        <td class="fw-bold small">${p.id}</td>
+        <td class="small">${p.policyId}</td>
+        <td>${p.policyType}</td>
+        <td>${App.formatDate(p.date)}</td>
+        <td>${methodIcon[p.method]||''} ${p.method}</td>
+        <td class="fw-bold">${App.formatCurrency(p.amount)}</td>
+        <td><span class="status-badge ${p.status==='Success'?'badge-approved':'badge-rejected'}">${p.status}</span></td>
+        <td><button class="btn btn-sm btn-outline-primary" onclick="showReceipt('${p.id}')"><i class="bi bi-receipt"></i></button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  }
+
+  function filterPayments() {
+    const q = document.getElementById('searchTxn').value.toLowerCase();
+    renderPayments(allPayments.filter(p =>
+      p.id.toLowerCase().includes(q) || p.policyType.toLowerCase().includes(q) || p.method.toLowerCase().includes(q)
+    ));
+  }
+
+  function showReceipt(txnId) {
+    const p = allPayments.find(x=>x.id===txnId);
+    if (!p) return;
+    document.getElementById('receiptBody').innerHTML = `
+      <div class="text-center mb-4">
+        <div style="font-size:3rem">✅</div>
+        <h5 class="fw-bold">Payment Receipt</h5>
+        <p class="text-muted small">InsureAI — Demo Platform</p>
+      </div>
+      <table class="table table-sm">
+        <tr><td class="text-muted">Transaction ID</td><td class="fw-bold">${p.id}</td></tr>
+        <tr><td class="text-muted">Reference No.</td><td>${p.txnRef||'-'}</td></tr>
+        <tr><td class="text-muted">Policy ID</td><td>${p.policyId}</td></tr>
+        <tr><td class="text-muted">Insurance Type</td><td>${p.policyType}</td></tr>
+        <tr><td class="text-muted">Payment Date</td><td>${App.formatDate(p.date)}</td></tr>
+        <tr><td class="text-muted">Payment Method</td><td>${p.method}</td></tr>
+        <tr><td class="text-muted">Status</td><td><span class="badge bg-success">${p.status}</span></td></tr>
+        <tr><td class="text-muted fw-bold">Amount Paid</td><td class="fw-bold fs-5 text-primary">${App.formatCurrency(p.amount)}</td></tr>
+      </table>`;
+    new bootstrap.Modal(document.getElementById('receiptModal')).show();
+  }
+
+  renderPayments(allPayments);
+</script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Travel Insurance Quote — InsureAI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-dark fixed-top" style="background:var(--primary)">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="index.html">Insure<span style="color:#ffd54f">AI</span></a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small">Hi, <strong id="navUserName"></strong></span>
+      <button class="btn btn-outline-light btn-sm" onclick="App.logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="app-wrapper">
+  <nav class="sidebar">
+    <div class="nav-section">Main Menu</div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      <li class="nav-item"><a href="get-quote.html"><i class="bi bi-calculator"></i> Get a Quote</a></li>
+      <li class="nav-item"><a href="policies.html"><i class="bi bi-file-earmark-text"></i> My Policies</a></li>
+      <li class="nav-item"><a href="claims.html"><i class="bi bi-shield-exclamation"></i> Claims</a></li>
+      <li class="nav-item"><a href="payments.html"><i class="bi bi-credit-card"></i> Payments</a></li>
+      <li class="nav-item"><a href="documents.html"><i class="bi bi-download"></i> Documents</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="mb-3"><a href="get-quote.html" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back</a></div>
+    <div class="page-title">✈️ Travel Insurance Quote</div>
+    <div class="page-subtitle">Travel worry-free with comprehensive coverage</div>
+
+    <div id="step1">
+      <div class="card mt-3">
+        <div class="card-header fw-bold">Trip Details</div>
+        <div class="card-body">
+          <form id="travelForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Trip Type <span class="text-danger">*</span></label>
+                <select id="tripType" class="form-select" required>
+                  <option value="">Select</option>
+                  <option>Single Trip</option><option>Multi Trip</option><option>Student</option>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Destination <span class="text-danger">*</span></label>
+                <select id="destination" class="form-select" required>
+                  <option value="">Select</option>
+                  <optgroup label="Domestic"><option>Within India</option></optgroup>
+                  <optgroup label="International">
+                    <option>USA</option><option>UK</option><option>Europe (Schengen)</option>
+                    <option>UAE / Dubai</option><option>Thailand</option><option>Singapore</option>
+                    <option>Australia</option><option>Canada</option><option>Japan</option>
+                  </optgroup>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Number of Travellers <span class="text-danger">*</span></label>
+                <select id="travellers" class="form-select" required onchange="renderTravelAges()">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4</option><option value="5">5</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Travel Start Date <span class="text-danger">*</span></label>
+                <input type="date" id="startDate" class="form-control" required>
+                <div class="invalid-feedback" id="startDateErr">Travel date must be in the future.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Travel End Date <span class="text-danger">*</span></label>
+                <input type="date" id="endDate" class="form-control" required>
+                <div class="invalid-feedback" id="endDateErr">End date must be after start date. Max 180 days.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Sum Insured (Medical) <span class="text-danger">*</span></label>
+                <select id="sumInsured" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="200000">₹2 Lakh (Domestic)</option>
+                  <option value="1500000">$15,000 USD (International)</option>
+                  <option value="3000000">$30,000 USD (International)</option>
+                  <option value="5000000">$50,000 USD (International)</option>
+                </select>
+                <div class="invalid-feedback">Required.</div>
+              </div>
+            </div>
+            <div id="travelAges" class="mt-3"></div>
+            <div class="mt-4">
+              <button type="submit" class="btn btn-primary px-4" style="background:#6a1b9a;border-color:#6a1b9a">Get Travel Quotes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="step2" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="fw-bold mb-0">Travel Insurance Plans</h5>
+          <p class="text-muted small" id="travelSummary"></p>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('step1').classList.remove('d-none');document.getElementById('step2').classList.add('d-none')">Edit</button>
+      </div>
+      <div class="row g-3" id="travelPlans"></div>
+      <div class="premium-box mt-4">
+        <div class="row align-items-center">
+          <div class="col">
+            <div style="opacity:.8;font-size:.9rem">Total Premium (incl. GST)</div>
+            <div class="amount" id="travelTotal">₹0</div>
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-warning btn-lg fw-bold me-2" onclick="buyTravelNow()">Buy Now</button>
+            <button class="btn btn-outline-light" onclick="saveTravelQuote()">Save Quote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.seed();
+  if (!App.requireAuth()) throw '';
+  renderNavUser();
+
+  // Set min date = today
+  document.getElementById('startDate').min = new Date().toISOString().split('T')[0];
+  document.getElementById('endDate').min = new Date().toISOString().split('T')[0];
+
+  function renderTravelAges() {
+    const n = parseInt(document.getElementById('travellers').value);
+    let html = '<div class="row g-2">';
+    for (let i=0; i<n; i++) {
+      html += `<div class="col-md-2"><label class="form-label small">Traveller ${i+1} Age</label>
+        <input type="number" class="form-control form-control-sm travel-age" placeholder="Age" min="1" max="99" required></div>`;
+    }
+    html += '</div>';
+    document.getElementById('travelAges').innerHTML = html;
+  }
+  renderTravelAges();
+
+  let selectedTravelPlan = null;
+
+  document.getElementById('travelForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let valid = true;
+    ['tripType','destination','sumInsured'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value) { el.classList.add('is-invalid'); valid=false; }
+      else el.classList.remove('is-invalid');
+    });
+
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!start || start <= today) { document.getElementById('startDate').classList.add('is-invalid'); valid=false; }
+    else document.getElementById('startDate').classList.remove('is-invalid');
+
+    const days = start && end ? Math.ceil((new Date(end)-new Date(start))/86400000) : 0;
+    if (!end || end <= start || days > 180) { document.getElementById('endDate').classList.add('is-invalid'); valid=false; }
+    else document.getElementById('endDate').classList.remove('is-invalid');
+
+    const ages = [];
+    document.querySelectorAll('.travel-age').forEach(inp => {
+      const v = parseInt(inp.value);
+      if (!v||v<1||v>99) { inp.classList.add('is-invalid'); valid=false; }
+      else { inp.classList.remove('is-invalid'); ages.push(v); }
+    });
+
+    if (!valid) return;
+
+    const si = parseInt(document.getElementById('sumInsured').value);
+    const dest = document.getElementById('destination').value;
+    const isIntl = dest !== 'Within India';
+
+    window._travelData = {
+      tripType: document.getElementById('tripType').value,
+      destination: dest, startDate:start, endDate:end, days, ages,
+      sumInsured: si, travellers: ages.length
+    };
+
+    document.getElementById('travelSummary').textContent =
+      `${dest} | ${days} days | ${ages.length} traveller(s) | ${window._travelData.tripType}`;
+
+    const plans = [
+      { name:'Basic', rate: isIntl?800:200, features:['Medical emergency','Trip cancellation','Baggage loss up to ₹25K','Passport loss ₹10K','24/7 helpline'] },
+      { name:'Standard', rate: isIntl?1500:400, features:['Medical emergency','Trip cancellation','Baggage loss up to ₹50K','Passport loss ₹25K','Flight delay cover','Home burglary cover'] },
+      { name:'Premium', rate: isIntl?2500:700, features:['Medical emergency','Trip cancellation','Baggage loss up to ₹1L','Passport loss ₹50K','Flight delay + missed connection','Adventure sports cover','Home burglary cover'] }
+    ];
+
+    const container = document.getElementById('travelPlans');
+    container.innerHTML = plans.map((p,i) => {
+      const prem = Math.round(p.rate * days * ages.length * 1.18);
+      return `<div class="col-md-4">
+        <div class="plan-card ${i===1?'selected':''}" id="tr_${i}" onclick="selectTravelPlan(${i},${prem},'${p.name}')">
+          <div class="plan-name">${p.name}</div>
+          <div class="plan-price mt-2">₹${prem.toLocaleString('en-IN')}<span>/trip</span></div>
+          <hr>
+          <ul class="list-unstyled small">
+            ${p.features.map(f=>`<li><i class="bi bi-check-circle-fill text-success me-2"></i>${f}</li>`).join('')}
+          </ul>
+        </div>
+      </div>`;
+    }).join('');
+
+    const defPrem = Math.round(plans[1].rate * days * ages.length * 1.18);
+    selectedTravelPlan = { idx:1, name:'Standard', premium:defPrem };
+    document.getElementById('travelTotal').textContent = App.formatCurrency(defPrem);
+    document.getElementById('step1').classList.add('d-none');
+    document.getElementById('step2').classList.remove('d-none');
+  });
+
+  function selectTravelPlan(idx, premium, name) {
+    document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+    document.getElementById('tr_'+idx).classList.add('selected');
+    selectedTravelPlan = { idx, name, premium };
+    document.getElementById('travelTotal').textContent = App.formatCurrency(premium);
+  }
+
+  function saveTravelQuote() {
+    const user = App.currentUser();
+    const q = { id:App.genId('QT'), userId:user.id, type:'Travel', plan:selectedTravelPlan.name,
+      sumInsured:window._travelData.sumInsured, premium:selectedTravelPlan.premium,
+      travelData:window._travelData, createdAt:new Date().toISOString() };
+    App.saveQuote(q); App.toast('Quote saved!','success');
+  }
+
+  function buyTravelNow() {
+    const user = App.currentUser();
+    const q = { id:App.genId('QT'), userId:user.id, type:'Travel', plan:selectedTravelPlan.name,
+      sumInsured:window._travelData.sumInsured, premium:selectedTravelPlan.premium,
+      travelData:window._travelData, createdAt:new Date().toISOString() };
+    const saved = App.saveQuote(q);
+    window.location.href = `checkout.html?quoteId=${saved.id}`;
+  }
+</script>
+</body>
+</html>
