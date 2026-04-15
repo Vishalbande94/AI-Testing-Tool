@@ -18,6 +18,7 @@ const exploratoryRoutes    = require('./routes/exploratoryRoutes');
 const advancedTestRoutes   = require('./routes/advancedTestRoutes');
 const authRoutes           = require('./routes/authRoutes');
 const notificationRoutes   = require('./routes/notificationRoutes');
+const adminRoutes          = require('./routes/adminRoutes');
 const { attachUser }       = require('./middleware/authMiddleware');
 
 const app  = express();
@@ -72,6 +73,7 @@ dirs.forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 // ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api', authRoutes);             // public: signup/login; others require auth
 app.use('/api', notificationRoutes);
+app.use('/api', adminRoutes);            // admin-only routes (middleware enforces)
 app.use('/api', testRoutes);
 app.use('/api', monitorRoutes);
 app.use('/api', agentRoutes);

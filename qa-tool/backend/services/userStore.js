@@ -130,7 +130,35 @@ function setPreferences(userId, prefs) {
 
 function count() { return loadAll().length; }
 
+// ── Admin helpers ───────────────────────────────────────────────────────────
+function listAllPublic() {
+  return loadAll().map(publicUser);
+}
+
+function updateRole(id, role) {
+  if (!['admin', 'user'].includes(role)) throw new Error('invalid role');
+  const users = loadAll();
+  const idx = users.findIndex(u => u.id === id);
+  if (idx === -1) throw new Error('user not found');
+  users[idx].role = role;
+  users[idx].updatedAt = new Date().toISOString();
+  saveAll(users);
+  return publicUser(users[idx]);
+}
+
+function deleteUser(id) {
+  const users = loadAll();
+  const idx = users.findIndex(u => u.id === id);
+  if (idx === -1) throw new Error('user not found');
+  // Never allow deleting the last admin
+  const isLastAdmin = users[idx].role === 'admin' && users.filter(u => u.role === 'admin').length === 1;
+  if (isLastAdmin) throw new Error('cannot delete the last admin');
+  const removed = users.splice(idx, 1)[0];
+  saveAll(users);
+  return publicUser(removed);
+}
+
 module.exports = {
   createUser, authenticate, getById, setSecret, getSecret, deleteSecret,
-  setPreferences, count,
+  setPreferences, count, listAllPublic, updateRole, deleteUser,
 };

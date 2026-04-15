@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import {
   CommandPalette, ShortcutsModal, NotificationBell,
   Sparkline, BarChart, TrendCard, EmptyState, Skeleton, Icons,
+  Sidebar, AdminUsersPage, AdminActivityPage, AdminSystemPage,
 } from './Enhancements.jsx';
 
 const API = '';  // proxied via Vite to http://localhost:5000
@@ -1354,6 +1355,10 @@ function QAToolApp({ authUser, onLogout }) {
   const [cicdStack,     setCicdStack]     = useState('playwright');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('qa-theme') !== 'light');
 
+  // ── Sidebar state ──────────────────────────────────────────────────────────
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('qa-sidebar-collapsed') === 'true');
+  useEffect(() => { localStorage.setItem('qa-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
+
   // ── Command Palette + Shortcuts Modal + Notifications ──────────────────────
   const [cmdOpen,       setCmdOpen]       = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -1880,78 +1885,25 @@ function QAToolApp({ authUser, onLogout }) {
     <>
     <Toast toasts={toasts} remove={id => setToasts(prev => prev.filter(t => t.id !== id))} />
     <Confetti active={showConfetti} />
-    <div className="app">
-      {/* ── Top bar ──────────────────────────────────────────────────────────── */}
-      <header className="topbar">
-        <div className="topbar-brand">
-          <span className="brand-icon">🤖</span>
-          <div>
-            <div className="brand-title">QA AI Testing Tool</div>
-            <div className="brand-sub">Automated test generation & execution</div>
-          </div>
-        </div>
-
-        {/* Page nav */}
-        <div className="topbar-nav">
-          <button
-            className={`topbar-navbtn ${page === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setPage('dashboard')}
-          >📊 Dashboard</button>
-          <button
-            className={`topbar-navbtn ${page === 'manual' ? 'active' : ''}`}
-            onClick={() => setPage('manual')}
-          >⚡ Manual Test</button>
-          <button
-            className={`topbar-navbtn ${page === 'monitor' ? 'active' : ''}`}
-            onClick={() => setPage('monitor')}
-          >
-            📧 Email Monitor
-            {monStatus?.isRunning && <span className="live-dot" />}
-          </button>
-          <button
-            className={`topbar-navbtn ${page === 'exploratory' ? 'active' : ''}`}
-            onClick={() => setPage('exploratory')}
-          >🔍 Exploratory</button>
-          <button
-            className={`topbar-navbtn ${page === 'api' ? 'active' : ''}`}
-            onClick={() => setPage('api')}
-          >🔌 API</button>
-          <button
-            className={`topbar-navbtn ${page === 'security' ? 'active' : ''}`}
-            onClick={() => setPage('security')}
-          >🛡️ Security</button>
-          <button
-            className={`topbar-navbtn ${page === 'performance' ? 'active' : ''}`}
-            onClick={() => setPage('performance')}
-          >⚡ Performance</button>
-          <button
-            className={`topbar-navbtn ${page === 'a11y' ? 'active' : ''}`}
-            onClick={() => setPage('a11y')}
-          >♿ A11y</button>
-          <button
-            className={`topbar-navbtn ${page === 'visual' ? 'active' : ''}`}
-            onClick={() => setPage('visual')}
-          >👁️ Visual</button>
-          <button
-            className={`topbar-navbtn ${page === 'mobile' ? 'active' : ''}`}
-            onClick={() => setPage('mobile')}
-          >📱 Mobile</button>
-          <button
-            className={`topbar-navbtn ${page === 'database' ? 'active' : ''}`}
-            onClick={() => setPage('database')}
-          >🗃️ Data</button>
-          <button
-            className={`topbar-navbtn ${page === 'cicd' ? 'active' : ''}`}
-            onClick={() => setPage('cicd')}
-          >🚀 CI/CD</button>
-          <button
-            className={`topbar-navbtn ${page === 'scripts' ? 'active' : ''}`}
-            onClick={() => setPage('scripts')}
-          >🛠️ Script Gen</button>
-          <button
-            className={`topbar-navbtn ${page === 'guide' ? 'active' : ''}`}
-            onClick={() => setPage('guide')}
-          >📖 User Guide</button>
+    <div className={`app app-with-sidebar ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <Sidebar
+        page={page}
+        setPage={setPage}
+        authUser={authUser}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(c => !c)}
+      />
+      {/* ── Top bar (minimal — sidebar handles nav) ──────────────────────────── */}
+      <header className="topbar topbar-minimal">
+        <button className="sidebar-toggle" onClick={() => setSidebarCollapsed(c => !c)} title="Toggle sidebar">
+          <Icons.Menu size={20} />
+        </button>
+        <div className="topbar-breadcrumb">
+          {monStatus?.isRunning && page !== 'monitor' && (
+            <span className="topbar-live-chip">
+              <span className="live-dot" /> Email Monitor Active
+            </span>
+          )}
         </div>
 
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
@@ -3539,6 +3491,16 @@ function QAToolApp({ authUser, onLogout }) {
             toast={toast}
             addNotification={addNotification}
           />
+        )}
+
+        {page === 'admin-users'    && authUser?.role === 'admin' && <AdminUsersPage    currentUser={authUser} toast={toast} />}
+        {page === 'admin-activity' && authUser?.role === 'admin' && <AdminActivityPage />}
+        {page === 'admin-system'   && authUser?.role === 'admin' && <AdminSystemPage   />}
+
+        {['admin-users', 'admin-activity', 'admin-system'].includes(page) && authUser?.role !== 'admin' && (
+          <div className="panel">
+            <EmptyState icon={Icons.Shield} title="Admin access required" description="You need an admin role to view this page. Contact your administrator to request access." />
+          </div>
         )}
 
         {page === 'dashboard' && (

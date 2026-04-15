@@ -2,6 +2,7 @@
 const express = require('express');
 const userStore = require('../services/userStore');
 const authService = require('../services/authService');
+const activityLog = require('../services/activityLog');
 const { requireAuth } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -19,8 +20,17 @@ router.post('/auth/signup', async (req, res) => {
 
     const user = await userStore.createUser({ email, password, name });
     const token = authService.sign(user);
+    activityLog.log({
+      userId: user.id, userEmail: user.email,
+      action: 'auth.signup', resource: `user:${user.id}`,
+      status: 'success', metadata: { role: user.role }, ip: req.ip,
+    });
     res.status(201).json({ user, token });
   } catch (err) {
+    activityLog.log({
+      action: 'auth.signup', status: 'failure',
+      metadata: { email: req.body?.email, error: err.message }, ip: req.ip,
+    });
     res.status(400).json({ error: err.message });
   }
 });
@@ -31,9 +41,20 @@ router.post('/auth/login', async (req, res) => {
   if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
 
   const user = await userStore.authenticate(email, password);
-  if (!user) return res.status(401).json({ error: 'invalid credentials' });
+  if (!user) {
+    activityLog.log({
+      action: 'auth.login', status: 'failure',
+      metadata: { email, reason: 'invalid credentials' }, ip: req.ip,
+    });
+    return res.status(401).json({ error: 'invalid credentials' });
+  }
 
   const token = authService.sign(user);
+  activityLog.log({
+    userId: user.id, userEmail: user.email,
+    action: 'auth.login', resource: `user:${user.id}`,
+    status: 'success', metadata: { role: user.role }, ip: req.ip,
+  });
   res.json({ user, token });
 });
 

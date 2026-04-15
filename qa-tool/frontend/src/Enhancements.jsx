@@ -4,8 +4,10 @@ import {
   Search, Command, Keyboard, Bell, TrendingUp, TrendingDown,
   Settings, User, LogOut, Moon, Sun, Zap, Shield, Eye, Smartphone,
   Database, Rocket, Target, CheckCircle, XCircle, AlertCircle,
-  Sparkles, ArrowRight, ChevronRight, Plus, Clock, Filter,
-  Download, Upload, Play, FileText, Globe, Activity,
+  Sparkles, ArrowRight, ChevronRight, ChevronDown, Plus, Clock, Filter,
+  Download, Upload, Play, FileText, Globe, Activity, Home,
+  Users, BarChart3, Server, Mail, BookOpen, Mic, Menu,
+  Trash2, UserCheck, UserX, Crown, Beaker, Layers, Wrench,
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -400,6 +402,541 @@ export const Icons = {
   Search, Command, Keyboard, Bell, TrendingUp, TrendingDown,
   Settings, User, LogOut, Moon, Sun, Zap, Shield, Eye, Smartphone,
   Database, Rocket, Target, CheckCircle, XCircle, AlertCircle,
-  Sparkles, ArrowRight, ChevronRight, Plus, Clock, Filter,
-  Download, Upload, Play, FileText, Globe, Activity,
+  Sparkles, ArrowRight, ChevronRight, ChevronDown, Plus, Clock, Filter,
+  Download, Upload, Play, FileText, Globe, Activity, Home,
+  Users, BarChart3, Server, Mail, BookOpen, Mic, Menu,
+  Trash2, UserCheck, UserX, Crown, Beaker, Layers, Wrench,
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SIDEBAR NAVIGATION — colorful, grouped, collapsible
+// ═══════════════════════════════════════════════════════════════════════════
+export function Sidebar({ page, setPage, authUser, collapsed, onToggleCollapse }) {
+  const isAdmin = authUser?.role === 'admin';
+
+  const groups = [
+    {
+      label: 'Overview',
+      color: '#06b6d4',
+      items: [
+        { id: 'dashboard',  icon: BarChart3, label: 'Dashboard' },
+        { id: 'monitor',    icon: Mail,      label: 'Email Monitor' },
+        { id: 'guide',      icon: BookOpen,  label: 'User Guide' },
+      ],
+    },
+    {
+      label: 'Run Tests',
+      color: '#8b5cf6',
+      items: [
+        { id: 'manual',       icon: Play,    label: 'Manual Test' },
+        { id: 'exploratory',  icon: Search,  label: 'Exploratory' },
+      ],
+    },
+    {
+      label: 'Generate Test Suites',
+      color: '#10b981',
+      items: [
+        { id: 'api',          icon: Globe,      label: 'API Testing',       badge: 'Hot' },
+        { id: 'security',     icon: Shield,     label: 'Security',          color: '#ef4444' },
+        { id: 'performance',  icon: Zap,        label: 'Performance',       color: '#f59e0b' },
+        { id: 'a11y',         icon: Eye,        label: 'Accessibility',     color: '#10b981' },
+        { id: 'visual',       icon: Layers,     label: 'Visual Regression', color: '#8b5cf6' },
+        { id: 'mobile',       icon: Smartphone, label: 'Mobile',            color: '#3b82f6' },
+        { id: 'database',     icon: Database,   label: 'Database / ETL',    color: '#0891b2' },
+        { id: 'cicd',         icon: Rocket,     label: 'CI/CD Pipelines',   color: '#f59e0b' },
+      ],
+    },
+    {
+      label: 'Tools',
+      color: '#f59e0b',
+      items: [
+        { id: 'scripts',    icon: Wrench,  label: 'Script Generator' },
+      ],
+    },
+    ...(isAdmin ? [{
+      label: 'Administration',
+      color: '#ef4444',
+      adminOnly: true,
+      items: [
+        { id: 'admin-users',    icon: Users,   label: 'Users' },
+        { id: 'admin-activity', icon: Activity, label: 'Activity Log' },
+        { id: 'admin-system',   icon: Server,  label: 'System Health' },
+      ],
+    }] : []),
+  ];
+
+  return (
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+      <div className="sidebar-brand" onClick={onToggleCollapse} title={collapsed ? 'Expand' : 'Collapse'}>
+        <div className="sidebar-logo-wrap">
+          <Beaker size={22} />
+        </div>
+        {!collapsed && (
+          <div className="sidebar-brand-text">
+            <div className="sidebar-brand-name">QA Platform</div>
+            <div className="sidebar-brand-sub">AI-Powered Testing</div>
+          </div>
+        )}
+      </div>
+
+      <nav className="sidebar-nav">
+        {groups.map(g => (
+          <SidebarGroup key={g.label} group={g} page={page} setPage={setPage} collapsed={collapsed} />
+        ))}
+      </nav>
+
+      {!collapsed && authUser && (
+        <div className="sidebar-footer">
+          <div className="sidebar-user" onClick={() => setPage('settings')}>
+            <div className="sidebar-user-avatar">
+              {(authUser.name || authUser.email || '?').charAt(0).toUpperCase()}
+            </div>
+            <div className="sidebar-user-info">
+              <div className="sidebar-user-name">{authUser.name}</div>
+              <div className="sidebar-user-role">
+                {authUser.role === 'admin' && <Crown size={10} />}
+                {authUser.role}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </aside>
+  );
+}
+
+function SidebarGroup({ group, page, setPage, collapsed }) {
+  const [open, setOpen] = useState(true);
+  const isActive = group.items.some(i => i.id === page);
+
+  return (
+    <div className={`sidebar-group ${group.adminOnly ? 'admin-group' : ''}`}>
+      {!collapsed && (
+        <button
+          className="sidebar-group-label"
+          onClick={() => setOpen(o => !o)}
+          style={{ '--group-color': group.color }}
+        >
+          <ChevronDown size={12} className={open ? '' : 'rotated'} />
+          {group.label}
+          {group.adminOnly && <span className="sidebar-admin-chip">ADMIN</span>}
+        </button>
+      )}
+      {(open || collapsed) && (
+        <div className="sidebar-items">
+          {group.items.map(item => {
+            const Icon = item.icon;
+            const isPage = item.id === page;
+            return (
+              <button
+                key={item.id}
+                className={`sidebar-item ${isPage ? 'active' : ''}`}
+                onClick={() => setPage(item.id)}
+                title={collapsed ? item.label : undefined}
+                style={{ '--item-color': item.color || group.color, '--group-color': group.color }}
+              >
+                <span className="sidebar-item-icon"><Icon size={16} /></span>
+                {!collapsed && (
+                  <>
+                    <span className="sidebar-item-label">{item.label}</span>
+                    {item.badge && <span className="sidebar-item-badge">{item.badge}</span>}
+                  </>
+                )}
+                {isPage && <span className="sidebar-active-bar" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN: USERS PAGE
+// ═══════════════════════════════════════════════════════════════════════════
+export function AdminUsersPage({ currentUser, toast }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState(null);
+  const [userDetail, setUserDetail] = useState(null);
+
+  const reload = () => {
+    setLoading(true);
+    fetch('/api/admin/users')
+      .then(r => r.json())
+      .then(d => setUsers(d.users || []))
+      .finally(() => setLoading(false));
+  };
+  useEffect(reload, []);
+
+  const loadDetail = (id) => {
+    setSelected(id);
+    setUserDetail(null);
+    fetch(`/api/admin/users/${id}`).then(r => r.json()).then(setUserDetail);
+  };
+
+  const promote = async (id, role) => {
+    if (!confirm(`Change role to ${role}?`)) return;
+    const res = await fetch(`/api/admin/users/${id}/role`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+    });
+    const data = await res.json();
+    if (!res.ok) return toast(data.error || 'Failed', 'error');
+    toast(`Role changed to ${role}`, 'success');
+    reload();
+    if (selected === id) loadDetail(id);
+  };
+
+  const remove = async (id, email) => {
+    if (!confirm(`Delete user ${email}? This cannot be undone.`)) return;
+    const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) return toast(data.error || 'Failed', 'error');
+    toast(`Deleted ${email}`, 'success');
+    setSelected(null);
+    reload();
+  };
+
+  const filtered = users.filter(u =>
+    !query ||
+    u.email.toLowerCase().includes(query.toLowerCase()) ||
+    u.name?.toLowerCase().includes(query.toLowerCase()) ||
+    u.role === query.toLowerCase()
+  );
+
+  return (
+    <div className="admin-page">
+      <div className="admin-header" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)' }}>
+        <div className="admin-header-icon"><Users size={36} /></div>
+        <div>
+          <h1 className="admin-header-title">User Management</h1>
+          <p className="admin-header-sub">{users.length} total · {users.filter(u => u.role === 'admin').length} admin(s)</p>
+        </div>
+      </div>
+
+      <div className="admin-layout">
+        <div className="admin-list-panel">
+          <div className="admin-search">
+            <Search size={16} />
+            <input
+              className="admin-search-input"
+              placeholder="Search by email, name, or role..."
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+          </div>
+
+          {loading ? (
+            <div style={{ padding: 40, textAlign: 'center' }}>
+              <Skeleton height={48} />
+              <div style={{ marginTop: 8 }}><Skeleton height={48} /></div>
+              <div style={{ marginTop: 8 }}><Skeleton height={48} /></div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <EmptyState icon={Users} title="No users match" description={`No users matched "${query}"`} />
+          ) : (
+            <div className="admin-user-list">
+              {filtered.map(u => (
+                <button
+                  key={u.id}
+                  className={`admin-user-row ${selected === u.id ? 'selected' : ''}`}
+                  onClick={() => loadDetail(u.id)}
+                >
+                  <div className={`admin-user-avatar role-${u.role}`}>
+                    {(u.name || u.email).charAt(0).toUpperCase()}
+                  </div>
+                  <div className="admin-user-main">
+                    <div className="admin-user-name">
+                      {u.name}
+                      {u.role === 'admin' && <Crown size={12} style={{ color: '#f59e0b' }} />}
+                      {u.id === currentUser?.id && <span className="admin-you">You</span>}
+                    </div>
+                    <div className="admin-user-email">{u.email}</div>
+                  </div>
+                  <div className="admin-user-stats">
+                    <div className="admin-user-stat">
+                      <Activity size={11} />
+                      {u.activityCount}
+                    </div>
+                    <div className="admin-user-stat admin-user-seen">
+                      {u.lastSeen ? timeSince(u.lastSeen) : 'never'}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="admin-detail-panel">
+          {!selected && (
+            <EmptyState
+              icon={User}
+              title="Select a user"
+              description="Click a user from the list to view their details, activity, and manage their access."
+            />
+          )}
+          {selected && !userDetail && (
+            <div style={{ padding: 40 }}><Skeleton height={200} /></div>
+          )}
+          {userDetail && (
+            <>
+              <div className="admin-detail-header">
+                <div className={`admin-detail-avatar role-${userDetail.user.role}`}>
+                  {(userDetail.user.name || userDetail.user.email).charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="admin-detail-name">{userDetail.user.name}</h2>
+                  <p className="admin-detail-email">{userDetail.user.email}</p>
+                  <div className="admin-detail-meta">
+                    <span className={`user-role-chip role-${userDetail.user.role}`}>{userDetail.user.role}</span>
+                    <span>· Joined {new Date(userDetail.user.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-actions-bar">
+                {userDetail.user.role === 'user' ? (
+                  <button className="btn btn-primary btn-sm" onClick={() => promote(userDetail.user.id, 'admin')}>
+                    <Crown size={14} /> Promote to Admin
+                  </button>
+                ) : (
+                  <button className="btn btn-ghost btn-sm" onClick={() => promote(userDetail.user.id, 'user')}
+                    disabled={userDetail.user.id === currentUser?.id}>
+                    <UserX size={14} /> Demote to User
+                  </button>
+                )}
+                <button
+                  className="btn btn-ghost btn-sm admin-danger-btn"
+                  onClick={() => remove(userDetail.user.id, userDetail.user.email)}
+                  disabled={userDetail.user.id === currentUser?.id}
+                >
+                  <Trash2 size={14} /> Delete User
+                </button>
+              </div>
+
+              <h3 className="admin-section-title">Recent Activity ({userDetail.activity.length})</h3>
+              {userDetail.activity.length === 0 ? (
+                <div className="admin-empty-small">No activity recorded yet.</div>
+              ) : (
+                <div className="admin-activity-list">
+                  {userDetail.activity.map(a => (
+                    <ActivityRow key={a.id} event={a} />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ActivityRow({ event }) {
+  const icon = event.status === 'success' ? CheckCircle : event.status === 'failure' ? XCircle : Activity;
+  const Icon = icon;
+  const color = event.status === 'success' ? '#10b981' : event.status === 'failure' ? '#ef4444' : '#06b6d4';
+  return (
+    <div className="admin-activity-row">
+      <div className="admin-activity-icon" style={{ background: `${color}22`, color }}>
+        <Icon size={14} />
+      </div>
+      <div className="admin-activity-body">
+        <div className="admin-activity-top">
+          <code className="admin-activity-action">{event.action}</code>
+          <span className="admin-activity-time">{new Date(event.timestamp).toLocaleString()}</span>
+        </div>
+        {event.resource && <div className="admin-activity-resource">{event.resource}</div>}
+        {event.metadata && Object.keys(event.metadata).length > 0 && (
+          <div className="admin-activity-meta">
+            {Object.entries(event.metadata).slice(0, 3).map(([k, v]) => (
+              <span key={k} className="admin-meta-chip">{k}: <strong>{String(v).slice(0, 40)}</strong></span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function timeSince(iso) {
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 60)      return 'just now';
+  if (s < 3600)    return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400)   return `${Math.floor(s / 3600)}h ago`;
+  if (s < 2592000) return `${Math.floor(s / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN: ACTIVITY LOG PAGE
+// ═══════════════════════════════════════════════════════════════════════════
+export function AdminActivityPage() {
+  const [data, setData] = useState({ entries: [], total: 0 });
+  const [loading, setLoading] = useState(true);
+  const [actionFilter, setActionFilter] = useState('');
+
+  const reload = () => {
+    setLoading(true);
+    const qs = actionFilter ? `?action=${encodeURIComponent(actionFilter)}` : '';
+    fetch(`/api/admin/activity${qs}`)
+      .then(r => r.json())
+      .then(d => setData(d))
+      .finally(() => setLoading(false));
+  };
+  useEffect(reload, [actionFilter]);
+
+  const uniqueActions = [...new Set(data.entries.map(e => e.action))].sort();
+
+  return (
+    <div className="admin-page">
+      <div className="admin-header" style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)' }}>
+        <div className="admin-header-icon"><Activity size={36} /></div>
+        <div>
+          <h1 className="admin-header-title">Activity Log</h1>
+          <p className="admin-header-sub">{data.total} events recorded — audit trail of all significant actions</p>
+        </div>
+      </div>
+
+      <div className="admin-activity-toolbar">
+        <select
+          className="field-input"
+          style={{ maxWidth: 260 }}
+          value={actionFilter}
+          onChange={e => setActionFilter(e.target.value)}
+        >
+          <option value="">All actions ({data.total})</option>
+          {uniqueActions.map(a => <option key={a} value={a}>{a}</option>)}
+        </select>
+        <button className="btn btn-ghost btn-sm" onClick={reload}>Refresh</button>
+      </div>
+
+      {loading ? (
+        <div className="panel">
+          {[1,2,3,4,5].map(i => (
+            <div key={i} style={{ marginBottom: 8 }}><Skeleton height={56} /></div>
+          ))}
+        </div>
+      ) : data.entries.length === 0 ? (
+        <div className="panel">
+          <EmptyState icon={Activity} title="No activity yet" description="Events will appear here as users interact with the platform." />
+        </div>
+      ) : (
+        <div className="panel admin-activity-full">
+          {data.entries.map(e => (
+            <div key={e.id} className="admin-activity-full-row">
+              <div className="admin-activity-full-left">
+                <div className="admin-activity-full-user">
+                  <div className="admin-activity-full-avatar">
+                    {(e.userEmail || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="admin-activity-full-email">{e.userEmail || <em>anonymous</em>}</div>
+                    <div className="admin-activity-full-time">{new Date(e.timestamp).toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="admin-activity-full-mid">
+                <code className="admin-activity-action">{e.action}</code>
+                {e.resource && <div className="admin-activity-resource">{e.resource}</div>}
+              </div>
+              <div className="admin-activity-full-right">
+                <span className={`activity-status status-${e.status}`}>{e.status}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN: SYSTEM HEALTH PAGE
+// ═══════════════════════════════════════════════════════════════════════════
+export function AdminSystemPage() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/stats')
+      .then(r => r.json())
+      .then(d => setStats(d))
+      .finally(() => setLoading(false));
+    const interval = setInterval(() => {
+      fetch('/api/admin/stats').then(r => r.json()).then(d => setStats(d));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) return <div className="admin-page"><Skeleton height={200} /></div>;
+  if (!stats) return <div className="admin-page">Failed to load stats</div>;
+
+  const uptimeHours = Math.floor(stats.server.uptime / 3600);
+  const uptimeMins = Math.floor((stats.server.uptime % 3600) / 60);
+  const memMB = Math.round(stats.server.memory.heapUsed / 1024 / 1024);
+
+  return (
+    <div className="admin-page">
+      <div className="admin-header" style={{ background: 'linear-gradient(135deg, #0891b2 0%, #10b981 100%)' }}>
+        <div className="admin-header-icon"><Server size={36} /></div>
+        <div>
+          <h1 className="admin-header-title">System Health</h1>
+          <p className="admin-header-sub">Real-time backend & usage metrics (auto-refreshes every 10s)</p>
+        </div>
+      </div>
+
+      <div className="admin-stats-grid">
+        <TrendCard label="Total Users" value={stats.users.total} color="#06b6d4" icon={Users} />
+        <TrendCard label="Admins" value={stats.users.admins} color="#f59e0b" icon={Crown} />
+        <TrendCard label="Total Runs" value={stats.testing.totalRuns} color="#8b5cf6" icon={Play} />
+        <TrendCard label="Events (24h)" value={stats.activity.last24h} color="#10b981" icon={Activity} />
+      </div>
+
+      <div className="admin-split">
+        <div className="panel">
+          <div className="section-title"><Server size={16} style={{ verticalAlign: -3 }} /> Server</div>
+          <div className="admin-kv">
+            <div><label>Uptime</label><strong>{uptimeHours}h {uptimeMins}m</strong></div>
+            <div><label>Memory (heap)</label><strong>{memMB} MB</strong></div>
+            <div><label>Node.js</label><strong>{stats.server.nodeVersion}</strong></div>
+            <div><label>Platform</label><strong>{stats.server.platform}</strong></div>
+          </div>
+        </div>
+
+        <div className="panel">
+          <div className="section-title"><BarChart3 size={16} style={{ verticalAlign: -3 }} /> Test Results</div>
+          <BarChart height={140} data={[
+            { label: 'Passed',  value: stats.testing.totalPassed, color: 'linear-gradient(90deg, #10b981, #059669)' },
+            { label: 'Failed',  value: stats.testing.totalFailed, color: 'linear-gradient(90deg, #ef4444, #dc2626)' },
+          ]} />
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="section-title"><Activity size={16} style={{ verticalAlign: -3 }} /> Activity by Action</div>
+        <BarChart height={Math.max(80, Object.keys(stats.activity.byAction).length * 30)} data={
+          Object.entries(stats.activity.byAction)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([label, value]) => ({ label, value, color: 'linear-gradient(90deg, #06b6d4, #8b5cf6)' }))
+        } />
+      </div>
+
+      <div className="panel">
+        <div className="section-title"><Database size={16} style={{ verticalAlign: -3 }} /> Storage</div>
+        <div className="admin-kv">
+          <div><label>Reports directory</label><strong>{stats.storage.reportsDirMB} MB</strong></div>
+          <div><label>Total events logged</label><strong>{stats.activity.total}</strong></div>
+          <div><label>Failed events</label><strong style={{ color: '#ef4444' }}>{stats.activity.byStatus.failure || 0}</strong></div>
+          <div><label>Successful events</label><strong style={{ color: '#10b981' }}>{stats.activity.byStatus.success || 0}</strong></div>
+        </div>
+      </div>
+    </div>
+  );
+}
