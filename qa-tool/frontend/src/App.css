@@ -4070,25 +4070,10 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
   50%      { box-shadow: 0 4px 20px rgba(6,182,212,.6), 0 0 40px rgba(139,92,246,.3); }
 }
 
-/* ─── Stat values shimmer when updating ─────────────────────────────────── */
+/* Stat values — kept solid and readable (no animation). Subtle depth only. */
 .stat-val, .kpi-val, .trend-card-value {
-  background: linear-gradient(
-    90deg,
-    currentColor 0%,
-    currentColor 40%,
-    rgba(255,255,255,.6) 50%,
-    currentColor 60%,
-    currentColor 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
-  animation: shimmer-text 4s infinite linear;
-}
-@keyframes shimmer-text {
-  from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgba(0,0,0,.05);
 }
 
 /* ─── Better panel with subtle inner highlight ──────────────────────────── */
@@ -4200,6 +4185,255 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
     0 20px 40px rgba(6,182,212,.15),
     0 10px 20px rgba(0,0,0,.08),
     0 0 0 1px rgba(6,182,212,.25) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ALL-ROUND LOOK & FEEL IMPROVEMENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Global typography polish ──────────────────────────────────────────── */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 { letter-spacing: -0.025em; }
+h1 { line-height: 1.15; }
+h2 { line-height: 1.25; }
+h3 { line-height: 1.35; }
+
+/* Selection color */
+::selection {
+  background: rgba(6,182,212,.3);
+  color: inherit;
+}
+
+/* ─── Smarter card borders (not just solid) ─────────────────────────────── */
+.panel, .trend-card, .kpi-card, .stat-card, .adv-tool-card,
+.admin-list-panel, .admin-detail-panel, .settings-card {
+  border: 1px solid transparent !important;
+  background-clip: padding-box;
+  position: relative;
+}
+.panel {
+  background-image:
+    linear-gradient(var(--surface), var(--surface)),
+    linear-gradient(145deg, rgba(148,163,184,.2), rgba(148,163,184,.05)) !important;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+[data-theme="dark"] .panel {
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,.025) 0%, transparent 20%),
+    linear-gradient(145deg, #1e293b 0%, #1a2234 100%),
+    linear-gradient(145deg, rgba(148,163,184,.3), rgba(148,163,184,.05)) !important;
+  background-origin: border-box;
+  background-clip: padding-box, padding-box, border-box;
+}
+
+/* ─── Better button colors + subtle inner highlight ─────────────────────── */
+.btn-primary, .btn-execute {
+  text-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+.btn-primary::after, .btn-execute::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,.15), transparent);
+  border-radius: 10px 10px 0 0;
+  pointer-events: none;
+}
+
+/* ─── Chips/badges — add subtle inner shadow for depth ──────────────────── */
+.chip, .exp-tc-priority, .exp-tc-category, .exp-risk-severity,
+.exp-ui-type, .exp-ui-relevance, .status-pill, .settings-chip-on,
+.user-role-chip, .admin-you, .activity-status, .sidebar-admin-chip,
+.sidebar-item-badge {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -1px 0 rgba(0,0,0,.05);
+}
+
+/* ─── KPI cards — richer gradient backgrounds ──────────────────────────── */
+.kpi-card.accent-indigo {
+  background:
+    linear-gradient(145deg, rgba(99,102,241,.08), rgba(99,102,241,.02)) !important;
+  border-top: 3px solid #6366f1 !important;
+}
+.kpi-card.accent-green {
+  background:
+    linear-gradient(145deg, rgba(16,185,129,.08), rgba(16,185,129,.02)) !important;
+  border-top: 3px solid #10b981 !important;
+}
+.kpi-card.accent-amber {
+  background:
+    linear-gradient(145deg, rgba(245,158,11,.08), rgba(245,158,11,.02)) !important;
+  border-top: 3px solid #f59e0b !important;
+}
+
+/* ─── Subtle icon glow on hover throughout ──────────────────────────────── */
+.topbar-iconbtn:hover svg, .notif-btn:hover svg, .theme-toggle:hover svg,
+.sidebar-toggle:hover svg {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* ─── Tab improvements (active tab has gradient underline) ──────────────── */
+.tab-active {
+  background: linear-gradient(180deg, transparent 85%, rgba(6,182,212,.06) 100%);
+}
+
+/* ─── Table rows — subtle zebra striping ────────────────────────────────── */
+.tbl tbody tr:nth-child(even) td {
+  background: rgba(148,163,184,.02);
+}
+.tbl tbody tr {
+  transition: background .15s;
+}
+
+/* ─── Better empty-state depth ──────────────────────────────────────────── */
+.empty-state-visual {
+  box-shadow:
+    inset 0 0 40px rgba(6,182,212,.08),
+    0 8px 24px rgba(6,182,212,.12);
+}
+
+/* ─── Sidebar user card — subtle glassy inner light ─────────────────────── */
+.sidebar-user {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02)) !important;
+  backdrop-filter: blur(6px);
+}
+
+/* ─── User menu dropdown — polished ─────────────────────────────────────── */
+.user-menu-dropdown {
+  background:
+    linear-gradient(180deg, rgba(30,41,59,.98), rgba(30,41,59,.92)) !important;
+  box-shadow:
+    0 20px 40px rgba(0,0,0,.5),
+    0 0 0 1px rgba(148,163,184,.15) !important;
+}
+
+/* ─── Code blocks — distinctive styling ─────────────────────────────────── */
+code, .mono {
+  background: rgba(6,182,212,.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #06b6d4;
+  font-size: 0.9em;
+  border: 1px solid rgba(6,182,212,.15);
+}
+.panel code { background: rgba(6,182,212,.08); }
+
+/* ─── Smooth element transitions for all interactive pieces ─────────────── */
+button, a, input, select, textarea {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Top bar — subtle gradient line at bottom ──────────────────────────── */
+.topbar-minimal::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(6,182,212,.3) 20%,
+    rgba(139,92,246,.3) 50%,
+    rgba(236,72,153,.3) 80%,
+    transparent 100%
+  );
+  opacity: .6;
+}
+
+/* ─── Loading cursor for disabled buttons ───────────────────────────────── */
+.btn:disabled { cursor: not-allowed; }
+
+/* ─── Focus visible for accessibility (keyboard users) ──────────────────── */
+*:focus-visible {
+  outline: 2px solid #06b6d4 !important;
+  outline-offset: 3px !important;
+  border-radius: 4px;
+}
+
+/* ─── Sidebar collapsed — icon-only gets a nicer hover ──────────────────── */
+.sidebar.collapsed .sidebar-item:hover {
+  background: linear-gradient(
+    135deg,
+    var(--item-color, #06b6d4) 0%,
+    transparent 150%
+  );
+  background-size: 200% 200%;
+  animation: hover-flow 3s ease-in-out infinite;
+}
+@keyframes hover-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* ─── Quick action tiles — nicer hover ──────────────────────────────────── */
+.action-item {
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.action-item:hover {
+  transform: translateX(4px) !important;
+  border-color: #06b6d4 !important;
+}
+
+/* ─── Better avatar animations ──────────────────────────────────────────── */
+.admin-user-avatar, .sidebar-user-avatar, .user-avatar,
+.admin-detail-avatar, .admin-activity-full-avatar {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.admin-user-row:hover .admin-user-avatar,
+.sidebar-user:hover .sidebar-user-avatar {
+  transform: scale(1.08) rotate(-4deg);
+}
+
+/* ─── Reduce motion if user prefers it (accessibility) ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .page-bg-orb, .page-bg-canvas::before, .sparkle-drift { animation: none !important; }
+}
+
+/* ─── Better field labels ───────────────────────────────────────────────── */
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ─── Tooltip-ready elements (when title= attribute is set) ─────────────── */
+[title]:hover { cursor: help; }
+button[title]:hover { cursor: pointer; }
+
+/* ─── Refined topbar icon buttons ───────────────────────────────────────── */
+.topbar-iconbtn {
+  background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02)) !important;
+  backdrop-filter: blur(8px);
+}
+[data-theme="dark"] .topbar-iconbtn { background: linear-gradient(145deg, rgba(255,255,255,.05), rgba(255,255,255,.01)) !important; }
+
+/* ─── Better error/success states in forms ─────────────────────────────── */
+.field-input.error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.15) !important;
+}
+.field-input.success {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16,185,129,.15) !important;
+}
+
+/* ─── Smooth height transitions for expandable sections ─────────────────── */
+.expand-smooth {
+  transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s;
 }
 
 /* ─── Sparkle particles (optional overlay) ─────────────────────────────── */
