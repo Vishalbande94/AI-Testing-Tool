@@ -1,7 +1,66 @@
-
-# Playwright
+# ── Node ────────────────────────────────────────────────────────────────────
 node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Env / secrets ───────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Playwright ──────────────────────────────────────────────────────────────
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/
+
+# ── QA Tool runtime data (NEVER commit — contains user password hashes etc.) ─
+qa-tool/backend/reports/
+qa-tool/backend/uploads/
+qa-tool/backend/logs/
+qa-tool/backend/*.db
+qa-tool/backend/*.sqlite
+qa-tool/backend/users.json
+qa-tool/backend/run-history.json
+qa-tool/reports/
+
+# ── Claude Code internal ────────────────────────────────────────────────────
+.claude/
+
+# ── Build output ────────────────────────────────────────────────────────────
+qa-tool/frontend/dist/
+qa-tool/frontend/build/
+**/dist/
+**/build/
+
+# ── IDE / editor ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── OS ──────────────────────────────────────────────────────────────────────
+Desktop.ini
+$RECYCLE.BIN/
+
+# ── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Misc ────────────────────────────────────────────────────────────────────
+.cache/
+tmp/
+temp/
+coverage/
+*.tsbuildinfo

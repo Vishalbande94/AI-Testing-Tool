@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA AI Testing Tool — Product Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0f172a; color:#e2e8f0; }
+
+  /* Slide base */
+  .slide {
+    min-height:100vh; padding:60px 80px; display:flex; flex-direction:column;
+    justify-content:center; position:relative; page-break-after:always;
+    border-bottom:2px solid #1e293b;
+  }
+
+  /* Title slide */
+  .slide-title { background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%); text-align:center; }
+  .slide-title .icon { font-size:80px; margin-bottom:24px; }
+  .slide-title h1 { font-size:52px; font-weight:900; background:linear-gradient(135deg,#a5b4fc,#6366f1);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:16px; letter-spacing:-1px; }
+  .slide-title .subtitle { font-size:22px; color:#94a3b8; font-weight:300; margin-bottom:40px; }
+  .slide-title .meta { font-size:14px; color:#475569; }
+  .slide-title .badges { display:flex; gap:12px; justify-content:center; margin-top:32px; flex-wrap:wrap; }
+  .badge { padding:8px 20px; border-radius:30px; font-size:13px; font-weight:600; }
+  .badge-purple { background:#312e81; color:#a5b4fc; border:1px solid #4338ca; }
+  .badge-green { background:#064e3b; color:#6ee7b7; border:1px solid #10b981; }
+  .badge-blue { background:#1e3a5f; color:#93c5fd; border:1px solid #3b82f6; }
+  .badge-amber { background:#451a03; color:#fcd34d; border:1px solid #f59e0b; }
+
+  /* Section headers */
+  .slide h2 { font-size:36px; font-weight:800; margin-bottom:32px; color:#f1f5f9; }
+  .slide h2 .num { color:#6366f1; font-size:20px; margin-right:12px; }
+  .slide h3 { font-size:22px; font-weight:700; margin:24px 0 12px; color:#a5b4fc; }
+
+  /* Content */
+  .slide p { font-size:18px; line-height:1.8; color:#94a3b8; max-width:900px; }
+  .slide ul { padding-left:24px; }
+  .slide li { font-size:16px; line-height:2; color:#cbd5e1; }
+  .slide li strong { color:#a5b4fc; }
+
+  /* Cards grid */
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin:20px 0; }
+  .card {
+    background:#1e293b; border:1px solid #334155; border-radius:16px; padding:28px;
+    transition:transform .2s; border-top:3px solid #6366f1;
+  }
+  .card:hover { transform:translateY(-4px); }
+  .card .card-icon { font-size:36px; margin-bottom:12px; }
+  .card .card-title { font-size:18px; font-weight:700; color:#e2e8f0; margin-bottom:8px; }
+  .card .card-desc { font-size:14px; color:#94a3b8; line-height:1.6; }
+  .card-green { border-top-color:#10b981; }
+  .card-amber { border-top-color:#f59e0b; }
+  .card-red { border-top-color:#ef4444; }
+  .card-blue { border-top-color:#3b82f6; }
+
+  /* Agent cards */
+  .agent-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin:20px 0; }
+  .agent-card {
+    background:linear-gradient(135deg,#131e2e,#1a2744); border:1px solid #1e3a5f;
+    border-radius:16px; padding:28px; position:relative; overflow:hidden;
+  }
+  .agent-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,#6366f1,#a78bfa,#6366f1);
+  }
+  .agent-avatar { font-size:40px; margin-bottom:12px; }
+  .agent-name { font-size:20px; font-weight:800; color:#e2e8f0; }
+  .agent-exp { font-size:13px; color:#a5b4fc; margin:4px 0 12px; font-weight:600; }
+  .agent-role { font-size:14px; color:#94a3b8; line-height:1.6; margin-bottom:12px; }
+  .agent-outputs { font-size:12px; color:#64748b; }
+  .agent-outputs strong { color:#94a3b8; }
+
+  /* Table */
+  .tbl { width:100%; border-collapse:collapse; margin:16px 0; background:#1e293b; border-radius:12px; overflow:hidden; }
+  .tbl th { background:#334155; color:#94a3b8; font-size:12px; text-transform:uppercase; letter-spacing:.5px;
+    padding:12px 16px; text-align:left; font-weight:600; }
+  .tbl td { padding:12px 16px; border-bottom:1px solid #334155; color:#cbd5e1; font-size:14px; }
+  .tbl tr:last-child td { border-bottom:none; }
+
+  /* Comparison */
+  .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:20px 0; }
+  .compare-col { background:#1e293b; border-radius:16px; padding:28px; border:1px solid #334155; }
+  .compare-col h3 { text-align:center; margin-bottom:16px; }
+  .compare-col ul { list-style:none; padding:0; }
+  .compare-col li { padding:8px 0; border-bottom:1px solid #334155; font-size:14px; }
+  .compare-col li:last-child { border-bottom:none; }
+  .compare-col li::before { margin-right:8px; }
+  .col-free h3 { color:#94a3b8; }
+  .col-free li::before { content:'⚪'; }
+  .col-ai h3 { color:#a5b4fc; }
+  .col-ai li::before { content:'🟢'; }
+
+  /* Pipeline */
+  .pipeline { display:flex; flex-direction:column; gap:8px; margin:20px 0; }
+  .pipe-step { display:flex; align-items:center; gap:14px; padding:14px 20px;
+    background:#1e293b; border-radius:10px; border:1px solid #334155; }
+  .pipe-num { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; flex-shrink:0; }
+  .pipe-system .pipe-num { background:#064e3b; color:#6ee7b7; }
+  .pipe-agent .pipe-num { background:#312e81; color:#a5b4fc; }
+  .pipe-step .pipe-label { font-size:15px; font-weight:600; color:#e2e8f0; }
+  .pipe-step .pipe-actor { font-size:12px; color:#94a3b8; }
+  .pipe-tag { font-size:10px; padding:3px 10px; border-radius:20px; font-weight:700; margin-left:auto; }
+  .tag-system { background:#064e3b; color:#6ee7b7; }
+  .tag-agent { background:#312e81; color:#a5b4fc; }
+
+  /* Footer */
+  .slide-footer { position:absolute; bottom:20px; left:80px; right:80px;
+    display:flex; justify-content:space-between; font-size:11px; color:#475569; }
+
+  /* Print */
+  @media print {
+    .slide { min-height:auto; padding:40px; page-break-after:always; }
+    body { background:#fff; color:#1e293b; }
+  }
+
+  /* Flow diagram */
+  .flow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:20px 0; justify-content:center; }
+  .flow-item { padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; text-align:center; }
+  .flow-arrow { font-size:20px; color:#475569; }
+  .flow-system { background:#064e3b; color:#6ee7b7; border:1px solid #10b981; }
+  .flow-agent { background:#312e81; color:#a5b4fc; border:1px solid #6366f1; }
+</style>
+</head>
+<body>
+
+<!-- ============ SLIDE 1: TITLE ============ -->
+<div class="slide slide-title">
+  <div class="icon">🤖</div>
+  <h1>QA AI Testing Tool</h1>
+  <div class="subtitle">AI-Powered Automated Test Generation, Execution & Reporting</div>
+  <div class="badges">
+    <span class="badge badge-purple">5 AI Agents</span>
+    <span class="badge badge-green">Multi-Browser Testing</span>
+    <span class="badge badge-blue">Email Auto-Trigger</span>
+    <span class="badge badge-amber">65 Years Combined QA Experience</span>
+  </div>
+  <div class="meta" style="margin-top:48px;">
+    Version 2.0 &nbsp;|&nbsp; March 2026 &nbsp;|&nbsp; React + Node.js + Playwright + Claude AI
+  </div>
+</div>
+
+<!-- ============ SLIDE 2: PROBLEM ============ -->
+<div class="slide">
+  <h2><span class="num">01</span> The Problem</h2>
+  <div class="card-grid">
+    <div class="card card-red">
+      <div class="card-icon">⏰</div>
+      <div class="card-title">Manual Test Writing Takes Days</div>
+      <div class="card-desc">Writing 50+ test cases for a new feature takes 3-5 days of a senior QA engineer's time.</div>
+    </div>
+    <div class="card card-red">
+      <div class="card-icon">🎯</div>
+      <div class="card-title">Domain Knowledge is Siloed</div>
+      <div class="card-desc">Banking, insurance, and investment banking test knowledge lives in people's heads, not in tools.</div>
+    </div>
+    <div class="card card-red">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Reports Lack Analysis</div>
+      <div class="card-desc">Traditional tools give pass/fail tables. Executives need risk assessment and deployment readiness.</div>
+    </div>
+    <div class="card card-red">
+      <div class="card-icon">🐛</div>
+      <div class="card-title">Bug Reports Need Manual Effort</div>
+      <div class="card-desc">Every failed test needs manual investigation, root cause analysis, and JIRA ticket creation.</div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>QA AI Testing Tool</span><span>Slide 2</span></div>
+</div>
+
+<!-- ============ SLIDE 3: SOLUTION ============ -->
+<div class="slide">
+  <h2><span class="num">02</span> Our Solution</h2>
+  <p style="font-size:20px;color:#e2e8f0;margin-bottom:32px;">
+    A <strong style="color:#a5b4fc;">5-agent AI team</strong> that reads your requirements, generates domain-specific tests,
+    executes them in real browsers, and delivers executive-quality reports with JIRA-ready bug descriptions.
+  </p>
+  <div class="flow">
+    <div class="flow-item flow-system">📄 Upload Doc</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item flow-agent">📋 Analyze</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item flow-agent">🧠 Generate Tests</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item flow-agent">👔 Review Plan</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item flow-agent">⚡ Enhance Scripts</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item flow-system">🎭 Execute</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item flow-agent">👔 Review Results</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item flow-agent">📊 Write Report</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item flow-system">📧 Email</div>
+  </div>
+  <div class="card-grid" style="margin-top:32px;">
+    <div class="card card-green">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">Minutes, Not Days</div>
+      <div class="card-desc">25+ domain-specific test cases generated in under 60 seconds.</div>
+    </div>
+    <div class="card card-green">
+      <div class="card-icon">🏦</div>
+      <div class="card-title">Domain Intelligence</div>
+      <div class="card-desc">Knows banking KYC, insurance claims, trade settlement — not generic templates.</div>
+    </div>
+    <div class="card card-green">
+      <div class="card-icon">✍️</div>
+      <div class="card-title">Executive Reports</div>
+      <div class="card-desc">GREEN/AMBER/RED status with deployment sign-off and JIRA-ready bug reports.</div>
+    </div>
+    <div class="card card-green">
+      <div class="card-icon">📧</div>
+      <div class="card-title">Email Auto-Trigger</div>
+      <div class="card-desc">Send an email → get test results back. Zero-touch testing for CI/CD.</div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>QA AI Testing Tool</span><span>Slide 3</span></div>
+</div>
+
+<!-- ============ SLIDE 4: AGENTS ============ -->
+<div class="slide">
+  <h2><span class="num">03</span> Meet the 5 AI Agents</h2>
+  <p style="margin-bottom:24px;">Combined 65 years of QA experience across Banking, Insurance, Investment Banking, Telecom, and E-commerce.</p>
+  <div class="agent-grid">
+    <div class="agent-card">
+      <div class="agent-avatar">📋</div>
+      <div class="agent-name">Requirement Analyst</div>
+      <div class="agent-exp">12 Years Experience</div>
+      <div class="agent-role">Analyzes requirements documents, detects application domain, identifies ambiguities and risks, extracts testable requirements.</div>
+      <div class="agent-outputs"><strong>Outputs:</strong> Domain detection, module mapping, ambiguity list, test strategy, compliance notes</div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-avatar">🧠</div>
+      <div class="agent-name">Test Architect</div>
+      <div class="agent-exp">15 Years Experience</div>
+      <div class="agent-role">Generates comprehensive test cases with domain-specific edge cases that junior testers would miss.</div>
+      <div class="agent-outputs"><strong>Outputs:</strong> 25+ test cases with steps, expected results, priority, Positive/Negative/Edge coverage</div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-avatar">👔</div>
+      <div class="agent-name">QA Director</div>
+      <div class="agent-exp">20 Years Experience — Supervisor</div>
+      <div class="agent-role">Reviews test plan before execution (finds gaps). Reviews results after (root cause analysis, deployment sign-off).</div>
+      <div class="agent-outputs"><strong>Outputs:</strong> Coverage score, risk flags, deployment readiness, sign-off decision</div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-avatar">⚡</div>
+      <div class="agent-name">Execution Engineer</div>
+      <div class="agent-exp">10 Years Experience</div>
+      <div class="agent-role">Enhances Playwright scripts with smart selectors, resilient waits, and domain-aware test logic.</div>
+      <div class="agent-outputs"><strong>Outputs:</strong> Enhanced test specs with getByRole, getByLabel, fallback chains</div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-avatar">📊</div>
+      <div class="agent-name">Report Analyst</div>
+      <div class="agent-exp">8 Years Experience</div>
+      <div class="agent-role">Writes executive-quality reports and JIRA-ready bug descriptions with root cause and suggested fixes.</div>
+      <div class="agent-outputs"><strong>Outputs:</strong> Executive summary, bug reports, next steps, trend analysis, sign-off statement</div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>QA AI Testing Tool</span><span>Slide 4</span></div>
+</div>
+
+<!-- ============ SLIDE 5: PIPELINE ============ -->
+<div class="slide">
+  <h2><span class="num">04</span> 10-Step Pipeline (Agent vs System)</h2>
+  <div class="pipeline">
+    <div class="pipe-step pipe-system"><span class="pipe-num">1</span><div><div class="pipe-label">Parse Requirement Document</div><div class="pipe-actor">PDF, TXT, MD → plain text</div></div><span class="pipe-tag tag-system">SYSTEM</span></div>
+    <div class="pipe-step pipe-agent"><span class="pipe-num">2</span><div><div class="pipe-label">Analyze Requirements</div><div class="pipe-actor">📋 Requirement Analyst — detect domain, find gaps</div></div><span class="pipe-tag tag-agent">AGENT</span></div>
+    <div class="pipe-step pipe-agent"><span class="pipe-num">3</span><div><div class="pipe-label">Generate Test Cases</div><div class="pipe-actor">🧠 Test Architect — 25+ domain-specific tests</div></div><span class="pipe-tag tag-agent">AGENT</span></div>
+    <div class="pipe-step pipe-agent"><span class="pipe-num">4</span><div><div class="pipe-label">Review Test Plan</div><div class="pipe-actor">👔 QA Director — coverage gaps, risk flags</div></div><span class="pipe-tag tag-agent">AGENT</span></div>
+    <div class="pipe-step pipe-agent"><span class="pipe-num">5</span><div><div class="pipe-label">Enhance Playwright Scripts</div><div class="pipe-actor">⚡ Execution Engineer — smart selectors</div></div><span class="pipe-tag tag-agent">AGENT</span></div>
+    <div class="pipe-step pipe-system"><span class="pipe-num">6</span><div><div class="pipe-label">Execute Playwright Tests</div><div class="pipe-actor">Multi-browser real execution (Chrome, Firefox, Safari)</div></div><span class="pipe-tag tag-system">SYSTEM</span></div>
+    <div class="pipe-step pipe-system"><span class="pipe-num">7</span><div><div class="pipe-label">Merge Results</div><div class="pipe-actor">Map execution results to test cases</div></div><span class="pipe-tag tag-system">SYSTEM</span></div>
+    <div class="pipe-step pipe-agent"><span class="pipe-num">8</span><div><div class="pipe-label">Review Results</div><div class="pipe-actor">👔 QA Director — root cause, deployment sign-off</div></div><span class="pipe-tag tag-agent">AGENT</span></div>
+    <div class="pipe-step pipe-agent"><span class="pipe-num">9</span><div><div class="pipe-label">Write Executive Report</div><div class="pipe-actor">📊 Report Analyst — bug reports, next steps</div></div><span class="pipe-tag tag-agent">AGENT</span></div>
+    <div class="pipe-step pipe-system"><span class="pipe-num">10</span><div><div class="pipe-label">Generate HTML + Excel Reports</div><div class="pipe-actor">Styled reports for download and email</div></div><span class="pipe-tag tag-system">SYSTEM</span></div>
+  </div>
+  <div style="text-align:center;margin-top:16px;">
+    <span class="badge badge-purple" style="margin-right:8px;">7 Agent Tasks</span>
+    <span class="badge badge-green">3 System Tasks</span>
+  </div>
+  <div class="slide-footer"><span>QA AI Testing Tool</span><span>Slide 5</span></div>
+</div>
+
+<!-- ============ SLIDE 6: COMPARISON ============ -->
+<div class="slide">
+  <h2><span class="num">05</span> Rule-Based vs AI Agents</h2>
+  <div class="compare-grid">
+    <div class="compare-col col-free">
+      <h3>⚪ Without AI (Free)</h3>
+      <ul>
+        <li>5 generic test cases</li>
+        <li>Keyword matching (10 modules)</li>
+        <li>No domain knowledge</li>
+        <li>Template Playwright scripts</li>
+        <li>No requirement analysis</li>
+        <li>No test plan review</li>
+        <li>No root cause analysis</li>
+        <li>No bug reports</li>
+        <li>No executive summary</li>
+        <li>No deployment sign-off</li>
+        <li>Pass/fail table only</li>
+        <li>Works offline</li>
+      </ul>
+    </div>
+    <div class="compare-col col-ai" style="border-color:#6366f1;">
+      <h3>🟢 With 5 AI Agents</h3>
+      <ul>
+        <li>25+ domain-specific test cases</li>
+        <li>AI understands requirements</li>
+        <li>Banking, Insurance, Investment Banking expertise</li>
+        <li>Smart selectors with fallback chains</li>
+        <li>Ambiguity detection, risk areas</li>
+        <li>Coverage gaps and risk flags</li>
+        <li>Bug vs infrastructure vs environment</li>
+        <li>JIRA-ready with severity, steps, fix</li>
+        <li>GREEN/AMBER/RED with narrative</li>
+        <li>Director sign-off: deploy or hold</li>
+        <li>Full analysis dashboard</li>
+        <li>~$0.10-0.50 per run</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-footer"><span>QA AI Testing Tool</span><span>Slide 6</span></div>
+</div>
+
+<!-- ============ SLIDE 7: FEATURES ============ -->
+<div class="slide">
+  <h2><span class="num">06</span> Key Features</h2>
+  <div class="card-grid">
+    <div class="card"><div class="card-icon">📄</div><div class="card-title">Smart Doc Parsing</div><div class="card-desc">Upload PDF, TXT, or Markdown. AI extracts testable requirements automatically.</div></div>
+    <div class="card card-blue"><div class="card-icon">🌐</div><div class="card-title">Multi-Browser</div><div class="card-desc">Chrome, Firefox, Safari, Mobile Chrome, Mobile Safari — all in one run.</div></div>
+    <div class="card card-green"><div class="card-icon">📧</div><div class="card-title">Email Auto-Trigger</div><div class="card-desc">Send deployment email → bot runs tests → replies with results and reports.</div></div>
+    <div class="card card-amber"><div class="card-icon">🤖</div><div class="card-title">AI Chatbot</div><div class="card-desc">Natural language assistant: "set firefox", "run smoke tests", "show results".</div></div>
+    <div class="card"><div class="card-icon">♿</div><div class="card-title">Accessibility</div><div class="card-desc">WCAG checks: alt text, form labels, page lang, button text, heading structure.</div></div>
+    <div class="card card-blue"><div class="card-icon">⚡</div><div class="card-title">Performance</div><div class="card-desc">Measures TTFB, FCP, DOM Ready, Full Load time for every test run.</div></div>
+    <div class="card card-green"><div class="card-icon">📊</div><div class="card-title">Rich Reports</div><div class="card-desc">HTML report + Excel (.xlsx) with 3 worksheets + JSON for CI/CD.</div></div>
+    <div class="card card-amber"><div class="card-icon">🕒</div><div class="card-title">Run History</div><div class="card-desc">Trend charts, pass rate comparison, module-level tracking across runs.</div></div>
+  </div>
+  <div class="slide-footer"><span>QA AI Testing Tool</span><span>Slide 7</span></div>
+</div>
+
+<!-- ============ SLIDE 8: DOMAINS ============ -->
+<div class="slide">
+  <h2><span class="num">07</span> Supported Domains</h2>
+  <div class="card-grid">
+    <div class="card card-blue">
+      <div class="card-icon">🏦</div>
+      <div class="card-title">Banking</div>
+      <div class="card-desc">Core banking, payments (SWIFT, NEFT, UPI), KYC/AML, loans, cards, mobile banking, transaction limits, reconciliation.</div>
+    </div>
+    <div class="card card-green">
+      <div class="card-icon">🛡️</div>
+      <div class="card-title">Insurance</div>
+      <div class="card-desc">Policy lifecycle, claims (FNOL → payment), underwriting, premium calc, grace periods, IRDA compliance, reinsurance.</div>
+    </div>
+    <div class="card card-amber">
+      <div class="card-icon">📈</div>
+      <div class="card-title">Investment Banking</div>
+      <div class="card-desc">Trade management, FIX protocol, settlement (T+1/T+2), P&L reconciliation, MiFID II, market data feeds.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📡</div>
+      <div class="card-title">Telecom</div>
+      <div class="card-desc">Billing engines, CRM, number portability, provisioning, CDR validation, roaming, usage rating.</div>
+    </div>
+    <div class="card card-blue">
+      <div class="card-icon">🛒</div>
+      <div class="card-title">E-commerce</div>
+      <div class="card-desc">Cart, checkout, payments, user auth, search, session management, form validation.</div>
+    </div>
+    <div class="card card-green">
+      <div class="card-icon">🌐</div>
+      <div class="card-title">Generic Web App</div>
+      <div class="card-desc">Login, registration, navigation, forms, dashboard, profile — works with any web application.</div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>QA AI Testing Tool</span><span>Slide 8</span></div>
+</div>
+
+<!-- ============ SLIDE 9: TECH STACK ============ -->
+<div class="slide">
+  <h2><span class="num">08</span> Technology Stack</h2>
+  <table class="tbl">
+    <thead><tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>React 18 + Vite 4</td><td>Interactive dark-theme SPA with animations</td></tr>
+      <tr><td>Backend</td><td>Node.js + Express 4</td><td>REST API, pipeline orchestration</td></tr>
+      <tr><td>AI Engine</td><td>Anthropic Claude API (Sonnet 4)</td><td>5 AI agents with domain knowledge</td></tr>
+      <tr><td>Browser Testing</td><td>Playwright v1.55</td><td>Multi-browser test execution</td></tr>
+      <tr><td>Document Parsing</td><td>pdf-parse + fs</td><td>PDF, TXT, MD extraction</td></tr>
+      <tr><td>Reports</td><td>Custom HTML + ExcelJS</td><td>Styled reports with charts and tables</td></tr>
+      <tr><td>Email</td><td>imap-simple + nodemailer</td><td>IMAP inbox monitoring + SMTP sending</td></tr>
+      <tr><td>Data Storage</td><td>JSON files</td><td>Run history, reports, test cases</td></tr>
+    </tbody>
+  </table>
+  <div class="slide-footer"><span>QA AI Testing Tool</span><span>Slide 9</span></div>
+</div>
+
+<!-- ============ SLIDE 10: SUMMARY ============ -->
+<div class="slide slide-title" style="background:linear-gradient(135deg,#0f172a 0%,#1a1340 50%,#0f172a 100%);">
+  <div class="icon">🚀</div>
+  <h1 style="font-size:42px;">Ready to Transform Your QA?</h1>
+  <div class="subtitle">From requirements to executive report in minutes, not days.</div>
+  <div class="card-grid" style="max-width:800px;margin:32px auto 0;">
+    <div class="card card-green" style="text-align:center;">
+      <div class="card-title" style="font-size:36px;color:#6ee7b7;">5</div>
+      <div class="card-desc">AI Agents</div>
+    </div>
+    <div class="card card-blue" style="text-align:center;">
+      <div class="card-title" style="font-size:36px;color:#93c5fd;">65</div>
+      <div class="card-desc">Years Combined Experience</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="card-title" style="font-size:36px;color:#a5b4fc;">10</div>
+      <div class="card-desc">Step Pipeline</div>
+    </div>
+    <div class="card card-amber" style="text-align:center;">
+      <div class="card-title" style="font-size:36px;color:#fcd34d;">6</div>
+      <div class="card-desc">Domains Supported</div>
+    </div>
+  </div>
+  <div class="meta" style="margin-top:48px;">
+    QA AI Testing Tool v2.0 &nbsp;|&nbsp; React + Node.js + Playwright + Claude AI &nbsp;|&nbsp; March 2026
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsureAI — QA Team Lead Complete Report</title>
+<style>
+  /* ── PRINT / PDF STYLES ── */
+  @media print {
+    .no-print { display: none !important; }
+    .page-break { page-break-before: always; }
+    body { font-size: 11pt; }
+    .cover { page-break-after: always; }
+  }
+
+  /* ── BASE ── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Calibri, Arial, sans-serif;
+    font-size: 11pt;
+    color: #1a1a2e;
+    background: #e8ecf0;
+    line-height: 1.6;
+  }
+
+  /* ── DOCUMENT WRAPPER ── */
+  .document {
+    max-width: 900px;
+    margin: 30px auto;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,.15);
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    background: linear-gradient(160deg, #0d47a1 0%, #1565c0 50%, #0288d1 100%);
+    color: white;
+    padding: 80px 60px 60px;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cover-logo { font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; }
+  .cover-logo span { color: #ffd54f; }
+  .cover-divider { width: 60px; height: 4px; background: #ffd54f; margin: 20px 0; }
+  .cover-title { font-size: 2rem; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .cover-subtitle { font-size: 1.1rem; opacity: .85; margin-bottom: 30px; }
+  .cover-meta table { border-collapse: collapse; }
+  .cover-meta td { padding: 4px 16px 4px 0; font-size: .95rem; opacity: .9; }
+  .cover-meta td:first-child { opacity: .7; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: .82rem;
+    margin-right: 8px;
+    margin-top: 8px;
+  }
+  .cover-footer { font-size: .82rem; opacity: .6; }
+
+  /* ── TABLE OF CONTENTS ── */
+  .toc-section {
+    padding: 50px 60px;
+    border-bottom: 3px solid #0d47a1;
+  }
+  .toc-title { font-size: 1.4rem; font-weight: 700; color: #0d47a1; margin-bottom: 24px; padding-bottom: 10px; border-bottom: 2px solid #e3f2fd; }
+  .toc-item { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px dotted #dee2e6; font-size: .95rem; }
+  .toc-item a { color: #1a1a2e; text-decoration: none; }
+  .toc-item a:hover { color: #0d47a1; }
+  .toc-num { color: #0d47a1; font-weight: 700; min-width: 30px; }
+  .toc-page { color: #6c757d; font-size: .85rem; }
+  .toc-sub { padding-left: 30px; font-size: .9rem; }
+
+  /* ── CONTENT PAGES ── */
+  .content { padding: 0 60px; }
+  .section { padding: 40px 0; border-bottom: 1px solid #e9ecef; }
+  .section:last-child { border-bottom: none; }
+
+  /* ── PHASE HEADER ── */
+  .phase-header {
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .phase-num {
+    background: rgba(255,255,255,.2);
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.1rem; flex-shrink: 0;
+  }
+  .phase-title { font-size: 1.2rem; font-weight: 700; }
+  .phase-sub { font-size: .85rem; opacity: .8; }
+
+  /* ── ROLE HEADERS ── */
+  .role-manual {
+    background: #e8f5e9;
+    border-left: 5px solid #2e7d32;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 24px 0 16px;
+    font-weight: 700;
+    color: #1b5e20;
+    font-size: .95rem;
+  }
+  .role-auto {
+    background: #e3f2fd;
+    border-left: 5px solid #0d47a1;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 24px 0 16px;
+    font-weight: 700;
+    color: #0d47a1;
+    font-size: .95rem;
+  }
+
+  /* ── HEADINGS ── */
+  h1 { font-size: 1.6rem; color: #0d47a1; margin-bottom: 16px; }
+  h2 { font-size: 1.25rem; color: #0d47a1; margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #e3f2fd; }
+  h3 { font-size: 1.05rem; color: #1a237e; margin: 18px 0 10px; }
+  h4 { font-size: .95rem; color: #37474f; margin: 12px 0 8px; text-transform: uppercase; letter-spacing: .04em; }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: .88rem; }
+  th {
+    background: #0d47a1;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+  }
+  td { padding: 9px 12px; border-bottom: 1px solid #e9ecef; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8f9ff; }
+  tr:hover td { background: #e3f2fd; }
+  .tbl-center td { text-align: center; }
+
+  /* ── STATUS BADGES ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: .75rem;
+    font-weight: 700;
+  }
+  .badge-critical { background: #ffebee; color: #c62828; }
+  .badge-high { background: #fff3e0; color: #e65100; }
+  .badge-medium { background: #fffde7; color: #f57f17; }
+  .badge-low { background: #e8f5e9; color: #2e7d32; }
+  .badge-pass { background: #e8f5e9; color: #2e7d32; }
+  .badge-fail { background: #ffebee; color: #c62828; }
+  .badge-auto { background: #e3f2fd; color: #0d47a1; }
+  .badge-manual { background: #e8f5e9; color: #2e7d32; }
+  .badge-both { background: #f3e5f5; color: #6a1b9a; }
+
+  /* ── CODE BLOCKS ── */
+  pre, code {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: .82rem;
+    border-radius: 6px;
+  }
+  pre { padding: 16px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+  code { padding: 2px 6px; font-size: .85rem; }
+  .code-keyword { color: #cba6f7; }
+  .code-string { color: #a6e3a1; }
+  .code-comment { color: #6c7086; }
+
+  /* ── INFO BOXES ── */
+  .info-box {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: .9rem;
+  }
+  .info-note { background: #e3f2fd; border-left: 4px solid #1976d2; }
+  .info-warn { background: #fff8e1; border-left: 4px solid #f9a825; }
+  .info-success { background: #e8f5e9; border-left: 4px solid #388e3c; }
+  .info-danger { background: #ffebee; border-left: 4px solid #d32f2f; }
+  .info-box strong { display: block; margin-bottom: 4px; }
+
+  /* ── STAT CARDS ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 20px 0; }
+  .stat-card {
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+    color: white;
+  }
+  .stat-card .val { font-size: 1.8rem; font-weight: 800; }
+  .stat-card .lbl { font-size: .78rem; opacity: .85; margin-top: 3px; }
+  .sc-blue { background: linear-gradient(135deg, #0d47a1, #1976d2); }
+  .sc-green { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
+  .sc-orange { background: linear-gradient(135deg, #e65100, #f57c00); }
+  .sc-purple { background: linear-gradient(135deg, #4a148c, #7b1fa2); }
+
+  /* ── PROGRESS BARS ── */
+  .progress-wrap { margin: 8px 0; }
+  .progress-label { display: flex; justify-content: space-between; font-size: .83rem; margin-bottom: 3px; }
+  .progress-bar { height: 14px; background: #e9ecef; border-radius: 7px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    border-radius: 7px;
+    background: linear-gradient(90deg, #0d47a1, #1976d2);
+    display: flex; align-items: center;
+    padding-left: 8px;
+    color: white; font-size: .7rem; font-weight: 700;
+    transition: width .3s ease;
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    padding: 6px 0 6px 28px;
+    position: relative;
+    font-size: .9rem;
+    border-bottom: 1px solid #f1f3f5;
+  }
+  .checklist li::before {
+    content: '☐';
+    position: absolute;
+    left: 0;
+    color: #0d47a1;
+    font-size: 1rem;
+  }
+  .checklist li.done::before { content: '☑'; color: #2e7d32; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 30px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 0; bottom: 0;
+    width: 2px; background: #dee2e6;
+  }
+  .tl-item { position: relative; margin-bottom: 20px; padding: 12px 16px; background: #f8f9ff; border-radius: 8px; }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -26px; top: 16px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #0d47a1;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #0d47a1;
+  }
+  .tl-week { font-weight: 700; color: #0d47a1; font-size: .88rem; margin-bottom: 4px; }
+  .tl-task { font-size: .85rem; color: #444; }
+
+  /* ── TEAM CARD ── */
+  .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .team-card { border: 2px solid #e3f2fd; border-radius: 10px; padding: 18px; }
+  .team-card .role { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: #6c757d; margin-bottom: 4px; }
+  .team-card .name { font-size: 1.1rem; font-weight: 700; color: #0d47a1; }
+  .team-card ul { margin-top: 10px; padding-left: 16px; font-size: .88rem; color: #444; }
+  .team-card ul li { margin-bottom: 3px; }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    background: #0d47a1;
+    color: rgba(255,255,255,.75);
+    padding: 20px 60px;
+    font-size: .82rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .doc-footer strong { color: white; }
+
+  /* ── PRINT BUTTON ── */
+  .print-bar {
+    position: sticky;
+    top: 0;
+    background: #0d47a1;
+    padding: 10px 20px;
+    text-align: right;
+    z-index: 100;
+  }
+  .print-bar button {
+    background: #ffd54f;
+    color: #0d47a1;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: .9rem;
+    margin-left: 8px;
+  }
+  .print-bar button:hover { background: #ffca28; }
+  .print-bar span { color: rgba(255,255,255,.8); font-size: .9rem; }
+</style>
+</head>
+<body>
+
+<!-- PRINT BAR -->
+<div class="print-bar no-print">
+  <span>InsureAI QA Complete Report</span>
+  <button onclick="window.print()">🖨 Print / Save as PDF</button>
+  <button onclick="document.body.style.background='white';document.querySelector('.document').style.boxShadow='none'">📄 Word View</button>
+</div>
+
+<div class="document">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- COVER PAGE                                 -->
+<!-- ══════════════════════════════════════════ -->
+<div class="cover">
+  <div>
+    <div class="cover-logo">Insure<span>AI</span></div>
+    <div class="cover-divider"></div>
+    <div class="cover-title">QA Team Lead<br>Complete Testing Report</div>
+    <div class="cover-subtitle">End-to-End QA Management Document<br>General Insurance Web Portal — v1.0</div>
+    <div>
+      <span class="cover-badge">📋 11 Phases Covered</span>
+      <span class="cover-badge">👥 2 QA Engineers</span>
+      <span class="cover-badge">🧪 167 Test Cases</span>
+      <span class="cover-badge">🤖 82 Automated</span>
+    </div>
+  </div>
+  <div>
+    <div class="cover-meta">
+      <table>
+        <tr><td>Project</td><td>InsureAI General Insurance Portal</td></tr>
+        <tr><td>Version</td><td>1.0 — Client Demonstration Build</td></tr>
+        <tr><td>Prepared By</td><td>QA Team Lead</td></tr>
+        <tr><td>Report Date</td><td>24 March 2026</td></tr>
+        <tr><td>QA Team</td><td>Manual QA Engineer + Automation QA Engineer</td></tr>
+        <tr><td>Environment</td><td>http://localhost:3000 | Chrome 131 | Windows 11</td></tr>
+        <tr><td>Status</td><td>✅ APPROVED FOR CLIENT DEMONSTRATION</td></tr>
+      </table>
+    </div>
+    <div class="cover-footer" style="margin-top:24px">
+      CONFIDENTIAL — For Internal Use Only &nbsp;|&nbsp; InsureAI QA Department
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- TABLE OF CONTENTS                          -->
+<!-- ══════════════════════════════════════════ -->
+<div class="toc-section">
+  <div class="toc-title">📑 Table of Contents</div>
+  <div class="toc-item"><span><span class="toc-num">1.</span> Requirement Analysis</span><span class="toc-page">Phase 1</span></div>
+  <div class="toc-item toc-sub"><span>1.1 Application Summary &amp; Module Overview</span></div>
+  <div class="toc-item toc-sub"><span>1.2 Testable Scenarios &amp; Acceptance Criteria</span></div>
+  <div class="toc-item"><span><span class="toc-num">2.</span> Test Planning</span><span class="toc-page">Phase 2</span></div>
+  <div class="toc-item toc-sub"><span>2.1 Test Plan — Scope, Objectives, Risks</span></div>
+  <div class="toc-item toc-sub"><span>2.2 Responsibility Matrix (RACI)</span></div>
+  <div class="toc-item toc-sub"><span>2.3 Sprint Timeline (6 Weeks)</span></div>
+  <div class="toc-item"><span><span class="toc-num">3.</span> Test Design</span><span class="toc-page">Phase 3</span></div>
+  <div class="toc-item toc-sub"><span>3.1 Test Scenarios — Manual QA (All Modules)</span></div>
+  <div class="toc-item toc-sub"><span>3.2 Sample Detailed Test Cases</span></div>
+  <div class="toc-item toc-sub"><span>3.3 Test Data Sheet</span></div>
+  <div class="toc-item toc-sub"><span>3.4 Requirement Traceability Matrix (RTM)</span></div>
+  <div class="toc-item toc-sub"><span>3.5 Automation Candidates &amp; Framework Design</span></div>
+  <div class="toc-item"><span><span class="toc-num">4.</span> Environment Setup</span><span class="toc-page">Phase 4</span></div>
+  <div class="toc-item"><span><span class="toc-num">5.</span> Test Execution</span><span class="toc-page">Phase 5</span></div>
+  <div class="toc-item toc-sub"><span>5.1 Manual QA — Test Cycles &amp; Smoke Checklist</span></div>
+  <div class="toc-item toc-sub"><span>5.2 Automation QA — Execution Plan &amp; Sample Script</span></div>
+  <div class="toc-item"><span><span class="toc-num">6.</span> Defect Management</span><span class="toc-page">Phase 6</span></div>
+  <div class="toc-item"><span><span class="toc-num">7.</span> API Testing</span><span class="toc-page">Phase 7</span></div>
+  <div class="toc-item"><span><span class="toc-num">8.</span> Performance Testing</span><span class="toc-page">Phase 8</span></div>
+  <div class="toc-item"><span><span class="toc-num">9.</span> Reporting</span><span class="toc-page">Phase 9</span></div>
+  <div class="toc-item"><span><span class="toc-num">10.</span> Release Activities</span><span class="toc-page">Phase 10</span></div>
+  <div class="toc-item"><span><span class="toc-num">11.</span> Maintenance</span><span class="toc-page">Phase 11</span></div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- CONTENT                                    -->
+<!-- ══════════════════════════════════════════ -->
+<div class="content">
+
+<!-- ── PHASE 1 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">1</div>
+    <div><div class="phase-title">Requirement Analysis</div><div class="phase-sub">Understanding the application, identifying testable scenarios and acceptance criteria</div></div>
+  </div>
+
+  <h2>1.1 Application Summary</h2>
+  <div class="info-note info-box"><strong>InsureAI — General Insurance Web Portal</strong>A web-based insurance portal allowing customers to register, get quotes for Motor/Health/Home/Travel insurance, purchase policies, file claims, make payments, and download documents. Admins can manage customers, claims, and generate reports.</div>
+
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="role">👤 Manual QA Engineer</div>
+      <div class="name">QA-M</div>
+      <ul>
+        <li>Functional & exploratory testing</li>
+        <li>Test case design & execution</li>
+        <li>Defect logging in JIRA</li>
+        <li>RTM, test data preparation</li>
+        <li>Cross-browser & mobile testing</li>
+      </ul>
+    </div>
+    <div class="team-card">
+      <div class="role">🤖 Automation QA Engineer</div>
+      <div class="name">QA-A</div>
+      <ul>
+        <li>Playwright automation framework</li>
+        <li>CI/CD pipeline (GitHub Actions)</li>
+        <li>API testing (Playwright requests)</li>
+        <li>Performance testing</li>
+        <li>Automation reports (Allure)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>1.2 Module-wise Requirements</h2>
+  <table>
+    <thead><tr><th>Module</th><th>Requirement IDs</th><th>Test Cases</th><th>Complexity</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Registration &amp; Login</strong></td><td>REQ-001 to REQ-015</td><td>35</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td><strong>Customer Dashboard</strong></td><td>REQ-016 to REQ-018</td><td>8</td><td><span class="badge badge-medium">Medium</span></td></tr>
+      <tr><td><strong>Get a Quote (4 types)</strong></td><td>REQ-019 to REQ-033</td><td>43</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td><strong>Policy Management</strong></td><td>REQ-034 to REQ-047</td><td>21</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td><strong>Claims Management</strong></td><td>REQ-048 to REQ-057</td><td>15</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td><strong>Payment Management</strong></td><td>REQ-058 to REQ-066</td><td>10</td><td><span class="badge badge-critical">Critical</span></td></tr>
+      <tr><td><strong>Documents &amp; Downloads</strong></td><td>REQ-067 to REQ-069</td><td>5</td><td><span class="badge badge-low">Low</span></td></tr>
+      <tr><td><strong>Admin Panel</strong></td><td>REQ-070 to REQ-075</td><td>18</td><td><span class="badge badge-medium">Medium</span></td></tr>
+      <tr><td><strong>Non-Functional (Perf/Security/UI)</strong></td><td>REQ-076 to REQ-087</td><td>14</td><td><span class="badge badge-high">High</span></td></tr>
+      <tr style="font-weight:700"><td>TOTAL</td><td>87 Requirements</td><td>169</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>1.3 Acceptance Criteria</h2>
+  <table>
+    <thead><tr><th>Scenario</th><th>Acceptance Criteria</th></tr></thead>
+    <tbody>
+      <tr><td>Registration</td><td>Valid data → success redirect; duplicate email → inline error; age &lt;18 → blocked</td></tr>
+      <tr><td>Login</td><td>Valid credentials → dashboard; 5 failed attempts → account locked</td></tr>
+      <tr><td>Motor Quote</td><td>Valid form → 3 plan options; add-ons update premium dynamically (no reload)</td></tr>
+      <tr><td>Policy Purchase</td><td>Checkout → unique policy number + transaction ID generated; appears in My Policies</td></tr>
+      <tr><td>Claim Filing</td><td>Incident date within policy period → claim ID generated; outside period → error</td></tr>
+      <tr><td>Performance (REQ-017)</td><td>All 14 pages load in &lt;3 seconds on standard broadband</td></tr>
+      <tr><td>Security (REQ-060)</td><td>No card data stored in localStorage after payment</td></tr>
+      <tr><td>Admin Access</td><td>Admin login → admin.html; customer attempting admin.html → redirected</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── PHASE 2 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">2</div>
+    <div><div class="phase-title">Test Planning</div><div class="phase-sub">Test plan, responsibility matrix, risk register, and 6-week sprint timeline</div></div>
+  </div>
+
+  <h2>2.1 Test Plan — Scope &amp; Objectives</h2>
+  <div class="info-success info-box"><strong>Objective</strong>Validate that InsureAI meets all functional, non-functional, and security requirements as per SRS v1.0, and is ready for client demonstration.</div>
+
+  <h3>In Scope</h3>
+  <table>
+    <thead><tr><th>Category</th><th>Details</th></tr></thead>
+    <tbody>
+      <tr><td>✅ Functional</td><td>All 8 modules — Registration to Admin Panel</td></tr>
+      <tr><td>✅ Test Types</td><td>Positive, Negative, Boundary, Edge Case, Integration</td></tr>
+      <tr><td>✅ Browsers</td><td>Chrome, Firefox, Edge</td></tr>
+      <tr><td>✅ Devices</td><td>Desktop (1920×1080), Tablet (768px), Mobile (320px–390px)</td></tr>
+      <tr><td>✅ Security</td><td>Auth guard, session management, card data storage</td></tr>
+      <tr><td>✅ Performance</td><td>Page load, Core Web Vitals, concurrent users, memory</td></tr>
+      <tr><td>❌ Out of Scope</td><td>Real payment gateway, actual email delivery, real PDF generation</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Risk Register</h3>
+  <table>
+    <thead><tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>localStorage cleared between tests</td><td><span class="badge badge-critical">High</span></td><td><span class="badge badge-critical">High</span></td><td>Seed data in beforeEach hooks</td></tr>
+      <tr><td>Browser compatibility differences</td><td><span class="badge badge-medium">Medium</span></td><td><span class="badge badge-medium">Medium</span></td><td>Test on all 3 browsers per sprint</td></tr>
+      <tr><td>Parallel test data conflicts</td><td><span class="badge badge-medium">Medium</span></td><td><span class="badge badge-critical">High</span></td><td>Isolate test data per context</td></tr>
+      <tr><td>Flaky tests due to timing</td><td><span class="badge badge-medium">Medium</span></td><td><span class="badge badge-medium">Medium</span></td><td>Explicit waits + retry logic</td></tr>
+      <tr><td>Scope creep from new requirements</td><td><span class="badge badge-low">Low</span></td><td><span class="badge badge-critical">High</span></td><td>Formal change request process</td></tr>
+    </tbody>
+  </table>
+
+  <h2>2.2 Responsibility Matrix (RACI)</h2>
+  <table>
+    <thead><tr><th>Activity</th><th>QA Lead</th><th>Manual QA</th><th>Automation QA</th></tr></thead>
+    <tbody>
+      <tr><td>Requirement Analysis</td><td>A</td><td><strong>R</strong></td><td>C</td></tr>
+      <tr><td>Test Plan Creation</td><td><strong>R/A</strong></td><td>C</td><td>C</td></tr>
+      <tr><td>Test Case Design</td><td>A</td><td><strong>R</strong></td><td>C</td></tr>
+      <tr><td>Automation Framework Design</td><td>A</td><td>I</td><td><strong>R</strong></td></tr>
+      <tr><td>Manual Test Execution</td><td>A</td><td><strong>R</strong></td><td>I</td></tr>
+      <tr><td>Automation Script Development</td><td>A</td><td>I</td><td><strong>R</strong></td></tr>
+      <tr><td>Defect Logging &amp; Triage</td><td><strong>R/A</strong></td><td>R</td><td>R</td></tr>
+      <tr><td>API &amp; Performance Testing</td><td>A</td><td>I</td><td><strong>R</strong></td></tr>
+      <tr><td>Test Summary Report</td><td><strong>R/A</strong></td><td>C</td><td>C</td></tr>
+    </tbody>
+  </table>
+  <div class="info-note info-box" style="font-size:.82rem">R = Responsible &nbsp;|&nbsp; A = Accountable &nbsp;|&nbsp; C = Consulted &nbsp;|&nbsp; I = Informed</div>
+
+  <h2>2.3 Sprint Timeline (6 Weeks)</h2>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-week">Week 1</div><div class="tl-task"><strong>Manual QA:</strong> Requirement analysis, test cases for Modules 1–4 &nbsp;|&nbsp; <strong>Auto QA:</strong> Framework setup, POM structure, page objects</div></div>
+    <div class="tl-item"><div class="tl-week">Week 2</div><div class="tl-task"><strong>Manual QA:</strong> Test cases Modules 5–8, RTM, test data prep &nbsp;|&nbsp; <strong>Auto QA:</strong> Smoke test automation, login/registration scripts</div></div>
+    <div class="tl-item"><div class="tl-week">Week 3</div><div class="tl-task"><strong>Manual QA:</strong> Smoke, Sanity, Functional testing execution &nbsp;|&nbsp; <strong>Auto QA:</strong> Quote flow + policy purchase automation</div></div>
+    <div class="tl-item"><div class="tl-week">Week 4</div><div class="tl-task"><strong>Manual QA:</strong> Regression, exploratory, cross-browser testing &nbsp;|&nbsp; <strong>Auto QA:</strong> Claims/payments automation, API tests</div></div>
+    <div class="tl-item"><div class="tl-week">Week 5</div><div class="tl-task"><strong>Manual QA:</strong> Defect re-testing, final regression &nbsp;|&nbsp; <strong>Auto QA:</strong> Performance tests, CI/CD pipeline setup</div></div>
+    <div class="tl-item"><div class="tl-week">Week 6</div><div class="tl-task"><strong>Manual QA:</strong> Test Summary Report, release activities &nbsp;|&nbsp; <strong>Auto QA:</strong> Final automation report, maintenance documentation</div></div>
+  </div>
+</div>
+
+<!-- ── PHASE 3 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">3</div>
+    <div><div class="phase-title">Test Design</div><div class="phase-sub">Test scenarios, detailed test cases, test data, RTM, and automation framework</div></div>
+  </div>
+
+  <div class="role-manual">👤 MANUAL QA ENGINEER — Test Scenarios</div>
+
+  <h2>3.1 Test Scenarios by Module</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Module</th><th>Scenario</th><th>Priority</th></tr></thead>
+    <tbody>
+      <tr><td>TS_REG_01</td><td>Registration</td><td>Valid registration with all mandatory details</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_REG_02</td><td>Registration</td><td>System rejects invalid/missing data with inline errors</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_REG_03</td><td>Registration</td><td>Password strength rules enforced (uppercase, number, special)</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_REG_04</td><td>Registration</td><td>Duplicate email registration blocked</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_LOG_01</td><td>Login</td><td>Valid credentials redirect to dashboard/admin panel</td><td><span class="badge badge-critical">Critical</span></td></tr>
+      <tr><td>TS_LOG_02</td><td>Login</td><td>Wrong credentials show generic error (no field specificity)</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_LOG_03</td><td>Login</td><td>Account locks after 5 consecutive failed attempts</td><td><span class="badge badge-critical">Critical</span></td></tr>
+      <tr><td>TS_LOG_04</td><td>Login</td><td>Forgot password flow works end-to-end</td><td><span class="badge badge-medium">Medium</span></td></tr>
+      <tr><td>TS_MOTOR_01</td><td>Motor Quote</td><td>Motor quote generates 3 plans with correct premiums</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_MOTOR_02</td><td>Motor Quote</td><td>NCB discount applied correctly to premium</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_MOTOR_03</td><td>Motor Quote</td><td>Add-ons update premium dynamically (no page reload)</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_HLT_01</td><td>Health Quote</td><td>Individual and family floater plan quotes generated</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_HLT_02</td><td>Health Quote</td><td>Pre-existing disease warning displayed correctly</td><td><span class="badge badge-medium">Medium</span></td></tr>
+      <tr><td>TS_TRVL_01</td><td>Travel Quote</td><td>Past travel dates rejected; future dates accepted</td><td><span class="badge badge-critical">Critical</span></td></tr>
+      <tr><td>TS_TRVL_02</td><td>Travel Quote</td><td>Maximum 180-day trip duration enforced</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_POL_01</td><td>Policy Mgmt</td><td>Policy created after successful checkout</td><td><span class="badge badge-critical">Critical</span></td></tr>
+      <tr><td>TS_POL_02</td><td>Policy Mgmt</td><td>Policy renewal within 60-day window</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_POL_03</td><td>Policy Mgmt</td><td>Policy cancellation with correct refund calculation</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_CLM_01</td><td>Claims</td><td>Claim filed with unique reference number generated</td><td><span class="badge badge-critical">Critical</span></td></tr>
+      <tr><td>TS_CLM_02</td><td>Claims</td><td>Claim rejected for date outside policy period</td><td><span class="badge badge-critical">Critical</span></td></tr>
+      <tr><td>TS_CLM_03</td><td>Claims</td><td>Claim status timeline displayed for all status changes</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_ADM_01</td><td>Admin</td><td>Admin searches, deactivates, unlocks customers</td><td><span class="badge badge-critical">High</span></td></tr>
+      <tr><td>TS_ADM_02</td><td>Admin</td><td>Admin updates claim status (Approve/Reject/Info Required)</td><td><span class="badge badge-critical">High</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>3.2 Sample Detailed Test Case — End-to-End Motor Policy Purchase</h2>
+  <table>
+    <thead><tr><th colspan="2" style="text-align:center;font-size:1rem">TC_FULL_001 — Motor Insurance End-to-End Purchase</th></tr></thead>
+    <tbody>
+      <tr><td width="30%"><strong>Test Case ID</strong></td><td>TC_FULL_001</td></tr>
+      <tr><td><strong>Module</strong></td><td>Motor Quote → Checkout → Policy</td></tr>
+      <tr><td><strong>Priority</strong></td><td><span class="badge badge-critical">Critical</span></td></tr>
+      <tr><td><strong>Test Type</strong></td><td>Integration / Positive / End-to-End</td></tr>
+      <tr><td><strong>Pre-condition</strong></td><td>User registered and logged in as rahul@demo.com</td></tr>
+      <tr><td><strong>Test Data</strong></td><td>Vehicle: MH12AB1234 | Maruti Swift 2022 | Petrol | Mumbai | NCB: 20%</td></tr>
+      <tr><td><strong>Test Steps</strong></td><td>
+        1. Login with rahul@demo.com / Test@1234<br>
+        2. Navigate: Get Quote → Motor Insurance<br>
+        3. Fill: Type=Four-Wheeler, Reg=MH12AB1234, Make=Maruti Suzuki, Model=Swift, Year=2022, Fuel=Petrol, City=Mumbai<br>
+        4. Select NCB: 20%<br>
+        5. Click Get Quotes<br>
+        6. Verify 3 plans displayed (Third Party / Standard / Comprehensive)<br>
+        7. Select Comprehensive plan<br>
+        8. Check Zero Depreciation add-on<br>
+        9. Verify premium increases by ₹1,200 (no page reload)<br>
+        10. Click Buy Now<br>
+        11. Fill Nominee: Sunita Sharma | Spouse | PAN: ABCDE1234F<br>
+        12. Select Credit Card | Enter: 4111 1111 1111 1111 | Exp: 12/27 | CVV: 123<br>
+        13. Click Pay Securely<br>
+        14. Verify success modal with Policy Number and Transaction ID<br>
+        15. Navigate to My Policies — verify new policy appears as Active
+      </td></tr>
+      <tr><td><strong>Expected Result</strong></td><td>Step 6: 3 plan cards visible with premiums<br>Step 9: Premium updates immediately (+₹1,200)<br>Step 13: Payment processing spinner shown<br>Step 14: Unique POL# and TXN# generated in modal<br>Step 15: New Active policy visible in list</td></tr>
+      <tr><td><strong>Actual Result</strong></td><td><em>(To be filled during execution)</em></td></tr>
+      <tr><td><strong>Status</strong></td><td>Not Executed</td></tr>
+      <tr><td><strong>Req ID</strong></td><td>REQ-019, REQ-022, REQ-023, REQ-034, REQ-037</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3.3 Test Data Sheet</h2>
+  <table>
+    <thead><tr><th>Category</th><th>Data</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Valid Customer</strong></td><td>rahul@demo.com / Test@1234</td><td>All customer-role tests</td></tr>
+      <tr><td><strong>Admin User</strong></td><td>admin@insureai.com / Admin@123</td><td>Admin panel tests</td></tr>
+      <tr><td><strong>Invalid Email</strong></td><td>rahultest.com</td><td>Registration/Login negative</td></tr>
+      <tr><td><strong>Age &lt;18</strong></td><td>DOB: 2010-01-01</td><td>Registration age validation</td></tr>
+      <tr><td><strong>Weak Password</strong></td><td>test123 (no uppercase/special)</td><td>Password strength tests</td></tr>
+      <tr><td><strong>Invalid Mobile</strong></td><td>98765 (5 digits)</td><td>Mobile validation tests</td></tr>
+      <tr><td><strong>Valid Vehicle Reg</strong></td><td>MH12AB1234</td><td>Motor quote tests</td></tr>
+      <tr><td><strong>Invalid Reg Format</strong></td><td>ABCD123</td><td>Motor reg validation test</td></tr>
+      <tr><td><strong>Travel Past Date</strong></td><td>Yesterday's date</td><td>Travel date validation</td></tr>
+      <tr><td><strong>Travel Boundary</strong></td><td>Start + 180 days (pass) | Start + 181 days (fail)</td><td>Max duration boundary</td></tr>
+      <tr><td><strong>Credit Card</strong></td><td>4111 1111 1111 1111 | CVV: 123 | Exp: 12/27</td><td>Payment tests</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3.4 Requirement Traceability Matrix (RTM) — Sample</h2>
+  <table>
+    <thead><tr><th>Req ID</th><th>Requirement</th><th>Test Case IDs</th><th>Priority</th><th>Covered By</th></tr></thead>
+    <tbody>
+      <tr><td>REQ-001</td><td>Registration with mandatory fields</td><td>TC_REG_001–006</td><td><span class="badge badge-critical">High</span></td><td><span class="badge badge-both">Both</span></td></tr>
+      <tr><td>REQ-005</td><td>Mobile 10-digit validation</td><td>TC_REG_005–007</td><td><span class="badge badge-critical">High</span></td><td><span class="badge badge-both">Both</span></td></tr>
+      <tr><td>REQ-007</td><td>Login with email/password</td><td>TC_LOG_001–002</td><td><span class="badge badge-critical">Critical</span></td><td><span class="badge badge-both">Both</span></td></tr>
+      <tr><td>REQ-008</td><td>Account lock after 5 failures</td><td>TC_LOG_007–008</td><td><span class="badge badge-critical">Critical</span></td><td><span class="badge badge-both">Both</span></td></tr>
+      <tr><td>REQ-015</td><td>Back button after logout</td><td>TC_LOG_014</td><td><span class="badge badge-critical">Critical</span></td><td><span class="badge badge-auto">Auto</span></td></tr>
+      <tr><td>REQ-017</td><td>Dashboard &lt;3 seconds</td><td>TC_NFR_001</td><td><span class="badge badge-critical">High</span></td><td><span class="badge badge-auto">Auto</span></td></tr>
+      <tr><td>REQ-020</td><td>Vehicle reg number format</td><td>TC_MOTOR_002</td><td><span class="badge badge-critical">High</span></td><td><span class="badge badge-both">Both</span></td></tr>
+      <tr><td>REQ-023</td><td>Dynamic premium update</td><td>TC_MOTOR_006–009</td><td><span class="badge badge-critical">High</span></td><td><span class="badge badge-both">Both</span></td></tr>
+      <tr><td>REQ-030</td><td>Travel dates must be future</td><td>TC_TRVL_002–003</td><td><span class="badge badge-critical">Critical</span></td><td><span class="badge badge-both">Both</span></td></tr>
+      <tr><td>REQ-037</td><td>Policy number after payment</td><td>TC_CHK_007</td><td><span class="badge badge-critical">Critical</span></td><td><span class="badge badge-auto">Auto</span></td></tr>
+      <tr><td>REQ-050</td><td>Claim incident date validation</td><td>TC_CLM_002–003</td><td><span class="badge badge-critical">Critical</span></td><td><span class="badge badge-auto">Auto</span></td></tr>
+      <tr><td>REQ-060</td><td>No card data in localStorage</td><td>TC_NFR_008</td><td><span class="badge badge-critical">Critical</span></td><td><span class="badge badge-auto">Auto</span></td></tr>
+      <tr><td>REQ-075</td><td>Admin IP/role restriction</td><td>TC_ADM_002</td><td><span class="badge badge-critical">Critical</span></td><td><span class="badge badge-auto">Auto</span></td></tr>
+      <tr><td>REQ-087</td><td>Cross-browser compatibility</td><td>TC_NFR_004–006</td><td><span class="badge badge-critical">High</span></td><td><span class="badge badge-both">Both</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="role-auto">🤖 AUTOMATION QA ENGINEER — Framework Design</div>
+
+  <h2>3.5 Automation Framework Structure (Playwright + POM)</h2>
+  <pre>InsureAI-Automation/
+│
+├── playwright.config.js          ← Browsers, baseURL, reporters
+├── playwright.perf.config.js     ← Performance test config
+│
+├── tests/
+│   ├── smoke/                    ← 10 critical smoke tests (5 min run)
+│   ├── regression/               ← Full regression suite (25 min run)
+│   │   ├── auth/                 ← login, register, logout, forgot-pwd
+│   │   ├── quote/                ← motor, health, home, travel
+│   │   ├── policy/               ← checkout, list, cancel
+│   │   ├── claims/               ← file-claim, track-claim
+│   │   ├── payments/             ← payment-history
+│   │   └── admin/                ← access-control, claim-mgmt
+│   ├── performance/              ← page-load, CWV, concurrent users
+│   └── e2e/                      ← full user journey flows
+│
+├── pages/                        ← Page Object Model (POM)
+│   ├── BasePage.js               ← navigate, waitFor, screenshot
+│   ├── LoginPage.js
+│   ├── RegisterPage.js
+│   ├── DashboardPage.js
+│   ├── MotorQuotePage.js
+│   ├── CheckoutPage.js
+│   ├── ClaimsPage.js
+│   └── AdminPage.js
+│
+├── fixtures/                     ← JSON test data files
+│   ├── users.json
+│   ├── motor-data.json
+│   └── payment-data.json
+│
+├── helpers/                      ← Reusable utilities
+│   ├── seed-data.js              ← localStorage seeder
+│   ├── auth-helper.js
+│   └── date-helper.js
+│
+└── .github/workflows/
+    └── qa-pipeline.yml           ← CI/CD GitHub Actions</pre>
+</div>
+
+<!-- ── PHASE 4 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">4</div>
+    <div><div class="phase-title">Environment Setup</div><div class="phase-sub">Tools, configuration, and setup commands for both QA engineers</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Component</th><th>Manual QA</th><th>Automation QA</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Application URL</strong></td><td colspan="2">http://localhost:3000 (npx serve)</td></tr>
+      <tr><td><strong>OS</strong></td><td colspan="2">Windows 11 Pro</td></tr>
+      <tr><td><strong>Browser</strong></td><td>Chrome 131 (primary), Firefox, Edge</td><td>Playwright: Chromium, Firefox, Webkit</td></tr>
+      <tr><td><strong>Test Management</strong></td><td>Excel / Google Sheets / TestRail</td><td>Playwright HTML + Allure Reports</td></tr>
+      <tr><td><strong>Bug Tracker</strong></td><td>JIRA (or GitHub Issues)</td><td>JIRA + Playwright failure logs</td></tr>
+      <tr><td><strong>Screenshot Tool</strong></td><td>Snagit / ShareX / Greenshot</td><td>Playwright auto-capture on failure</td></tr>
+      <tr><td><strong>Test Framework</strong></td><td>N/A (manual)</td><td>Playwright v1.55 + JavaScript</td></tr>
+      <tr><td><strong>CI/CD</strong></td><td>N/A</td><td>GitHub Actions</td></tr>
+      <tr><td><strong>Performance Tool</strong></td><td>Chrome DevTools</td><td>Playwright + Web APIs (no JMeter)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Setup Commands</h3>
+  <pre><span class="code-comment"># Step 1 — Start the application (both QAs)</span>
+<span class="code-keyword">cd</span> C:\Users\Vishal\PlaywrightPractice
+npx serve insurance-app -p 3000
+<span class="code-comment"># Open: http://localhost:3000</span>
+
+<span class="code-comment"># Step 2 — Automation QA framework setup</span>
+npm install
+npx playwright install
+npx playwright install-deps
+
+<span class="code-comment"># Step 3 — Run smoke tests</span>
+npx playwright test tests/smoke/ --project=chromium
+
+<span class="code-comment"># Step 4 — Run full regression</span>
+npx playwright test tests/regression/
+
+<span class="code-comment"># Step 5 — Run performance tests</span>
+npm run perf:all</pre>
+</div>
+
+<!-- ── PHASE 5 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">5</div>
+    <div><div class="phase-title">Test Execution</div><div class="phase-sub">Manual test cycles, smoke checklist, exploratory charters, and automation execution</div></div>
+  </div>
+
+  <div class="role-manual">👤 MANUAL QA ENGINEER</div>
+
+  <h2>5.1 Test Execution Cycles</h2>
+  <table>
+    <thead><tr><th>Cycle</th><th>Type</th><th>Scope</th><th>Duration</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Cycle 1</strong></td><td>Smoke Test</td><td>10 critical cases</td><td>30 min</td><td>Day 1 of each new build</td></tr>
+      <tr><td><strong>Cycle 2</strong></td><td>Sanity Test</td><td>Module-specific (post-fix)</td><td>1–2 hrs</td><td>After each bug fix deploy</td></tr>
+      <tr><td><strong>Cycle 3</strong></td><td>Functional Testing</td><td>All 169 test cases</td><td>3–4 days</td><td>Week 3</td></tr>
+      <tr><td><strong>Cycle 4</strong></td><td>Integration Testing</td><td>E2E flows (4 journeys)</td><td>1 day</td><td>Week 3–4</td></tr>
+      <tr><td><strong>Cycle 5</strong></td><td>Regression Testing</td><td>Full suite after fixes</td><td>2 days</td><td>Week 4–5</td></tr>
+      <tr><td><strong>Cycle 6</strong></td><td>Exploratory Testing</td><td>Unscripted — edge cases</td><td>4 hrs</td><td>Week 4</td></tr>
+      <tr><td><strong>Cycle 7</strong></td><td>Cross-Browser Testing</td><td>Chrome / Firefox / Edge</td><td>1 day</td><td>Week 4</td></tr>
+      <tr><td><strong>Cycle 8</strong></td><td>UAT Support</td><td>Client scenarios</td><td>1 day</td><td>Week 5–6</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5.2 Smoke Test Checklist (30-Minute Run)</h2>
+  <ul class="checklist">
+    <li>SM-01 | Application opens at http://localhost:3000</li>
+    <li>SM-02 | New user can register successfully (valid data)</li>
+    <li>SM-03 | Registered user can login and reach dashboard</li>
+    <li>SM-04 | Dashboard loads stats: active policies, claims, premium</li>
+    <li>SM-05 | Motor insurance quote can be generated (3 plans visible)</li>
+    <li>SM-06 | Policy can be purchased — policy number generated</li>
+    <li>SM-07 | Claim can be filed against active policy — CLM# generated</li>
+    <li>SM-08 | Payment history is visible with correct amount</li>
+    <li>SM-09 | Admin can login and access admin.html panel</li>
+    <li>SM-10 | Logout works and back button does NOT restore session</li>
+  </ul>
+
+  <h2>5.3 Exploratory Testing Charters</h2>
+  <table>
+    <thead><tr><th>Charter</th><th>Area</th><th>Time Box</th><th>Focus</th></tr></thead>
+    <tbody>
+      <tr><td>ET-01</td><td>Registration edge cases</td><td>30 min</td><td>SQL injection, XSS in name, special characters</td></tr>
+      <tr><td>ET-02</td><td>Quote form boundaries</td><td>45 min</td><td>Max chars, zero values, negative numbers, blank selects</td></tr>
+      <tr><td>ET-03</td><td>Multi-tab session behavior</td><td>30 min</td><td>Open app in 2 tabs, check session conflicts</td></tr>
+      <tr><td>ET-04</td><td>Payment flow edge cases</td><td>45 min</td><td>Incomplete card, expired card format, rapid re-submit</td></tr>
+      <tr><td>ET-05</td><td>Admin rapid operations</td><td>30 min</td><td>Rapid status changes, concurrent search+deactivate</td></tr>
+      <tr><td>ET-06</td><td>Mobile responsiveness</td><td>30 min</td><td>320px, 375px, 768px, 1024px — layout check</td></tr>
+    </tbody>
+  </table>
+
+  <div class="role-auto">🤖 AUTOMATION QA ENGINEER</div>
+
+  <h2>5.4 Automation Execution Commands</h2>
+  <pre><span class="code-comment"># Daily Smoke (5 minutes)</span>
+npx playwright test tests/smoke/ --project=chromium --reporter=list
+
+<span class="code-comment"># Nightly Full Regression (25 minutes)</span>
+npx playwright test tests/regression/ --reporter=html
+
+<span class="code-comment"># Weekly All Browsers (60 minutes)</span>
+npx playwright test --project=chromium --project=firefox --project=webkit
+
+<span class="code-comment"># Performance Suite (15 minutes)</span>
+npm run perf:all</pre>
+
+  <h2>5.5 Sample Automation Script</h2>
+  <pre><span class="code-comment">// tests/regression/auth/login.spec.js</span>
+<span class="code-keyword">import</span> { test, expect } <span class="code-keyword">from</span> <span class="code-string">'@playwright/test'</span>;
+<span class="code-keyword">import</span> { LoginPage } <span class="code-keyword">from</span> <span class="code-string">'../../../pages/LoginPage.js'</span>;
+
+test.describe(<span class="code-string">'🔐 Login — Functional Tests'</span>, () => {
+
+  test(<span class="code-string">'REQ-007 | Valid login → dashboard redirect'</span>, <span class="code-keyword">async</span> ({ page }) => {
+    <span class="code-keyword">const</span> login = <span class="code-keyword">new</span> LoginPage(page);
+    <span class="code-keyword">await</span> login.navigate();
+    <span class="code-keyword">await</span> login.login(<span class="code-string">'rahul@demo.com'</span>, <span class="code-string">'Test@1234'</span>);
+    <span class="code-keyword">await</span> expect(page).toHaveURL(/dashboard\.html/);
+  });
+
+  test(<span class="code-string">'REQ-008 | Account locks after 5 failed attempts'</span>, <span class="code-keyword">async</span> ({ page }) => {
+    <span class="code-keyword">const</span> login = <span class="code-keyword">new</span> LoginPage(page);
+    <span class="code-keyword">await</span> login.navigate();
+    <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = 0; i &lt; 5; i++) {
+      <span class="code-keyword">await</span> login.login(<span class="code-string">'rahul@demo.com'</span>, <span class="code-string">'WrongPass@1'</span>);
+    }
+    <span class="code-keyword">const</span> alert = <span class="code-keyword">await</span> login.getAlertText();
+    expect(alert).toContain(<span class="code-string">'locked'</span>);
+  });
+
+  test(<span class="code-string">'REQ-015 | Back button after logout → stays on login'</span>, <span class="code-keyword">async</span> ({ page }) => {
+    <span class="code-keyword">await</span> page.goto(<span class="code-string">'/login.html'</span>);
+    <span class="code-keyword">await</span> login.login(<span class="code-string">'rahul@demo.com'</span>, <span class="code-string">'Test@1234'</span>);
+    <span class="code-keyword">await</span> page.click(<span class="code-string">'button:has-text("Logout")'</span>);
+    <span class="code-keyword">await</span> page.goBack();
+    <span class="code-keyword">await</span> expect(page).toHaveURL(/login\.html/);
+  });
+});</pre>
+</div>
+
+<!-- ── PHASE 6 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">6</div>
+    <div><div class="phase-title">Defect Management</div><div class="phase-sub">JIRA defect template, severity matrix, and automation failure capture</div></div>
+  </div>
+
+  <div class="role-manual">👤 MANUAL QA ENGINEER — JIRA Defect Template</div>
+
+  <table>
+    <thead><tr><th colspan="2" style="text-align:center">DEFECT REPORT TEMPLATE</th></tr></thead>
+    <tbody>
+      <tr><td width="30%"><strong>Defect ID</strong></td><td>DEF-[Auto-generated]</td></tr>
+      <tr><td><strong>Title</strong></td><td>[Short, clear description of the defect]</td></tr>
+      <tr><td><strong>Module</strong></td><td>[e.g. Claims / Motor Quote / Login]</td></tr>
+      <tr><td><strong>Severity</strong></td><td>Critical / Major / Minor / Trivial</td></tr>
+      <tr><td><strong>Priority</strong></td><td>P1 / P2 / P3 / P4</td></tr>
+      <tr><td><strong>Environment</strong></td><td>OS: Windows 11 | Browser: Chrome 131 | URL: localhost:3000</td></tr>
+      <tr><td><strong>Steps to Reproduce</strong></td><td>1. Login as rahul@demo.com<br>2. Navigate to Claims<br>3. File claim with incident date before policy start<br>4. Click Submit</td></tr>
+      <tr><td><strong>Expected Result</strong></td><td>Error: Date must be within policy period</td></tr>
+      <tr><td><strong>Actual Result</strong></td><td>Claim submitted without validation error [BUG]</td></tr>
+      <tr><td><strong>Attachments</strong></td><td>[Screenshot] [Screen Recording] [Console Logs]</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6.1 Severity &amp; Priority Matrix</h2>
+  <table>
+    <thead><tr><th>Severity</th><th>Priority</th><th>Examples</th><th>Resolution SLA</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-critical">Critical (S1)</span></td><td>P1</td><td>Account lockout not working, auth bypass, policy purchase fails</td><td>Same day</td></tr>
+      <tr><td><span class="badge badge-high">Major (S2)</span></td><td>P2</td><td>Form validation missing, claim date not validated, wrong premium</td><td>Next day</td></tr>
+      <tr><td><span class="badge badge-medium">Minor (S3)</span></td><td>P3</td><td>UI misalignment, wrong color scheme, non-critical field error</td><td>This sprint</td></tr>
+      <tr><td><span class="badge badge-low">Trivial (S4)</span></td><td>P4</td><td>Typo, missing tooltip, placeholder text incorrect</td><td>Next sprint</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6.2 Defect Lifecycle</h2>
+  <div class="info-note info-box">
+    <strong>Flow:</strong>
+    New → Assigned → In Progress → Fixed → Ready for Re-Test → [Pass → Closed] / [Fail → Reopened]
+  </div>
+
+  <div class="role-auto">🤖 AUTOMATION QA ENGINEER — Auto Failure Capture</div>
+  <pre><span class="code-comment">// playwright.config.js — Global settings</span>
+use: {
+  screenshot: <span class="code-string">'only-on-failure'</span>,   <span class="code-comment">// Auto screenshot on failure</span>
+  video:      <span class="code-string">'retain-on-failure'</span>,  <span class="code-comment">// Auto video recording</span>
+  trace:      <span class="code-string">'on-first-retry'</span>,    <span class="code-comment">// Full trace on retry</span>
+}</pre>
+</div>
+
+<!-- ── PHASE 7 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">7</div>
+    <div><div class="phase-title">API Testing</div><div class="phase-sub">Automation QA — API test cases with status codes, response and schema validation</div></div>
+  </div>
+
+  <div class="role-auto">🤖 AUTOMATION QA ENGINEER</div>
+
+  <table>
+    <thead><tr><th>ID</th><th>Endpoint</th><th>Method</th><th>Scenario</th><th>Expected Status</th><th>Validation</th></tr></thead>
+    <tbody>
+      <tr><td>API_001</td><td>/auth/register</td><td>POST</td><td>Valid registration</td><td><span class="badge badge-pass">201 Created</span></td><td>userId in response</td></tr>
+      <tr><td>API_002</td><td>/auth/register</td><td>POST</td><td>Duplicate email</td><td><span class="badge badge-fail">400 Bad Request</span></td><td>error message contains "registered"</td></tr>
+      <tr><td>API_003</td><td>/auth/register</td><td>POST</td><td>Age &lt;18</td><td><span class="badge badge-fail">422 Unprocessable</span></td><td>Validation error returned</td></tr>
+      <tr><td>API_004</td><td>/auth/login</td><td>POST</td><td>Valid credentials</td><td><span class="badge badge-pass">200 OK</span></td><td>JWT token + user object returned</td></tr>
+      <tr><td>API_005</td><td>/auth/login</td><td>POST</td><td>Wrong password</td><td><span class="badge badge-fail">401 Unauthorized</span></td><td>Generic error (no field specificity)</td></tr>
+      <tr><td>API_006</td><td>/policies</td><td>GET</td><td>Valid JWT token</td><td><span class="badge badge-pass">200 OK</span></td><td>Array of policies returned</td></tr>
+      <tr><td>API_007</td><td>/policies</td><td>GET</td><td>No token</td><td><span class="badge badge-fail">401 Unauthorized</span></td><td>Auth error returned</td></tr>
+      <tr><td>API_008</td><td>/claims</td><td>POST</td><td>Valid claim data</td><td><span class="badge badge-pass">201 Created</span></td><td>claimId starts with "CLM"</td></tr>
+      <tr><td>API_009</td><td>/claims</td><td>POST</td><td>Date outside policy</td><td><span class="badge badge-fail">422 Unprocessable</span></td><td>Date validation error</td></tr>
+      <tr><td>API_010</td><td>/policies</td><td>GET</td><td>Schema validation</td><td><span class="badge badge-pass">200 OK</span></td><td>id=string, premium=number, status=enum</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── PHASE 8 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">8</div>
+    <div><div class="phase-title">Performance Testing</div><div class="phase-sub">Automation QA — Page load, Core Web Vitals, concurrent users using Playwright (no JMeter)</div></div>
+  </div>
+
+  <div class="role-auto">🤖 AUTOMATION QA ENGINEER</div>
+  <div class="info-note info-box"><strong>Tool Used:</strong> Playwright + Browser Web APIs (Navigation Timing, PerformanceObserver, Chrome DevTools Protocol) — No JMeter required.</div>
+
+  <table>
+    <thead><tr><th>Scenario</th><th>Metric</th><th>Pass Threshold</th><th>Req ID</th></tr></thead>
+    <tbody>
+      <tr><td>Page Load — All 14 pages</td><td>Full Load Time</td><td>&lt; 3000ms</td><td>REQ-017</td></tr>
+      <tr><td>First Contentful Paint</td><td>FCP</td><td>&lt; 1800ms (Good)</td><td>—</td></tr>
+      <tr><td>Largest Contentful Paint</td><td>LCP</td><td>&lt; 2500ms (Good)</td><td>—</td></tr>
+      <tr><td>Layout Stability</td><td>CLS</td><td>&lt; 0.1 (Good)</td><td>—</td></tr>
+      <tr><td>Total Blocking Time</td><td>TBT</td><td>&lt; 200ms (Good)</td><td>—</td></tr>
+      <tr><td>5 Concurrent Users</td><td>Avg Load Time</td><td>&lt; 5000ms</td><td>—</td></tr>
+      <tr><td>10 Concurrent Users (Stress)</td><td>Max Load Time</td><td>&lt; 8000ms</td><td>—</td></tr>
+      <tr><td>Memory Leak (8 iterations)</td><td>JS Heap Growth</td><td>&lt; 50MB</td><td>—</td></tr>
+      <tr><td>Form Interaction (INP)</td><td>Click Response</td><td>&lt; 200ms (Good)</td><td>—</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── PHASE 9 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">9</div>
+    <div><div class="phase-title">Reporting</div><div class="phase-sub">Daily status report, weekly execution summary, and automation execution report</div></div>
+  </div>
+
+  <div class="role-manual">👤 MANUAL QA ENGINEER — Daily Status Report</div>
+
+  <table>
+    <thead><tr><th colspan="4" style="text-align:center">DAILY QA STATUS REPORT — InsureAI | 24-Mar-2026</th></tr></thead>
+    <tbody>
+      <tr><td colspan="4"><strong>Test Execution Summary</strong></td></tr>
+      <tr><td>Total Test Cases</td><td>169</td><td>Executed Today</td><td>45</td></tr>
+      <tr><td>Pass</td><td>40 (88%)</td><td>Fail</td><td>3 (7%)</td></tr>
+      <tr><td>Blocked</td><td>2 (4%)</td><td>Not Executed</td><td>124</td></tr>
+      <tr><td colspan="4"><strong>Defects Today</strong></td></tr>
+      <tr><td colspan="2">New: 3 (1 Major, 2 Minor)</td><td colspan="2">Closed: 1 (DEF-009 ✅)</td></tr>
+      <tr><td colspan="4"><strong>Blockers</strong></td></tr>
+      <tr><td colspan="4">DEF-012 (Claim date validation) — blocking 4 claim test cases</td></tr>
+    </tbody>
+  </table>
+
+  <h2>9.1 Weekly Execution Summary</h2>
+  <table>
+    <thead><tr><th>Module</th><th>Total</th><th>Pass</th><th>Fail</th><th>Blocked</th><th>% Done</th></tr></thead>
+    <tbody>
+      <tr><td>Registration</td><td>20</td><td>18</td><td>2</td><td>0</td><td>100%</td></tr>
+      <tr><td>Login</td><td>15</td><td>14</td><td>1</td><td>0</td><td>100%</td></tr>
+      <tr><td>Dashboard</td><td>8</td><td>8</td><td>0</td><td>0</td><td>100%</td></tr>
+      <tr><td>Motor Quote</td><td>15</td><td>13</td><td>2</td><td>0</td><td>100%</td></tr>
+      <tr><td>Health Quote</td><td>10</td><td>10</td><td>0</td><td>0</td><td>100%</td></tr>
+      <tr><td>Travel Quote</td><td>8</td><td>6</td><td>2</td><td>0</td><td>100%</td></tr>
+      <tr><td>Checkout / Policy</td><td>21</td><td>17</td><td>2</td><td>2</td><td>91%</td></tr>
+      <tr><td>Claims</td><td>15</td><td>10</td><td>3</td><td>2</td><td>80%</td></tr>
+      <tr><td>Payments + Docs</td><td>12</td><td>0</td><td>0</td><td>0</td><td>TBD</td></tr>
+      <tr><td>Admin Panel</td><td>18</td><td>0</td><td>0</td><td>0</td><td>TBD</td></tr>
+      <tr><td>NFR / Security</td><td>14</td><td>0</td><td>0</td><td>0</td><td>TBD</td></tr>
+      <tr style="font-weight:700; background:#e3f2fd"><td>TOTAL</td><td>169</td><td>96</td><td>12</td><td>4</td><td>68%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── PHASE 10 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">10</div>
+    <div><div class="phase-title">Release Activities</div><div class="phase-sub">Test Summary Report, Release Notes, and Stakeholder Communication</div></div>
+  </div>
+
+  <h2>10.1 Test Summary Report (TSR)</h2>
+
+  <div class="stat-grid">
+    <div class="stat-card sc-blue"><div class="val">169</div><div class="lbl">Total Test Cases</div></div>
+    <div class="stat-card sc-green"><div class="val">91%</div><div class="lbl">Pass Rate</div></div>
+    <div class="stat-card sc-orange"><div class="val">28</div><div class="lbl">Total Defects</div></div>
+    <div class="stat-card sc-purple"><div class="val">86%</div><div class="lbl">Automation Coverage</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Category</th><th>Metric</th><th>Result</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Test Execution</td><td>Total Executed</td><td>169/169 (100%)</td><td><span class="badge badge-pass">✅ PASS</span></td></tr>
+      <tr><td>Test Execution</td><td>Overall Pass Rate</td><td>154/169 (91%)</td><td><span class="badge badge-pass">✅ PASS</span></td></tr>
+      <tr><td>Defects</td><td>Critical (P1) Open</td><td>0</td><td><span class="badge badge-pass">✅ PASS</span></td></tr>
+      <tr><td>Defects</td><td>Major (P2) Open</td><td>2</td><td><span class="badge badge-high">⚠ MONITOR</span></td></tr>
+      <tr><td>Performance</td><td>All pages &lt;3s (REQ-017)</td><td>14/14 pages passed</td><td><span class="badge badge-pass">✅ PASS</span></td></tr>
+      <tr><td>Performance</td><td>Core Web Vitals</td><td>Good rating on all pages</td><td><span class="badge badge-pass">✅ PASS</span></td></tr>
+      <tr><td>Security</td><td>No card data in storage</td><td>Verified — no card data stored</td><td><span class="badge badge-pass">✅ PASS</span></td></tr>
+      <tr><td>Security</td><td>Auth guard on protected pages</td><td>All protected routes verified</td><td><span class="badge badge-pass">✅ PASS</span></td></tr>
+      <tr><td>Automation</td><td>Automation coverage</td><td>82/95 cases automated (86%)</td><td><span class="badge badge-pass">✅ PASS</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-success info-box" style="margin-top:20px; font-size:1rem">
+    <strong>🏆 RECOMMENDATION: APPROVED FOR CLIENT DEMONSTRATION</strong>
+    All critical defects resolved. Performance budgets met. Security verified. 2 minor cosmetic issues accepted for demo.
+  </div>
+
+  <h3>Sign-off</h3>
+  <table>
+    <thead><tr><th>Role</th><th>Name</th><th>Signature</th><th>Date</th></tr></thead>
+    <tbody>
+      <tr><td>QA Team Lead</td><td></td><td>___________________</td><td>___________</td></tr>
+      <tr><td>Development Lead</td><td></td><td>___________________</td><td>___________</td></tr>
+      <tr><td>Product Owner</td><td></td><td>___________________</td><td>___________</td></tr>
+    </tbody>
+  </table>
+
+  <h2>10.2 Stakeholder Email Draft</h2>
+  <div style="background:#f8f9ff; border:1px solid #dee2e6; border-radius:8px; padding:20px; font-size:.9rem; line-height:1.8; margin-top:16px">
+    <strong>To:</strong> [Stakeholder / Client] &nbsp;&nbsp; <strong>From:</strong> QA Team Lead &nbsp;&nbsp; <strong>Date:</strong> 24-Mar-2026<br>
+    <strong>Subject:</strong> ✅ InsureAI v1.0 — QA Sign-Off &amp; Test Summary<br><br>
+    Dear [Name],<br><br>
+    I am pleased to share the QA sign-off for <strong>InsureAI General Insurance Portal v1.0</strong>, which is now ready for client demonstration.<br><br>
+    <strong>Summary:</strong><br>
+    • Test Cases Executed: 169/169 (100%) &nbsp;|&nbsp; Pass Rate: 91%<br>
+    • Critical Defects Open: <strong>0</strong><br>
+    • Automation Coverage: 86% (82 automated scripts)<br>
+    • Performance: All 14 pages &lt;3s (REQ-017 ✅)<br>
+    • Core Web Vitals: Good rating on all key pages<br><br>
+    <strong>What Was Tested:</strong> Registration/Login, Quote Generation (Motor/Health/Home/Travel), Policy Purchase, Claims, Payments, Admin Panel, Performance, Security<br><br>
+    <strong>Known Minor Issues (Not blocking demo):</strong> Minor UI on 375px mobile — Chrome recommended for demo.<br><br>
+    The application is <strong>APPROVED</strong> for client demonstration.<br><br>
+    Best regards,<br>
+    QA Team Lead — InsureAI Project
+  </div>
+</div>
+
+<!-- ── PHASE 11 ── -->
+<div class="section page-break">
+  <div class="phase-header">
+    <div class="phase-num">11</div>
+    <div><div class="phase-title">Maintenance</div><div class="phase-sub">Test case updates, automation script maintenance, flaky test strategy, CI/CD pipeline</div></div>
+  </div>
+
+  <div class="role-manual">👤 MANUAL QA ENGINEER — Test Case Maintenance</div>
+  <table>
+    <thead><tr><th>Trigger</th><th>Action Required</th></tr></thead>
+    <tbody>
+      <tr><td>New feature added</td><td>Write new test cases, update RTM</td></tr>
+      <tr><td>Existing feature changed</td><td>Update affected test cases and expected results</td></tr>
+      <tr><td>Bug fixed</td><td>Add regression test case to prevent recurrence</td></tr>
+      <tr><td>Requirement changed</td><td>Update RTM + linked test cases</td></tr>
+      <tr><td>Sprint retrospective</td><td>Review coverage gaps and improve test suite</td></tr>
+    </tbody>
+  </table>
+
+  <div class="role-auto">🤖 AUTOMATION QA ENGINEER — Script Maintenance</div>
+  <table>
+    <thead><tr><th>Trigger</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Locator/selector changed</td><td>Update Page Object Model (POM) selectors</td></tr>
+      <tr><td>New field added to form</td><td>Add to spec file + fixture JSON</td></tr>
+      <tr><td>User flow changed</td><td>Update E2E spec and step sequence</td></tr>
+      <tr><td>Flaky test detected</td><td>Add explicit waitFor() / retry logic / quarantine with @flaky tag</td></tr>
+      <tr><td>Performance threshold drift</td><td>Review and update threshold constants in perf config</td></tr>
+    </tbody>
+  </table>
+
+  <h2>11.1 CI/CD Pipeline — GitHub Actions</h2>
+  <pre>name: InsureAI QA Pipeline
+
+on:
+  push:    { branches: [main, develop] }
+  schedule: [{ cron: '0 23 * * *' }]   <span class="code-comment"># Nightly at 11 PM</span>
+
+jobs:
+  smoke:      <span class="code-comment"># 🔥 5 min — Fail fast on critical issues</span>
+  regression: <span class="code-comment"># 🔄 25 min — Full suite (needs: smoke)</span>
+  performance: <span class="code-comment"># ⚡ 15 min — Page load + CWV + load tests</span>
+  notify:     <span class="code-comment"># 📧 Slack/email on failure</span></pre>
+
+  <h2>11.2 Test Coverage Summary</h2>
+  <div class="progress-wrap"><div class="progress-label"><span>Registration &amp; Login</span><span>95%</span></div><div class="progress-bar"><div class="progress-fill" style="width:95%">95%</div></div></div>
+  <div class="progress-wrap"><div class="progress-label"><span>Motor / Health / Home / Travel Quote</span><span>88%</span></div><div class="progress-bar"><div class="progress-fill" style="width:88%">88%</div></div></div>
+  <div class="progress-wrap"><div class="progress-label"><span>Policy Purchase &amp; Management</span><span>90%</span></div><div class="progress-bar"><div class="progress-fill" style="width:90%">90%</div></div></div>
+  <div class="progress-wrap"><div class="progress-label"><span>Claims Management</span><span>88%</span></div><div class="progress-bar"><div class="progress-fill" style="width:88%">88%</div></div></div>
+  <div class="progress-wrap"><div class="progress-label"><span>Payments &amp; Documents</span><span>82%</span></div><div class="progress-bar"><div class="progress-fill" style="width:82%">82%</div></div></div>
+  <div class="progress-wrap"><div class="progress-label"><span>Admin Panel</span><span>75%</span></div><div class="progress-bar"><div class="progress-fill" style="width:75%">75%</div></div></div>
+  <div class="progress-wrap"><div class="progress-label"><span>NFR / Security / Performance</span><span>92%</span></div><div class="progress-bar"><div class="progress-fill" style="width:92%">92%</div></div></div>
+  <div class="progress-wrap" style="margin-top:12px"><div class="progress-label"><span><strong>Overall Automation Coverage</strong></span><span><strong>86%</strong></span></div><div class="progress-bar" style="height:20px"><div class="progress-fill" style="width:86%; font-size:.8rem">82 / 95 cases automated — 86%</div></div></div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ══════════════════════════════════════════ -->
+<!-- FOOTER                                     -->
+<!-- ══════════════════════════════════════════ -->
+<div class="doc-footer">
+  <div><strong>InsureAI QA Complete Report</strong> — v1.0</div>
+  <div>All 11 QA Phases Covered &nbsp;|&nbsp; 24 March 2026</div>
+  <div>CONFIDENTIAL — Internal Use Only</div>
+</div>
+
+</div><!-- /document -->
+
+<script>
+  // Smooth scroll for TOC links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.querySelector(a.getAttribute('href'));
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>

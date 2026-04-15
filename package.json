@@ -18,5 +18,12 @@
     "@playwright/test": "^1.55.0",
     "@types/node": "^24.3.1",
     "serve": "^14.2.6"
+  },
+  "dependencies": {
+    "docx": "^9.1.1",
+    "imap-simple": "^5.1.0",
+    "mailparser": "^3.9.6",
+    "nodemailer": "^8.0.4",
+    "pptxgenjs": "^4.0.1"
   }
 }
