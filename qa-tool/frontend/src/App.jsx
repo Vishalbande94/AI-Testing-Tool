@@ -1910,6 +1910,11 @@ function QAToolApp({ authUser, onLogout }) {
         onToggleCollapse={() => setSidebarCollapsed(c => !c)}
       />
       {/* ── Top bar (minimal — sidebar handles nav) ──────────────────────────── */}
+      <div className="page-bg-canvas" data-page={page}>
+        <div className="page-bg-orb page-bg-orb-1" />
+        <div className="page-bg-orb page-bg-orb-2" />
+        <div className="page-bg-orb page-bg-orb-3" />
+      </div>
       <header className="topbar topbar-minimal">
         <button className="sidebar-toggle" onClick={() => setSidebarCollapsed(c => !c)} title="Toggle sidebar">
           <Icons.Menu size={20} />
