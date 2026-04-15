@@ -1,4 +1,8 @@
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
+import {
+  CommandPalette, ShortcutsModal, NotificationBell,
+  Sparkline, BarChart, TrendCard, EmptyState, Skeleton, Icons,
+} from './Enhancements.jsx';
 
 const API = '';  // proxied via Vite to http://localhost:5000
 
@@ -664,6 +668,276 @@ function TrendLineChart({ data }) {
 }
 
 // ── Dashboard Page ─────────────────────────────────────────────────────────────
+// ── Settings Page — profile, notifications, appearance, security ──────────
+function SettingsPage({ authUser, darkMode, onToggleTheme, onLogout, toast, addNotification }) {
+  const [section, setSection] = useState('profile');
+  const [notifs,  setNotifs]  = useState({ slackWebhookUrl: '', teamsWebhookUrl: '', webhookUrl: '' });
+  const [newSlack, setNewSlack] = useState('');
+  const [newTeams, setNewTeams] = useState('');
+  const [newWebhook, setNewWebhook] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/notifications')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setNotifs(d); })
+      .catch(() => {});
+  }, []);
+
+  const saveNotif = async (kind, url) => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind, url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      // Refresh
+      const getRes = await fetch('/api/notifications');
+      if (getRes.ok) setNotifs(await getRes.json());
+      toast(`${kind.charAt(0).toUpperCase() + kind.slice(1)} webhook saved`, 'success');
+      if (addNotification) addNotification({ type: 'success', title: `${kind} notifications configured`, description: 'You will receive test run alerts.' });
+    } catch (e) { toast(e.message, 'error'); }
+    finally { setLoading(false); }
+  };
+
+  const testNotif = async (kind) => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/notifications/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast('Test notification sent!', 'success');
+    } catch (e) { toast(e.message, 'error'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="settings-page">
+      <div className="settings-header">
+        <div>
+          <h1 className="settings-title">
+            <Icons.Settings size={28} />
+            Settings
+          </h1>
+          <p className="settings-sub">Manage your profile, integrations, and preferences</p>
+        </div>
+      </div>
+
+      <div className="settings-layout">
+        {/* Sidebar */}
+        <aside className="settings-sidebar">
+          {[
+            { id: 'profile',       label: 'Profile',        icon: Icons.User },
+            { id: 'appearance',    label: 'Appearance',     icon: darkMode ? Icons.Moon : Icons.Sun },
+            { id: 'notifications', label: 'Notifications',  icon: Icons.Bell },
+            { id: 'security',      label: 'Security',       icon: Icons.Shield },
+            { id: 'danger',        label: 'Danger Zone',    icon: Icons.AlertCircle, danger: true },
+          ].map(s => {
+            const Icon = s.icon;
+            return (
+              <button
+                key={s.id}
+                className={`settings-nav ${section === s.id ? 'active' : ''} ${s.danger ? 'danger' : ''}`}
+                onClick={() => setSection(s.id)}
+              >
+                <Icon size={16} />
+                <span>{s.label}</span>
+              </button>
+            );
+          })}
+        </aside>
+
+        <div className="settings-content">
+          {section === 'profile' && (
+            <div className="settings-card">
+              <h2 className="settings-card-title"><Icons.User size={18} /> Profile</h2>
+              <div className="settings-row">
+                <label>Name</label>
+                <input className="field-input" value={authUser?.name || ''} readOnly />
+              </div>
+              <div className="settings-row">
+                <label>Email</label>
+                <input className="field-input" value={authUser?.email || ''} readOnly />
+              </div>
+              <div className="settings-row">
+                <label>Role</label>
+                <div>
+                  <span className={`user-role-chip role-${authUser?.role}`} style={{ fontSize: 11 }}>
+                    {authUser?.role}
+                  </span>
+                </div>
+              </div>
+              <div className="settings-row">
+                <label>Account ID</label>
+                <code className="settings-code">{authUser?.id}</code>
+              </div>
+            </div>
+          )}
+
+          {section === 'appearance' && (
+            <div className="settings-card">
+              <h2 className="settings-card-title"><Icons.Sparkles size={18} /> Appearance</h2>
+              <div className="settings-theme-grid">
+                <button className={`theme-card ${!darkMode ? 'active' : ''}`} onClick={() => darkMode && onToggleTheme()}>
+                  <Icons.Sun size={36} />
+                  <div className="theme-card-name">Light</div>
+                </button>
+                <button className={`theme-card ${darkMode ? 'active' : ''}`} onClick={() => !darkMode && onToggleTheme()}>
+                  <Icons.Moon size={36} />
+                  <div className="theme-card-name">Dark</div>
+                </button>
+              </div>
+              <p className="settings-hint">Theme preference is saved to your browser.</p>
+            </div>
+          )}
+
+          {section === 'notifications' && (
+            <div className="settings-card">
+              <h2 className="settings-card-title"><Icons.Bell size={18} /> Notifications</h2>
+              <p className="settings-hint">Get alerts in Slack, Teams, or a custom webhook when tests complete.</p>
+
+              {/* Slack */}
+              <div className="settings-integration">
+                <div className="settings-integration-top">
+                  <strong>💬 Slack</strong>
+                  {notifs.slackWebhookUrl && <span className="settings-chip-on">Connected</span>}
+                </div>
+                {notifs.slackWebhookUrl ? (
+                  <>
+                    <code className="settings-code">{notifs.slackWebhookUrl}</code>
+                    <div className="settings-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => testNotif('slack')} disabled={loading}>Send test</button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => saveNotif('slack', '')} disabled={loading}>Remove</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      className="field-input"
+                      placeholder="https://hooks.slack.com/services/..."
+                      value={newSlack}
+                      onChange={e => setNewSlack(e.target.value)}
+                    />
+                    <button className="btn btn-primary btn-sm" onClick={() => saveNotif('slack', newSlack)} disabled={loading || !newSlack.startsWith('https://')}>Save Slack webhook</button>
+                  </>
+                )}
+              </div>
+
+              {/* Teams */}
+              <div className="settings-integration">
+                <div className="settings-integration-top">
+                  <strong>👥 Microsoft Teams</strong>
+                  {notifs.teamsWebhookUrl && <span className="settings-chip-on">Connected</span>}
+                </div>
+                {notifs.teamsWebhookUrl ? (
+                  <>
+                    <code className="settings-code">{notifs.teamsWebhookUrl}</code>
+                    <div className="settings-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => testNotif('teams')} disabled={loading}>Send test</button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => saveNotif('teams', '')} disabled={loading}>Remove</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      className="field-input"
+                      placeholder="https://outlook.office.com/webhook/..."
+                      value={newTeams}
+                      onChange={e => setNewTeams(e.target.value)}
+                    />
+                    <button className="btn btn-primary btn-sm" onClick={() => saveNotif('teams', newTeams)} disabled={loading || !newTeams.startsWith('https://')}>Save Teams webhook</button>
+                  </>
+                )}
+              </div>
+
+              {/* Generic webhook */}
+              <div className="settings-integration">
+                <div className="settings-integration-top">
+                  <strong>🔗 Custom Webhook</strong>
+                  {notifs.webhookUrl && <span className="settings-chip-on">Connected</span>}
+                </div>
+                {notifs.webhookUrl ? (
+                  <>
+                    <code className="settings-code">{notifs.webhookUrl}</code>
+                    <div className="settings-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => testNotif('webhook')} disabled={loading}>Send test</button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => saveNotif('webhook', '')} disabled={loading}>Remove</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      className="field-input"
+                      placeholder="https://your-endpoint.com/..."
+                      value={newWebhook}
+                      onChange={e => setNewWebhook(e.target.value)}
+                    />
+                    <button className="btn btn-primary btn-sm" onClick={() => saveNotif('webhook', newWebhook)} disabled={loading || !newWebhook.startsWith('https://')}>Save webhook</button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {section === 'security' && (
+            <div className="settings-card">
+              <h2 className="settings-card-title"><Icons.Shield size={18} /> Security</h2>
+              <div className="settings-sec-item">
+                <div>
+                  <div className="settings-sec-label">🔐 Authentication</div>
+                  <div className="settings-sec-desc">JWT-based login, bcrypt password hashing</div>
+                </div>
+                <span className="settings-chip-on">Active</span>
+              </div>
+              <div className="settings-sec-item">
+                <div>
+                  <div className="settings-sec-label">🔒 Secrets encryption</div>
+                  <div className="settings-sec-desc">AES-256-GCM at rest for Slack, Teams, webhook URLs, API keys</div>
+                </div>
+                <span className="settings-chip-on">Active</span>
+              </div>
+              <div className="settings-sec-item">
+                <div>
+                  <div className="settings-sec-label">⚡ Rate limiting</div>
+                  <div className="settings-sec-desc">2000 requests / 15 min per IP (loopback exempt)</div>
+                </div>
+                <span className="settings-chip-on">Active</span>
+              </div>
+              <div className="settings-sec-item">
+                <div>
+                  <div className="settings-sec-label">🛡️ HTTP security headers</div>
+                  <div className="settings-sec-desc">HSTS, CSP, X-Frame-Options, X-Content-Type-Options via Helmet</div>
+                </div>
+                <span className="settings-chip-on">Active</span>
+              </div>
+            </div>
+          )}
+
+          {section === 'danger' && (
+            <div className="settings-card settings-danger">
+              <h2 className="settings-card-title"><Icons.AlertCircle size={18} color="#ef4444" /> Danger Zone</h2>
+              <div className="settings-danger-item">
+                <div>
+                  <div className="settings-danger-label">Log out</div>
+                  <div className="settings-danger-desc">Sign out of this browser. Your data stays safe.</div>
+                </div>
+                <button className="btn btn-ghost btn-sm" onClick={onLogout}>Log out</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DashboardPage({ runHistory, onNavigate }) {
   const totalRuns   = runHistory.length;
   const totalTests  = runHistory.reduce((s, r) => s + (r.total || 0), 0);
@@ -677,44 +951,79 @@ function DashboardPage({ runHistory, onNavigate }) {
 
   if (totalRuns === 0) return (
     <div className="dashboard">
-      <div style={{ textAlign:'center', padding:'80px 20px', background:'var(--surface)', borderRadius:16, border:'1px solid var(--border)' }}>
-        <div style={{ fontSize:56, marginBottom:14 }}>📊</div>
-        <h2 style={{ fontSize:22, fontWeight:700, marginBottom:8 }}>QA Dashboard</h2>
-        <p style={{ color:'#6b7280', marginBottom:24, maxWidth:400, margin:'0 auto 24px' }}>
-          Run your first test to see metrics, trends, and history here.
-        </p>
-        <button className="btn btn-execute"
-          style={{ display:'inline-flex', width:'auto', padding:'12px 28px' }}
-          onClick={() => onNavigate('manual')}>
-          ⚡ Start First Run
-        </button>
+      <div className="panel" style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="hero-animated-bg" />
+        <div style={{ position: 'relative' }}>
+          <EmptyState
+            icon={Icons.Activity}
+            title="Welcome to your QA Dashboard"
+            description="Run your first test to see metrics, pass-rate trends, flaky test detection, and module-level distribution right here."
+            action={{ label: 'Start First Run', icon: Icons.Play, onClick: () => onNavigate('manual') }}
+          />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginTop: 32, maxWidth: 800, marginLeft: 'auto', marginRight: 'auto' }}>
+            {[
+              { i: Icons.Zap,       t: 'Manual Test',   d: 'Run Playwright suites', p: 'manual' },
+              { i: Icons.Search,    t: 'Exploratory',    d: 'Analyze screenshots', p: 'exploratory' },
+              { i: Icons.Globe,     t: 'API Testing',    d: 'Generate API suites', p: 'api' },
+              { i: Icons.Shield,    t: 'Security',       d: 'OWASP scans', p: 'security' },
+            ].map(q => (
+              <button key={q.p} className="adv-tool-card" onClick={() => onNavigate(q.p)} style={{ textAlign: 'left' }}>
+                <div className="adv-tool-icon-wrap" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,.15), rgba(139,92,246,.08))' }}>
+                  <q.i size={20} />
+                </div>
+                <div className="adv-tool-meta">
+                  <div className="adv-tool-name">{q.t}</div>
+                  <div className="adv-tool-desc">{q.d}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
+
+  // ── Module distribution for the bar chart ─────────────────────────────────
+  const moduleData = [
+    { label: 'Passed', value: runHistory.reduce((s, r) => s + (r.passed || 0), 0), color: 'linear-gradient(90deg, #10b981, #059669)' },
+    { label: 'Failed', value: runHistory.reduce((s, r) => s + (r.failed || 0), 0), color: 'linear-gradient(90deg, #ef4444, #dc2626)' },
+    { label: 'Skipped', value: runHistory.reduce((s, r) => s + (r.skipped || 0), 0), color: 'linear-gradient(90deg, #f59e0b, #d97706)' },
+  ];
+  const sparkRates = trendData.map(d => d.passRate);
+  const sparkTotal = [...runHistory].reverse().slice(-10).map(r => r.total || 0);
 
   const kpiColor = (rate) => rate >= 80 ? '#34d399' : rate >= 50 ? '#fbbf24' : '#f87171';
 
   return (
     <div className="dashboard">
-      {/* KPI grid */}
+      {/* KPI grid — now with sparklines */}
       <div className="kpi-grid">
-        <div className="kpi-card accent-indigo">
+        <div className="kpi-card accent-indigo" style={{ position:'relative', overflow:'hidden' }}>
           <div className="kpi-icon">🚀</div>
           <div className="kpi-val" style={{ color:'#0097a7' }}>{totalRuns}</div>
           <div className="kpi-lbl">Total Runs</div>
           <div className="kpi-sub">All time</div>
+          <div style={{ marginTop: 8 }}>
+            <Sparkline data={sparkTotal.length > 1 ? sparkTotal : [0, totalRuns]} color="#0097a7" width={180} height={30} />
+          </div>
         </div>
         <div className="kpi-card accent-green">
           <div className="kpi-icon">🧪</div>
           <div className="kpi-val" style={{ color:'#34d399' }}>{totalTests}</div>
           <div className="kpi-lbl">Tests Executed</div>
           <div className="kpi-sub">Across all runs</div>
+          <div style={{ marginTop: 8 }}>
+            <Sparkline data={sparkTotal} color="#34d399" width={180} height={30} />
+          </div>
         </div>
         <div className="kpi-card accent-amber">
           <div className="kpi-icon">📈</div>
           <div className="kpi-val" style={{ color: kpiColor(avgPassRate) }}>{avgPassRate}%</div>
           <div className="kpi-lbl">Avg Pass Rate</div>
           <div className="kpi-sub">{totalRuns} run{totalRuns !== 1 ? 's' : ''}</div>
+          <div style={{ marginTop: 8 }}>
+            <Sparkline data={sparkRates} color={kpiColor(avgPassRate)} width={180} height={30} />
+          </div>
         </div>
         <div className="kpi-card" style={{ borderTopColor: kpiColor(lastRun?.passRate || 0) }}>
           <div className="kpi-icon">⏱️</div>
@@ -749,6 +1058,12 @@ function DashboardPage({ runHistory, onNavigate }) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Test Result Distribution */}
+      <div className="panel">
+        <div className="section-title">🎯 Test Result Distribution (cumulative)</div>
+        <BarChart data={moduleData} height={120} />
       </div>
 
       {/* Quick Actions */}
@@ -1038,6 +1353,33 @@ function QAToolApp({ authUser, onLogout }) {
   const [cicdPlatform,  setCicdPlatform]  = useState('github');
   const [cicdStack,     setCicdStack]     = useState('playwright');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('qa-theme') !== 'light');
+
+  // ── Command Palette + Shortcuts Modal + Notifications ──────────────────────
+  const [cmdOpen,       setCmdOpen]       = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [notifications, setNotifications] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('qa_notifications') || '[]'); } catch { return []; }
+  });
+
+  const addNotification = useCallback((notif) => {
+    const item = { id: Date.now() + Math.random(), read: false, timestamp: new Date().toISOString(), ...notif };
+    setNotifications(prev => {
+      const next = [item, ...prev].slice(0, 50);
+      localStorage.setItem('qa_notifications', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+  const markNotifRead = useCallback((id) => {
+    setNotifications(prev => {
+      const next = prev.map(n => n.id === id ? { ...n, read: true } : n);
+      localStorage.setItem('qa_notifications', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+  const clearAllNotifs = useCallback(() => {
+    setNotifications([]);
+    localStorage.setItem('qa_notifications', '[]');
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -1470,6 +1812,43 @@ function QAToolApp({ authUser, onLogout }) {
     toast('Test cases exported as CSV!', 'success');
   };
 
+  // ── Global keyboard shortcuts (Cmd+K, ?, g+letter, t) ────────────────────
+  useEffect(() => {
+    let gPressed = false;
+    let gTimer;
+
+    const handler = (e) => {
+      // Ignore if user is typing in input/textarea/contenteditable
+      const t = e.target;
+      const isInput = t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable;
+
+      // Cmd/Ctrl+K → command palette
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCmdOpen(o => !o);
+        return;
+      }
+
+      if (isInput) return;
+
+      // ? → shortcuts modal
+      if (e.key === '?') { e.preventDefault(); setShortcutsOpen(true); return; }
+      // t → theme
+      if (e.key === 't') { e.preventDefault(); setDarkMode(d => !d); return; }
+
+      // g + letter navigation
+      if (e.key === 'g') { gPressed = true; clearTimeout(gTimer); gTimer = setTimeout(() => { gPressed = false; }, 1200); return; }
+      if (gPressed) {
+        const map = { d: 'dashboard', m: 'manual', e: 'exploratory', a: 'api', s: 'security', p: 'performance', c: 'cicd', v: 'visual' };
+        const pageName = map[e.key.toLowerCase()];
+        if (pageName) { e.preventDefault(); setPage(pageName); gPressed = false; }
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => { window.removeEventListener('keydown', handler); clearTimeout(gTimer); };
+  }, []);
+
   // ── Keyboard shortcut: Ctrl+Enter to execute ──────────────────────────────
   useEffect(() => {
     const handler = (e) => {
@@ -1586,11 +1965,24 @@ function QAToolApp({ authUser, onLogout }) {
             <button className="btn btn-ghost" onClick={handleReset}>↺ New Run</button>
           )}
           <button
+            className="topbar-iconbtn"
+            onClick={() => setCmdOpen(true)}
+            title="Command palette (Ctrl+K)"
+          >
+            <Icons.Search size={18} />
+            <kbd className="topbar-kbd">⌘K</kbd>
+          </button>
+          <NotificationBell
+            notifications={notifications}
+            onMarkRead={markNotifRead}
+            onClearAll={clearAllNotifs}
+          />
+          <button
             className="theme-toggle"
             onClick={() => setDarkMode(d => !d)}
             title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
-            {darkMode ? '☀️' : '🌙'}
+            {darkMode ? <Icons.Sun size={18} /> : <Icons.Moon size={18} />}
           </button>
           <div className="user-menu">
             <button className="user-menu-btn" title={authUser?.email}>
@@ -1603,7 +1995,12 @@ function QAToolApp({ authUser, onLogout }) {
                 <div className="user-menu-name">{authUser?.name}</div>
                 <div className="user-menu-email">{authUser?.email}</div>
               </div>
-              <button className="user-menu-item" onClick={onLogout}>🚪 Log out</button>
+              <button className="user-menu-item" onClick={() => setPage('settings')}>
+                <Icons.Settings size={14} style={{ marginRight: 8, verticalAlign: -2 }} /> Settings
+              </button>
+              <button className="user-menu-item" onClick={onLogout}>
+                <Icons.LogOut size={14} style={{ marginRight: 8, verticalAlign: -2 }} /> Log out
+              </button>
             </div>
           </div>
         </div>
@@ -3133,6 +3530,17 @@ function QAToolApp({ authUser, onLogout }) {
         )}
 
         {/* ══════════════ DASHBOARD PAGE ════════════════════════════════════════ */}
+        {page === 'settings' && (
+          <SettingsPage
+            authUser={authUser}
+            darkMode={darkMode}
+            onToggleTheme={() => setDarkMode(d => !d)}
+            onLogout={onLogout}
+            toast={toast}
+            addNotification={addNotification}
+          />
+        )}
+
         {page === 'dashboard' && (
           <DashboardPage runHistory={runHistory} onNavigate={setPage} />
         )}
@@ -4377,6 +4785,37 @@ function QAToolApp({ authUser, onLogout }) {
         QA AI Testing Tool &nbsp;|&nbsp; Powered by Playwright v1.55 &nbsp;|&nbsp; AI-Powered Test Automation
       </footer>
     </div>
+
+    {/* ── Command Palette (Cmd+K) ──────────────────────────────────────────── */}
+    <CommandPalette
+      open={cmdOpen}
+      onClose={() => setCmdOpen(false)}
+      commands={[
+        // Navigation
+        { id: 'nav-dashboard',   group: 'Navigate', label: 'Dashboard',           description: 'View KPIs & trends', icon: Icons.Activity, color: '#06b6d4', shortcut: 'g d', action: () => setPage('dashboard') },
+        { id: 'nav-manual',      group: 'Navigate', label: 'Manual Test',          description: 'Run tests against an app', icon: Icons.Play,  color: '#8b5cf6', shortcut: 'g m', action: () => setPage('manual') },
+        { id: 'nav-exploratory', group: 'Navigate', label: 'Exploratory Testing',  description: 'Analyze screenshots/video',  icon: Icons.Search, color: '#10b981', shortcut: 'g e', action: () => setPage('exploratory') },
+        { id: 'nav-api',         group: 'Navigate', label: 'API Testing',          description: 'Generate API test suite',    icon: Icons.Globe,  color: '#06b6d4', shortcut: 'g a', action: () => setPage('api') },
+        { id: 'nav-security',    group: 'Navigate', label: 'Security Testing',     description: 'OWASP ZAP, Nuclei, checklist', icon: Icons.Shield, color: '#ef4444', shortcut: 'g s', action: () => setPage('security') },
+        { id: 'nav-performance', group: 'Navigate', label: 'Performance Testing',  description: 'k6, JMeter, Artillery',      icon: Icons.Zap,   color: '#f59e0b', shortcut: 'g p', action: () => setPage('performance') },
+        { id: 'nav-a11y',        group: 'Navigate', label: 'Accessibility',        description: 'WCAG 2.1 / axe-core',        icon: Icons.Eye,   color: '#10b981', action: () => setPage('a11y') },
+        { id: 'nav-visual',      group: 'Navigate', label: 'Visual Regression',    description: 'Screenshot diffing',         icon: Icons.Eye,   color: '#8b5cf6', action: () => setPage('visual') },
+        { id: 'nav-mobile',      group: 'Navigate', label: 'Mobile Testing',       description: 'Appium / Detox / Maestro',   icon: Icons.Smartphone, color: '#3b82f6', action: () => setPage('mobile') },
+        { id: 'nav-database',    group: 'Navigate', label: 'Database Testing',     description: 'SQL assertions, ETL',        icon: Icons.Database, color: '#0891b2', action: () => setPage('database') },
+        { id: 'nav-cicd',        group: 'Navigate', label: 'CI/CD Pipelines',      description: 'GitHub Actions, Jenkins',    icon: Icons.Rocket,  color: '#f59e0b', action: () => setPage('cicd') },
+        { id: 'nav-scripts',     group: 'Navigate', label: 'Script Generator',     description: 'Scaffold automation project', icon: Icons.FileText, color: '#6366f1', action: () => setPage('scripts') },
+        { id: 'nav-monitor',     group: 'Navigate', label: 'Email Monitor',        description: 'Trigger tests via email',     icon: Icons.Bell, color: '#ec4899', action: () => setPage('monitor') },
+        { id: 'nav-guide',       group: 'Navigate', label: 'User Guide',           description: 'Docs & how-tos',              icon: Icons.FileText, color: '#94a3b8', action: () => setPage('guide') },
+        // Quick actions
+        { id: 'act-theme',       group: 'Actions',  label: 'Toggle theme',         description: 'Dark ↔ Light', icon: darkMode ? Icons.Sun : Icons.Moon, shortcut: 't', action: () => setDarkMode(d => !d) },
+        { id: 'act-shortcuts',   group: 'Actions',  label: 'Keyboard shortcuts',   description: 'View all shortcuts', icon: Icons.Keyboard, shortcut: '?', action: () => setShortcutsOpen(true) },
+        { id: 'act-reset',       group: 'Actions',  label: 'Reset Manual test',    description: 'Clear current run state', icon: Icons.Plus, action: () => handleReset() },
+        { id: 'act-logout',      group: 'Account',  label: 'Log out',              description: `Signed in as ${authUser?.email}`, icon: Icons.LogOut, color: '#ef4444', action: () => onLogout() },
+      ]}
+    />
+
+    {/* ── Keyboard shortcuts modal (?) ─────────────────────────────────────── */}
+    <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
     {/* ── Floating AI Chatbot ──────────────────────────────────────────────── */}
     <ChatBot
