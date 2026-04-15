@@ -398,6 +398,183 @@ export function Skeleton({ width = '100%', height = 20, radius = 6, className = 
 // ═══════════════════════════════════════════════════════════════════════════
 // 9. ICON MAP — consistent icons for common terms
 // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// ONBOARDING TOUR — guided walkthrough for first-time users
+// ═══════════════════════════════════════════════════════════════════════════
+export function OnboardingTour({ open, steps, onClose, onComplete }) {
+  const [stepIdx, setStepIdx] = useState(0);
+  const [highlightRect, setHighlightRect] = useState(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const step = steps[stepIdx];
+    if (!step) return;
+    if (step.targetSelector) {
+      const el = document.querySelector(step.targetSelector);
+      if (el) {
+        const r = el.getBoundingClientRect();
+        setHighlightRect({
+          top:    r.top - 4,
+          left:   r.left - 4,
+          width:  r.width + 8,
+          height: r.height + 8,
+        });
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        setHighlightRect(null);
+      }
+    } else {
+      setHighlightRect(null);
+    }
+  }, [open, stepIdx, steps]);
+
+  if (!open || steps.length === 0) return null;
+  const step = steps[stepIdx];
+
+  const next = () => {
+    if (stepIdx < steps.length - 1) setStepIdx(s => s + 1);
+    else { onComplete?.(); onClose(); }
+  };
+
+  // Position tooltip — centered if no target, else below or near target
+  const tooltipStyle = highlightRect
+    ? {
+        top:  Math.min(highlightRect.top + highlightRect.height + 16, window.innerHeight - 220),
+        left: Math.min(Math.max(highlightRect.left, 20), window.innerWidth - 380),
+      }
+    : { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+
+  return (
+    <>
+      <div className="tour-backdrop" />
+      {highlightRect && (
+        <div
+          className="tour-highlight"
+          style={{
+            top: highlightRect.top,
+            left: highlightRect.left,
+            width: highlightRect.width,
+            height: highlightRect.height,
+          }}
+        />
+      )}
+      <div className="tour-tooltip" style={tooltipStyle}>
+        <div className="tour-step-counter">
+          Step {stepIdx + 1} of {steps.length}
+        </div>
+        <div className="tour-title">{step.title}</div>
+        <div className="tour-desc">{step.description}</div>
+        <div className="tour-actions">
+          <button className="tour-skip" onClick={onClose}>Skip tour</button>
+          <button className="tour-next" onClick={next}>
+            {stepIdx === steps.length - 1 ? (
+              <>Got it! <CheckCircle size={14} /></>
+            ) : (
+              <>Next <ArrowRight size={14} /></>
+            )}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WHAT'S NEW MODAL — show recent changes/features
+// ═══════════════════════════════════════════════════════════════════════════
+export function WhatsNewModal({ open, onClose, items }) {
+  if (!open) return null;
+  return (
+    <div className="cmdk-backdrop" onClick={onClose}>
+      <div className="whatsnew-card" onClick={e => e.stopPropagation()}>
+        <div className="whatsnew-hero">
+          <div style={{ fontSize: 48, marginBottom: 8, position: 'relative' }}>✨</div>
+          <div className="whatsnew-hero-title">What's New</div>
+          <div className="whatsnew-hero-sub">Fresh features added to your QA platform</div>
+        </div>
+        <div className="whatsnew-body">
+          {items.map((item, i) => (
+            <div key={i} className="whatsnew-item">
+              <div className="whatsnew-icon" style={{ color: item.color || '#06b6d4' }}>
+                {item.icon ? <item.icon size={18} /> : <Sparkles size={18} />}
+              </div>
+              <div>
+                <div className="whatsnew-title">
+                  {item.title}
+                  {item.isNew && <span className="chip chip-new" style={{ marginLeft: 8 }}>NEW</span>}
+                </div>
+                <div className="whatsnew-desc">{item.description}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="whatsnew-footer">
+          <button className="btn btn-primary btn-sm" onClick={onClose}>
+            Got it, let me explore
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SEGMENTED CONTROL — iOS-style pill tabs
+// ═══════════════════════════════════════════════════════════════════════════
+export function SegmentedControl({ options, value, onChange }) {
+  return (
+    <div className="segmented">
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          className={`segmented-btn ${value === opt.value ? 'active' : ''}`}
+          onClick={() => onChange(opt.value)}
+        >
+          {opt.icon && <opt.icon size={13} style={{ marginRight: 4, verticalAlign: -2 }} />}
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROGRESS BAR — animated gradient fill
+// ═══════════════════════════════════════════════════════════════════════════
+export function ProgressBar({ value, max = 100, color }) {
+  const pct = Math.min(Math.max((value / max) * 100, 0), 100);
+  const style = color ? { background: color } : {};
+  return (
+    <div className="progress-bar">
+      <div className="progress-bar-fill" style={{ width: `${pct}%`, ...style }} />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHIP — reusable pill/tag
+// ═══════════════════════════════════════════════════════════════════════════
+export function Chip({ children, variant = 'default', icon: Icon }) {
+  return (
+    <span className={`chip chip-${variant}`}>
+      {Icon && <Icon size={11} />}
+      {children}
+    </span>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LIVE DOT — animated pulse indicator
+// ═══════════════════════════════════════════════════════════════════════════
+export function LiveDot({ color = 'green', size = 'normal' }) {
+  const className = `live-dot ${size === 'large' ? 'large' : ''} ${
+    color === 'red' ? 'dot-red' :
+    color === 'amber' ? 'dot-amber' :
+    color === 'cyan' ? 'dot-cyan' : ''
+  }`;
+  return <span className={className} />;
+}
+
 export const Icons = {
   Search, Command, Keyboard, Bell, TrendingUp, TrendingDown,
   Settings, User, LogOut, Moon, Sun, Zap, Shield, Eye, Smartphone,
@@ -473,7 +650,7 @@ export function Sidebar({ page, setPage, authUser, collapsed, onToggleCollapse }
         </div>
         {!collapsed && (
           <div className="sidebar-brand-text">
-            <div className="sidebar-brand-name">QA Platform</div>
+            <div className="sidebar-brand-name gradient-text">QA Platform</div>
             <div className="sidebar-brand-sub">AI-Powered Testing</div>
           </div>
         )}

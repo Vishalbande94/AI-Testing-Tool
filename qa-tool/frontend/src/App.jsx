@@ -3,6 +3,7 @@ import {
   CommandPalette, ShortcutsModal, NotificationBell,
   Sparkline, BarChart, TrendCard, EmptyState, Skeleton, Icons,
   Sidebar, AdminUsersPage, AdminActivityPage, AdminSystemPage,
+  OnboardingTour, WhatsNewModal, SegmentedControl, ProgressBar, Chip, LiveDot,
 } from './Enhancements.jsx';
 
 const API = '';  // proxied via Vite to http://localhost:5000
@@ -1358,6 +1359,21 @@ function QAToolApp({ authUser, onLogout }) {
   // ── Sidebar state ──────────────────────────────────────────────────────────
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('qa-sidebar-collapsed') === 'true');
   useEffect(() => { localStorage.setItem('qa-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
+
+  // ── Onboarding tour + What's New ──────────────────────────────────────────
+  const tourCompletedKey = `qa-tour-completed-${authUser?.id || 'anon'}`;
+  const whatsNewKey       = 'qa-whatsnew-v2';
+  const [tourOpen,     setTourOpen]     = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+
+  // Show tour on first login + what's new modal on version bump
+  useEffect(() => {
+    const t1 = setTimeout(() => {
+      if (!localStorage.getItem(tourCompletedKey)) setTourOpen(true);
+      else if (!localStorage.getItem(whatsNewKey))  setWhatsNewOpen(true);
+    }, 800);
+    return () => clearTimeout(t1);
+  }, [authUser?.id, tourCompletedKey]);
 
   // ── Command Palette + Shortcuts Modal + Notifications ──────────────────────
   const [cmdOpen,       setCmdOpen]       = useState(false);
@@ -4778,6 +4794,58 @@ function QAToolApp({ authUser, onLogout }) {
 
     {/* ── Keyboard shortcuts modal (?) ─────────────────────────────────────── */}
     <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+    {/* ── Onboarding tour ──────────────────────────────────────────────────── */}
+    <OnboardingTour
+      open={tourOpen}
+      onClose={() => { setTourOpen(false); localStorage.setItem(tourCompletedKey, '1'); }}
+      onComplete={() => localStorage.setItem(tourCompletedKey, '1')}
+      steps={[
+        {
+          title: `Welcome, ${authUser?.name || 'friend'}! 👋`,
+          description: 'You\'re using a complete AI-powered QA platform covering 12+ testing disciplines. This 5-step tour will show you the essentials.',
+        },
+        {
+          targetSelector: '.sidebar-nav',
+          title: '🧭 Navigation sidebar',
+          description: 'Groups: Overview · Run Tests · Generate Suites · Tools · Administration (admin only). Click the logo at top to collapse.',
+        },
+        {
+          targetSelector: '.topbar-iconbtn',
+          title: '🔍 Command Palette',
+          description: 'Press Ctrl+K anytime to search & jump to any page, run a quick action, or toggle the theme. The fastest way around the app.',
+        },
+        {
+          targetSelector: '.notif-btn',
+          title: '🔔 Notifications',
+          description: 'Stay informed about completed test runs, errors, and system events. Configure Slack/Teams integration in Settings.',
+        },
+        {
+          targetSelector: '.user-menu-btn',
+          title: '⚙️ Your account',
+          description: 'Click your avatar to access Settings where you configure notifications, theme, and view your security posture. Admins have extra controls.',
+        },
+      ]}
+    />
+
+    {/* ── What's New modal (shown once per version) ────────────────────────── */}
+    <WhatsNewModal
+      open={whatsNewOpen}
+      onClose={() => { setWhatsNewOpen(false); localStorage.setItem(whatsNewKey, '1'); }}
+      items={[
+        { icon: Icons.Command,   color: '#06b6d4', isNew: true, title: 'Command Palette', description: 'Press Ctrl+K to jump anywhere, search commands, and run quick actions.' },
+        { icon: Icons.Users,     color: '#ef4444', isNew: true, title: 'Admin Control Panel', description: 'Manage users, view global activity log, monitor system health in real time.' },
+        { icon: Icons.Activity,  color: '#10b981', isNew: true, title: 'Audit Activity Log', description: 'Every login, signup, and config change is recorded and reviewable by admins.' },
+        { icon: Icons.Bell,      color: '#f59e0b', isNew: true, title: 'Notification Center', description: 'Bell icon shows all recent events. Slack/Teams webhooks via Settings.' },
+        { icon: Icons.Sparkles,  color: '#8b5cf6', isNew: true, title: 'Beautiful Visual Polish', description: 'Animated gradients, pulse indicators, glass morphism, aurora backgrounds.' },
+        { icon: Icons.Shield,    color: '#06b6d4', title: '12+ Testing Disciplines', description: 'API, Security, Performance, A11y, Visual, Mobile, Database, CI/CD — all included.' },
+      ]}
+    />
+
+    {/* ── FAB for Cmd+K on mobile ─────────────────────────────────────────── */}
+    <button className="fab-cmdk" onClick={() => setCmdOpen(true)} title="Command palette">
+      <Icons.Command size={22} />
+    </button>
 
     {/* ── Floating AI Chatbot ──────────────────────────────────────────────── */}
     <ChatBot
