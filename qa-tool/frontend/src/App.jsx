@@ -1360,6 +1360,24 @@ function QAToolApp({ authUser, onLogout }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('qa-sidebar-collapsed') === 'true');
   useEffect(() => { localStorage.setItem('qa-sidebar-collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
 
+  // ── Mouse-follow spotlight (updates CSS vars for .spotlight elements) ────
+  useEffect(() => {
+    const handler = (e) => {
+      const targets = document.querySelectorAll('.panel, .trend-card, .stat-card, .kpi-card, .adv-tool-card, .admin-user-row, .cmdk-item');
+      for (const el of targets) {
+        const r = el.getBoundingClientRect();
+        // Only set if cursor is within the element's bounds (+ padding)
+        if (e.clientX >= r.left - 100 && e.clientX <= r.right + 100 &&
+            e.clientY >= r.top  - 100 && e.clientY <= r.bottom + 100) {
+          el.style.setProperty('--mx', `${e.clientX - r.left}px`);
+          el.style.setProperty('--my', `${e.clientY - r.top}px`);
+        }
+      }
+    };
+    window.addEventListener('mousemove', handler);
+    return () => window.removeEventListener('mousemove', handler);
+  }, []);
+
   // ── Onboarding tour + What's New ──────────────────────────────────────────
   const tourCompletedKey = `qa-tour-completed-${authUser?.id || 'anon'}`;
   const whatsNewKey       = 'qa-whatsnew-v2';
@@ -1914,6 +1932,17 @@ function QAToolApp({ authUser, onLogout }) {
         <div className="page-bg-orb page-bg-orb-1" />
         <div className="page-bg-orb page-bg-orb-2" />
         <div className="page-bg-orb page-bg-orb-3" />
+        <div className="page-bg-orb page-bg-orb-4" />
+        <div className="page-bg-orb page-bg-orb-5" />
+        <div className="page-bg-noise" />
+        <svg className="page-bg-mesh" aria-hidden="true">
+          <defs>
+            <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+              <circle cx="20" cy="20" r="1" fill="currentColor" opacity=".18" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dots)" />
+        </svg>
       </div>
       <header className="topbar topbar-minimal">
         <button className="sidebar-toggle" onClick={() => setSidebarCollapsed(c => !c)} title="Toggle sidebar">

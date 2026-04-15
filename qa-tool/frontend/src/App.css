@@ -3778,8 +3778,8 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PER-PAGE COLORFUL ANIMATED BACKGROUNDS
-   Every page has its own color theme with floating animated orbs.
+   PER-PAGE COLORFUL ANIMATED BACKGROUNDS (5 orbs + noise + mesh + sparkles)
+   Every page has its own color theme with floating animated elements.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .page-bg-canvas {
@@ -3790,6 +3790,29 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
   overflow: hidden;
   transition: opacity .6s;
 }
+
+/* Dot mesh overlay */
+.page-bg-mesh {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  opacity: .4;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent);
+}
+
+/* Noise film grain for depth */
+.page-bg-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.3'/></svg>");
+  opacity: .05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+[data-theme="dark"] .page-bg-noise { opacity: .08; }
 
 /* Base orb — gets its color from [data-page] */
 .page-bg-orb {
@@ -3817,21 +3840,43 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
   top: 40%; left: 60%;
   animation: orb-drift-3 32s ease-in-out infinite alternate;
 }
+.page-bg-orb-4 {
+  width: 300px; height: 300px;
+  top: 70%; left: 10%;
+  animation: orb-drift-4 28s ease-in-out infinite alternate;
+  opacity: .35;
+}
+.page-bg-orb-5 {
+  width: 260px; height: 260px;
+  top: 10%; right: 20%;
+  animation: orb-drift-5 36s ease-in-out infinite alternate;
+  opacity: .3;
+}
 
 @keyframes orb-drift-1 {
-  0%   { transform: translate(0, 0) scale(1); }
-  50%  { transform: translate(200px, 100px) scale(1.3); }
-  100% { transform: translate(60px, 200px) scale(0.9); }
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate(200px, 100px) scale(1.3) rotate(90deg); }
+  100% { transform: translate(60px, 200px) scale(0.9) rotate(180deg); }
 }
 @keyframes orb-drift-2 {
-  0%   { transform: translate(0, 0) scale(1); }
-  50%  { transform: translate(-150px, -80px) scale(1.25); }
-  100% { transform: translate(80px, -120px) scale(.95); }
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate(-150px, -80px) scale(1.25) rotate(-90deg); }
+  100% { transform: translate(80px, -120px) scale(.95) rotate(-180deg); }
 }
 @keyframes orb-drift-3 {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate(-120px, 80px) scale(1.15) rotate(120deg); }
+  100% { transform: translate(180px, -60px) scale(.8) rotate(240deg); }
+}
+@keyframes orb-drift-4 {
   0%   { transform: translate(0, 0) scale(1); }
-  50%  { transform: translate(-120px, 80px) scale(1.15); }
-  100% { transform: translate(180px, -60px) scale(.8); }
+  50%  { transform: translate(150px, -100px) scale(1.2); }
+  100% { transform: translate(-100px, 120px) scale(.85); }
+}
+@keyframes orb-drift-5 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-130px, 160px) scale(1.1); }
+  100% { transform: translate(100px, -80px) scale(.9); }
 }
 
 /* ─── PER-PAGE COLORS ──────────────────────────────────────────────────── */
@@ -3925,6 +3970,237 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
 [data-page="admin-system"] .page-bg-orb-1 { background: #0891b2; }
 [data-page="admin-system"] .page-bg-orb-2 { background: #10b981; }
 [data-page="admin-system"] .page-bg-orb-3 { background: #14b8a6; }
+
+/* Orbs 4 & 5 — universal accent (pink / emerald) across pages for contrast */
+.page-bg-orb-4 { background: #ec4899; }
+.page-bg-orb-5 { background: #10b981; }
+[data-page="security"]      .page-bg-orb-4 { background: #fbbf24; }
+[data-page="security"]      .page-bg-orb-5 { background: #ec4899; }
+[data-page="performance"]   .page-bg-orb-4 { background: #8b5cf6; }
+[data-page="admin-users"]   .page-bg-orb-4 { background: #fbbf24; }
+
+/* ─── ENHANCED: Spotlight follow on cards (mouse-tracking glow) ─────────── */
+.panel, .stat-card, .adv-tool-card, .trend-card, .kpi-card,
+.admin-user-row, .cmdk-item {
+  position: relative;
+}
+.panel::before, .trend-card::before, .kpi-card::before,
+.adv-tool-card::before, .admin-user-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    400px circle at var(--mx, -999px) var(--my, -999px),
+    rgba(6,182,212,.12),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+  z-index: 0;
+}
+.panel:hover::before, .trend-card:hover::before, .kpi-card:hover::before,
+.adv-tool-card:hover::before, .admin-user-row:hover::before {
+  opacity: 1;
+}
+.panel > *, .trend-card > *, .kpi-card > *,
+.adv-tool-card > *, .admin-user-row > * { position: relative; z-index: 1; }
+
+/* ─── Stronger shadows + glow on hover ──────────────────────────────────── */
+.panel:hover {
+  box-shadow:
+    0 0 0 1px rgba(6,182,212,.2),
+    0 20px 50px rgba(6,182,212,.08),
+    0 2px 8px rgba(0,0,0,.08) !important;
+}
+
+/* ─── Gradient buttons with flow animation ──────────────────────────────── */
+.btn-primary, .btn-execute, .adv-generate-btn {
+  background-size: 200% 200% !important;
+  animation: btn-gradient-flow 6s linear infinite;
+}
+@keyframes btn-gradient-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Rainbow outlined focus rings ──────────────────────────────────────── */
+.field-input:focus {
+  box-shadow:
+    0 0 0 3px rgba(6,182,212,.2),
+    0 0 0 1px #06b6d4,
+    0 4px 12px rgba(6,182,212,.15) !important;
+}
+
+/* ─── Sidebar — glow on active item ─────────────────────────────────────── */
+.sidebar-item.active {
+  box-shadow:
+    inset 0 0 20px rgba(6,182,212,.1),
+    0 4px 12px rgba(6,182,212,.15) !important;
+}
+.sidebar-item.active::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: var(--item-color, #06b6d4);
+  border-radius: 4px;
+  box-shadow: 0 0 12px var(--item-color, #06b6d4);
+  animation: active-glow 2s ease-in-out infinite;
+}
+@keyframes active-glow {
+  0%, 100% { opacity: 1; transform: translateY(-50%) scaleY(1); }
+  50%      { opacity: .7; transform: translateY(-50%) scaleY(.85); }
+}
+
+/* ─── Sidebar brand icon pulse-glow ─────────────────────────────────────── */
+.sidebar-logo-wrap {
+  box-shadow:
+    0 4px 12px rgba(6,182,212,.35),
+    0 0 24px rgba(6,182,212,.2) !important;
+  animation: brand-pulse 4s ease-in-out infinite;
+}
+@keyframes brand-pulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(6,182,212,.35), 0 0 24px rgba(6,182,212,.2); }
+  50%      { box-shadow: 0 4px 20px rgba(6,182,212,.6), 0 0 40px rgba(139,92,246,.3); }
+}
+
+/* ─── Stat values shimmer when updating ─────────────────────────────────── */
+.stat-val, .kpi-val, .trend-card-value {
+  background: linear-gradient(
+    90deg,
+    currentColor 0%,
+    currentColor 40%,
+    rgba(255,255,255,.6) 50%,
+    currentColor 60%,
+    currentColor 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: shimmer-text 4s infinite linear;
+}
+@keyframes shimmer-text {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ─── Better panel with subtle inner highlight ──────────────────────────── */
+[data-theme="dark"] .panel {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 20%),
+    linear-gradient(145deg, #1e293b 0%, #1a2234 100%) !important;
+}
+
+/* ─── Gradient dividers ─────────────────────────────────────────────────── */
+.gradient-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(6,182,212,.4) 50%,
+    transparent 100%
+  );
+  margin: 24px 0;
+}
+
+/* ─── Enhanced scrollbars ────────────────────────────────────────────────── */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(6,182,212,.3), rgba(139,92,246,.3)) !important;
+  background-clip: padding-box !important;
+  border: 3px solid transparent !important;
+  border-radius: 999px !important;
+}
+
+/* ─── Section title decoration ──────────────────────────────────────────── */
+.section-title {
+  position: relative;
+  padding-left: 14px;
+}
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: linear-gradient(180deg, #06b6d4, #8b5cf6);
+  border-radius: 3px;
+}
+
+/* ─── Input on focus — add animated gradient outline ────────────────────── */
+.field-input:focus::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6, #ec4899);
+  background-size: 200% 200%;
+  animation: gradient-flow 3s linear infinite;
+  z-index: -1;
+}
+
+/* ─── Page-switch animation (more dramatic) ─────────────────────────────── */
+.main > * {
+  animation: page-enter-dramatic .45s cubic-bezier(.22,1,.36,1);
+}
+@keyframes page-enter-dramatic {
+  0%   { opacity: 0; transform: translateY(24px) scale(.98); filter: blur(3px); }
+  60%  { opacity: .8; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Sidebar item — color glow on icon hover ──────────────────────────── */
+.sidebar-item:hover .sidebar-item-icon {
+  filter: drop-shadow(0 0 6px var(--item-color, #06b6d4));
+}
+
+/* ─── Tool cards — Rainbow animated border on selection ────────────────── */
+.adv-tool-card.selected::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(45deg, #06b6d4, #8b5cf6, #ec4899, #f59e0b, #06b6d4);
+  background-size: 400% 400%;
+  animation: gradient-flow 6s linear infinite;
+  z-index: -1;
+  opacity: .6;
+}
+
+/* ─── Interactive ripple effect on click ────────────────────────────────── */
+@keyframes ripple-effect {
+  to { transform: scale(4); opacity: 0; }
+}
+.btn::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  width: 10px; height: 10px;
+  left: var(--mx, 50%); top: var(--my, 50%);
+  pointer-events: none;
+  transform: scale(0);
+  opacity: 0;
+}
+.btn:active::before {
+  animation: ripple-effect 0.6s ease-out;
+}
+
+/* ─── Stronger lift effect on cards ─────────────────────────────────────── */
+.adv-tool-card:hover, .kpi-card:hover, .stat-card:hover, .trend-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow:
+    0 20px 40px rgba(6,182,212,.15),
+    0 10px 20px rgba(0,0,0,.08),
+    0 0 0 1px rgba(6,182,212,.25) !important;
+}
 
 /* ─── Sparkle particles (optional overlay) ─────────────────────────────── */
 .page-bg-canvas::before {
