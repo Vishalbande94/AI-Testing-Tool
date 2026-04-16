@@ -3108,6 +3108,20 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
   animation: pop .3s cubic-bezier(.34,1.56,.64,1);
 }
 
+/* ─── Standard action bar (used after error/done states) ────────────────── */
+.action-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 6px;
+}
+.action-bar .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MASCOT COMPANION — emotional AI sidekick
    ═══════════════════════════════════════════════════════════════════════════ */

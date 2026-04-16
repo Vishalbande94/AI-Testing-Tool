@@ -98,7 +98,7 @@ function ToolOptionsPanel({ tool, values, onChange }) {
 }
 
 // ── Shared panel for API / Security / Performance testing pages ──────────────
-function AdvancedTestingPanel({ kind, title, subtitle, heroIcon, accent, accentGrad, tools, selectedTool, setSelectedTool, toolOpts, setToolOpts, extraConfig, onGenerate, disabled, loading, result, error }) {
+function AdvancedTestingPanel({ kind, title, subtitle, heroIcon, accent, accentGrad, tools, selectedTool, setSelectedTool, toolOpts, setToolOpts, extraConfig, onGenerate, disabled, loading, result, error, onReset, onGoHome }) {
   const curTool = tools.find(t => t.id === selectedTool);
   const curOpts = toolOpts?.[selectedTool] || {};
   const setCurOpts = (nextVals) => setToolOpts?.({ ...toolOpts, [selectedTool]: nextVals });
@@ -226,6 +226,16 @@ function AdvancedTestingPanel({ kind, title, subtitle, heroIcon, accent, accentG
               <a className="btn btn-primary" href={result.downloadUrl} download style={{ background: accentGrad, boxShadow: `0 4px 12px ${accent}55` }}>
                 ⬇️ Download ZIP
               </a>
+              {onReset && (
+                <button className="btn btn-ghost" onClick={onReset}>
+                  <Icons.Plus size={14} /> Generate Another
+                </button>
+              )}
+              {onGoHome && (
+                <button className="btn btn-ghost" onClick={onGoHome}>
+                  <Icons.Activity size={14} /> Dashboard
+                </button>
+              )}
               <div className="adv-result-hint">
                 💡 Extract the ZIP and follow the README inside for setup &amp; run instructions.
               </div>
@@ -3070,6 +3080,8 @@ function QAToolApp({ authUser, onLogout }) {
             loading={advLoading && advType === 'api'}
             result={advType === 'api' ? advResult : null}
             error={advType === 'api' ? advError : ''}
+            onReset={() => { setAdvResult(null); setAdvError(''); }}
+            onGoHome={() => setPage('dashboard')}
           />
         )}
 
@@ -3155,6 +3167,8 @@ function QAToolApp({ authUser, onLogout }) {
             loading={advLoading && advType === 'security'}
             result={advType === 'security' ? advResult : null}
             error={advType === 'security' ? advError : ''}
+            onReset={() => { setAdvResult(null); setAdvError(''); }}
+            onGoHome={() => setPage('dashboard')}
           />
         )}
 
@@ -3250,6 +3264,8 @@ function QAToolApp({ authUser, onLogout }) {
             loading={advLoading && advType === 'performance'}
             result={advType === 'performance' ? advResult : null}
             error={advType === 'performance' ? advError : ''}
+            onReset={() => { setAdvResult(null); setAdvError(''); }}
+            onGoHome={() => setPage('dashboard')}
           />
         )}
 
@@ -3309,6 +3325,8 @@ function QAToolApp({ authUser, onLogout }) {
             loading={advLoading && advType === 'a11y'}
             result={advType === 'a11y' ? advResult : null}
             error={advType === 'a11y' ? advError : ''}
+            onReset={() => { setAdvResult(null); setAdvError(''); }}
+            onGoHome={() => setPage('dashboard')}
           />
         )}
 
@@ -3359,6 +3377,8 @@ function QAToolApp({ authUser, onLogout }) {
             loading={advLoading && advType === 'visual'}
             result={advType === 'visual' ? advResult : null}
             error={advType === 'visual' ? advError : ''}
+            onReset={() => { setAdvResult(null); setAdvError(''); }}
+            onGoHome={() => setPage('dashboard')}
           />
         )}
 
@@ -3412,6 +3432,8 @@ function QAToolApp({ authUser, onLogout }) {
             loading={advLoading && advType === 'mobile'}
             result={advType === 'mobile' ? advResult : null}
             error={advType === 'mobile' ? advError : ''}
+            onReset={() => { setAdvResult(null); setAdvError(''); }}
+            onGoHome={() => setPage('dashboard')}
           />
         )}
 
@@ -3462,6 +3484,8 @@ function QAToolApp({ authUser, onLogout }) {
             loading={advLoading && advType === 'database'}
             result={advType === 'database' ? advResult : null}
             error={advType === 'database' ? advError : ''}
+            onReset={() => { setAdvResult(null); setAdvError(''); }}
+            onGoHome={() => setPage('dashboard')}
           />
         )}
 
@@ -3516,6 +3540,8 @@ function QAToolApp({ authUser, onLogout }) {
             loading={advLoading && advType === 'cicd'}
             result={advType === 'cicd' ? advResult : null}
             error={advType === 'cicd' ? advError : ''}
+            onReset={() => { setAdvResult(null); setAdvError(''); }}
+            onGoHome={() => setPage('dashboard')}
           />
         )}
 
@@ -3684,7 +3710,17 @@ function QAToolApp({ authUser, onLogout }) {
                     {expLogs.map((l, i) => <div key={i} className="log-line">{l}</div>)}
                   </div>
                 )}
-                <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={handleExpReset}>↺ Try Again</button>
+                <div className="action-bar" style={{ marginTop: 16 }}>
+                  <button className="btn btn-primary" onClick={handleExpReset}>
+                    <Icons.Play size={14} /> Start New Analysis
+                  </button>
+                  <button className="btn btn-ghost" onClick={() => setPage('dashboard')}>
+                    <Icons.Activity size={14} /> Go to Dashboard
+                  </button>
+                  <button className="btn btn-ghost" onClick={() => setPage('manual')}>
+                    <Icons.Zap size={14} /> Switch to Manual Test
+                  </button>
+                </div>
               </div>
             )}
 
@@ -4524,9 +4560,17 @@ function QAToolApp({ authUser, onLogout }) {
                 {logs.map((log, i) => <div key={i} className="log-line">{log}</div>)}
               </div>
             </div>
-            <button className="btn btn-execute" style={{ marginTop: 20 }} onClick={handleReset}>
-              ↺ Try Again
-            </button>
+            <div className="action-bar" style={{ marginTop: 20 }}>
+              <button className="btn btn-primary" onClick={handleReset}>
+                <Icons.Play size={14} /> Start New Run
+              </button>
+              <button className="btn btn-ghost" onClick={() => setPage('dashboard')}>
+                <Icons.Activity size={14} /> Go to Dashboard
+              </button>
+              <button className="btn btn-ghost" onClick={() => setPage('manual')}>
+                <Icons.ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Back to Manual Test
+              </button>
+            </div>
           </div>
         )}
 

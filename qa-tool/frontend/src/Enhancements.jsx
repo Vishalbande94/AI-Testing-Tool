@@ -1083,6 +1083,13 @@ export function AdminUsersPage({ currentUser, toast }) {
           )}
           {userDetail && (
             <>
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ marginBottom: 12 }}
+                onClick={() => { setSelected(null); setUserDetail(null); }}
+              >
+                <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Back to user list
+              </button>
               <div className="admin-detail-header">
                 <div className={`admin-detail-avatar role-${userDetail.user.role}`}>
                   {(userDetail.user.name || userDetail.user.email).charAt(0).toUpperCase()}
