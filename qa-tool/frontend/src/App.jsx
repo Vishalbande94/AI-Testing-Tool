@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import {
-  CommandPalette, ShortcutsModal, NotificationBell,
+  CommandPalette, ShortcutsModal, NotificationBell, ValidationModal,
   Sparkline, BarChart, TrendCard, EmptyState, Skeleton, Icons,
   Sidebar, AdminUsersPage, AdminActivityPage, AdminSystemPage,
   OnboardingTour, WhatsNewModal, SegmentedControl, ProgressBar, Chip, LiveDot,
@@ -1327,6 +1327,9 @@ function QAToolApp({ authUser, onLogout }) {
   const [authPassField, setAuthPassField] = useState('');
   const [authSubmitSel, setAuthSubmitSel] = useState('');
 
+  // ── Validation modal state ───────────────────────────────────────────────
+  const [validationOpen, setValidationOpen] = useState(false);
+
   // ── Script Generator state ───────────────────────────────────────────────
   const [sgTool,       setSgTool]       = useState('playwright');
   const [sgLang,       setSgLang]       = useState('javascript');
@@ -1725,12 +1728,175 @@ function QAToolApp({ authUser, onLogout }) {
     setFile(f);
   };
 
+  // ── Build validation issues list for the pre-flight modal ──────────────────
+  const buildValidationIssues = () => {
+    const issues = [];
+
+    // 1. App URL
+    const urlTrim = appUrl.trim();
+    if (!urlTrim) {
+      issues.push({
+        field: 'appUrl',
+        label: 'Application URL',
+        message: 'Enter the URL of the app you want to test (e.g. https://yourapp.com)',
+        resolved: false,
+        input: {
+          type: 'text',
+          placeholder: 'https://yourapp.com  or  C:/path/to/index.html',
+          value: appUrl,
+          onChange: (v) => setAppUrl(v),
+        },
+      });
+    } else {
+      // Basic URL validation — check after transforming relative Windows paths
+      const normalized = /^[a-zA-Z]:[/\\]/.test(urlTrim)
+        ? 'file:///' + urlTrim.replace(/\\/g, '/')
+        : urlTrim.startsWith('/') && !urlTrim.startsWith('//')
+          ? 'file://' + urlTrim
+          : urlTrim;
+      const valid = normalized.startsWith('http://') || normalized.startsWith('https://') || normalized.startsWith('file://');
+      if (!valid) {
+        issues.push({
+          field: 'appUrl',
+          label: 'Application URL format',
+          message: 'URL must start with http://, https://, or be a valid file path',
+          resolved: false,
+          input: {
+            type: 'text',
+            placeholder: 'https://yourapp.com',
+            value: appUrl,
+            onChange: (v) => setAppUrl(v),
+          },
+        });
+      }
+    }
+
+    // 2. Input mode requirements
+    if (inputMode === 'requirement' && !file) {
+      issues.push({
+        field: 'requirementFile',
+        label: 'Requirement document',
+        message: 'Upload a PDF, TXT, or MD file describing what to test',
+        resolved: false,
+        input: {
+          type: 'file',
+          accept: '.pdf,.txt,.md',
+          onChange: (f) => { if (f) validateAndSetFile(f); },
+        },
+      });
+    }
+    if (inputMode === 'testcase' && !testcaseFile) {
+      issues.push({
+        field: 'testcaseFile',
+        label: 'Test case sheet',
+        message: 'Upload a CSV or XLSX file with your test cases',
+        resolved: false,
+        input: {
+          type: 'file',
+          accept: '.csv,.xlsx,.xls',
+          onChange: (f) => { if (f) setTestcaseFile(f); },
+        },
+      });
+    }
+
+    // 3. Authentication (if enabled)
+    if (authEnabled) {
+      if (authType === 'form' || authType === 'basic') {
+        if (!authUsername.trim()) {
+          issues.push({
+            field: 'authUsername',
+            label: 'Login username / email',
+            message: `Your ${authType === 'basic' ? 'Basic Auth' : 'form login'} needs a username so tests can log in`,
+            resolved: false,
+            input: {
+              type: 'text',
+              placeholder: 'test@example.com',
+              value: authUsername,
+              onChange: (v) => setAuthUsername(v),
+            },
+          });
+        }
+        if (!authPassword.trim()) {
+          issues.push({
+            field: 'authPassword',
+            label: 'Login password',
+            message: `Your ${authType === 'basic' ? 'Basic Auth' : 'form login'} needs a password so tests can log in`,
+            resolved: false,
+            input: {
+              type: 'password',
+              placeholder: '••••••••',
+              value: authPassword,
+              onChange: (v) => setAuthPassword(v),
+            },
+          });
+        }
+      }
+      if (authType === 'bearer' && !authToken.trim()) {
+        issues.push({
+          field: 'authToken',
+          label: 'Bearer token',
+          message: 'You selected Bearer Token auth but didn\'t provide a token',
+          resolved: false,
+          input: {
+            type: 'password',
+            placeholder: 'eyJhbGciOiJIUzI1NiIs...',
+            value: authToken,
+            onChange: (v) => setAuthToken(v),
+          },
+        });
+      }
+      if (authType === 'cookie' && !authCookie.trim()) {
+        issues.push({
+          field: 'authCookie',
+          label: 'Session cookie',
+          message: 'You selected Cookie auth but didn\'t paste a cookie string',
+          resolved: false,
+          input: {
+            type: 'text',
+            placeholder: 'session_id=abc; auth_token=xyz',
+            value: authCookie,
+            onChange: (v) => setAuthCookie(v),
+          },
+        });
+      }
+    }
+
+    return issues;
+  };
+
+  // Re-build issues whenever state changes (so modal updates with resolutions)
+  const validationIssues = validationOpen ? buildValidationIssues().map(i => ({
+    ...i,
+    // Mark as resolved if the field now has a value (via inline input)
+    resolved: (() => {
+      if (i.field === 'appUrl') {
+        const t = appUrl.trim();
+        if (!t) return false;
+        const n = /^[a-zA-Z]:[/\\]/.test(t) ? 'file:///' + t.replace(/\\/g,'/') : t;
+        return n.startsWith('http://') || n.startsWith('https://') || n.startsWith('file://');
+      }
+      if (i.field === 'requirementFile') return !!file;
+      if (i.field === 'testcaseFile')    return !!testcaseFile;
+      if (i.field === 'authUsername')    return !!authUsername.trim();
+      if (i.field === 'authPassword')    return !!authPassword.trim();
+      if (i.field === 'authToken')       return !!authToken.trim();
+      if (i.field === 'authCookie')      return !!authCookie.trim();
+      return false;
+    })(),
+  })) : [];
+
   // ── Execute ──────────────────────────────────────────────────────────────────
   const handleExecute = async () => {
-    if (!appUrl.trim()) { toast('Please enter the application URL', 'error'); return; }
-    if (inputMode === 'requirement' && !file)    { toast('Please upload a requirement document', 'error'); return; }
-    if (inputMode === 'testcase'    && !testcaseFile) { toast('Please upload a test case sheet (CSV or XLSX)', 'error'); return; }
+    // Pre-flight validation — if anything is missing, show popup instead
+    const issues = buildValidationIssues();
+    if (issues.length > 0) {
+      setValidationOpen(true);
+      return;
+    }
+    await runExecute();
+  };
 
+  const runExecute = async () => {
     // Auto-convert Windows/Linux file paths → proper file:// URL
     let normalizedUrl = appUrl.trim();
     if (/^[a-zA-Z]:[/\\]/.test(normalizedUrl)) {
@@ -4983,6 +5149,17 @@ function QAToolApp({ authUser, onLogout }) {
         QA AI Testing Tool &nbsp;|&nbsp; Powered by Playwright v1.55 &nbsp;|&nbsp; AI-Powered Test Automation
       </footer>
     </div>
+
+    {/* ── Pre-flight validation modal ──────────────────────────────────────── */}
+    <ValidationModal
+      open={validationOpen}
+      issues={validationIssues}
+      onClose={() => setValidationOpen(false)}
+      onContinue={() => {
+        setValidationOpen(false);
+        runExecute();
+      }}
+    />
 
     {/* ── Command Palette (Cmd+K) ──────────────────────────────────────────── */}
     <CommandPalette

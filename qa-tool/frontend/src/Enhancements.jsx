@@ -586,6 +586,116 @@ export const Icons = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// VALIDATION MODAL — shows missing required fields with inline fix inputs
+// ═══════════════════════════════════════════════════════════════════════════
+export function ValidationModal({ open, issues, onClose, onContinue }) {
+  // Track local edits (which field is being fixed inline)
+  const inputRefs = useRef({});
+
+  useEffect(() => {
+    if (open) {
+      // Focus first input
+      setTimeout(() => {
+        const first = Object.values(inputRefs.current)[0];
+        if (first) first.focus();
+      }, 50);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const remaining = issues.filter(i => !i.resolved);
+  const canContinue = remaining.length === 0;
+
+  return (
+    <div className="cmdk-backdrop" onClick={onClose}>
+      <div className="validation-modal" onClick={e => e.stopPropagation()}>
+        <div className="validation-header">
+          <div className="validation-icon">
+            <AlertCircle size={26} />
+          </div>
+          <div>
+            <div className="validation-title">
+              {canContinue ? 'Ready to run!' : 'Missing information'}
+            </div>
+            <div className="validation-sub">
+              {canContinue
+                ? 'All required fields are filled. Click Continue to start.'
+                : `Please provide the ${remaining.length} field${remaining.length > 1 ? 's' : ''} below to start the test run.`}
+            </div>
+          </div>
+        </div>
+
+        <div className="validation-body">
+          {issues.map((issue, i) => (
+            <div key={i} className={`validation-item ${issue.resolved ? 'resolved' : 'pending'}`}>
+              <div className="validation-item-head">
+                <span className="validation-item-icon">
+                  {issue.resolved ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                </span>
+                <div className="validation-item-label">
+                  <div className="validation-item-field">{issue.label}</div>
+                  <div className="validation-item-msg">{issue.message}</div>
+                </div>
+              </div>
+              {issue.input && !issue.resolved && (
+                <div className="validation-item-input-wrap">
+                  {issue.input.type === 'file' ? (
+                    <input
+                      ref={el => { inputRefs.current[issue.field] = el; }}
+                      type="file"
+                      accept={issue.input.accept}
+                      onChange={e => issue.input.onChange(e.target.files[0])}
+                      className="field-input"
+                    />
+                  ) : (
+                    <input
+                      ref={el => { inputRefs.current[issue.field] = el; }}
+                      type={issue.input.type || 'text'}
+                      placeholder={issue.input.placeholder}
+                      value={issue.input.value || ''}
+                      onChange={e => issue.input.onChange(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && canContinue) {
+                          onContinue();
+                        } else if (e.key === 'Enter') {
+                          // Move to next unfixed field
+                          const unresolvedKeys = issues
+                            .filter(x => !x.resolved && x !== issue && x.input)
+                            .map(x => x.field);
+                          if (unresolvedKeys.length > 0) {
+                            const nextEl = inputRefs.current[unresolvedKeys[0]];
+                            if (nextEl) nextEl.focus();
+                          }
+                        }
+                      }}
+                      className="field-input"
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="validation-footer">
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={onContinue}
+            disabled={!canContinue}
+          >
+            {canContinue ? <>Continue <ArrowRight size={14} /></> : `${remaining.length} field${remaining.length > 1 ? 's' : ''} remaining`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // SIDEBAR NAVIGATION — colorful, grouped, collapsible
 // ═══════════════════════════════════════════════════════════════════════════
 export function Sidebar({ page, setPage, authUser, collapsed, onToggleCollapse }) {
