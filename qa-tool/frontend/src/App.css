@@ -3108,6 +3108,271 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
   animation: pop .3s cubic-bezier(.34,1.56,.64,1);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MASCOT COMPANION — emotional AI sidekick
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mascot {
+  position: fixed;
+  z-index: 9000;
+  width: 72px;
+  height: 72px;
+  cursor: pointer;
+  user-select: none;
+  transition: bottom .8s cubic-bezier(.34,1.56,.64,1),
+              right .8s cubic-bezier(.34,1.56,.64,1),
+              left .8s cubic-bezier(.34,1.56,.64,1);
+  filter: drop-shadow(0 6px 16px rgba(6,182,212,.25));
+}
+
+.mascot-body {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(6,182,212,.25), rgba(139,92,246,.15));
+  backdrop-filter: blur(12px);
+  border: 2px solid rgba(6,182,212,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,.3),
+    0 8px 20px rgba(6,182,212,.3),
+    0 0 0 1px rgba(6,182,212,.15);
+  position: relative;
+  overflow: visible;
+}
+
+.mascot-face {
+  font-size: 40px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.15));
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  animation: mascot-idle-bob 3s ease-in-out infinite;
+}
+
+@keyframes mascot-idle-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+/* ─── Per-emotion body animations ───────────────────────────────────────── */
+.mascot-idle .mascot-body { animation: mascot-float 4s ease-in-out infinite; }
+@keyframes mascot-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+.mascot-happy .mascot-body, .mascot-loving .mascot-body {
+  animation: mascot-happy-bounce 1.5s ease-in-out infinite;
+}
+@keyframes mascot-happy-bounce {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  25%      { transform: translateY(-8px) rotate(-4deg); }
+  75%      { transform: translateY(-8px) rotate(4deg); }
+}
+
+.mascot-excited .mascot-body, .mascot-celebrating .mascot-body {
+  animation: mascot-jump 0.6s cubic-bezier(.34,1.56,.64,1) infinite;
+}
+@keyframes mascot-jump {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-18px) scale(1.1); }
+}
+
+.mascot-thinking .mascot-body {
+  animation: mascot-think 2.5s ease-in-out infinite;
+}
+@keyframes mascot-think {
+  0%, 100% { transform: rotate(0); }
+  25%      { transform: rotate(-5deg); }
+  75%      { transform: rotate(5deg); }
+}
+
+.mascot-sad .mascot-body {
+  animation: mascot-droop 2.5s ease-in-out infinite;
+  filter: saturate(0.6);
+}
+@keyframes mascot-droop {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(2px) rotate(3deg); }
+}
+
+.mascot-sleeping .mascot-body {
+  animation: mascot-breathe 4s ease-in-out infinite;
+  filter: saturate(0.5);
+}
+@keyframes mascot-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+.mascot-sleeping .mascot-face { animation: none; transform: translateY(4px); }
+
+.mascot-waving .mascot-body, .mascot-farewell .mascot-body {
+  animation: mascot-wave 1s ease-in-out 3;
+}
+@keyframes mascot-wave {
+  0%, 100% { transform: rotate(0); }
+  25%      { transform: rotate(-15deg); }
+  75%      { transform: rotate(15deg); }
+}
+
+.mascot-running .mascot-body {
+  animation: mascot-run 0.4s ease-in-out infinite;
+}
+@keyframes mascot-run {
+  0%, 100% { transform: translateX(-3px) rotate(-3deg); }
+  50%      { transform: translateX(3px) rotate(3deg); }
+}
+
+.mascot-surprised .mascot-body, .mascot-confused .mascot-body {
+  animation: mascot-shake 0.5s ease-in-out;
+}
+@keyframes mascot-shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-4px); }
+  40%      { transform: translateX(4px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+.mascot-proud .mascot-body {
+  animation: mascot-proud 3s ease-in-out infinite;
+}
+@keyframes mascot-proud {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-4px) scale(1.05); }
+}
+
+.mascot-angry .mascot-body {
+  animation: mascot-shake 0.2s ease-in-out infinite;
+  border-color: rgba(239,68,68,.6) !important;
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,.3),
+    0 8px 20px rgba(239,68,68,.3) !important;
+}
+
+/* ─── Speech bubble ─────────────────────────────────────────────────────── */
+.mascot-bubble {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 12px;
+  background: rgba(30,41,59,.98);
+  color: #f1f5f9;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  max-width: 260px;
+  min-width: 120px;
+  white-space: normal;
+  box-shadow: 0 10px 30px rgba(0,0,0,.3), 0 0 0 1px rgba(6,182,212,.3);
+  backdrop-filter: blur(12px);
+  animation: bubble-pop .3s cubic-bezier(.34,1.56,.64,1);
+  letter-spacing: -0.01em;
+}
+@keyframes bubble-pop {
+  from { opacity: 0; transform: translateY(8px) scale(.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.mascot-bubble-tail {
+  position: absolute;
+  bottom: -6px;
+  right: 28px;
+  width: 12px;
+  height: 12px;
+  background: rgba(30,41,59,.98);
+  transform: rotate(45deg);
+  border-right: 1px solid rgba(6,182,212,.3);
+  border-bottom: 1px solid rgba(6,182,212,.3);
+}
+
+/* ─── Mood decorations (sparkles, hearts, zzz) ──────────────────────────── */
+.mascot-float {
+  position: absolute;
+  font-size: 22px;
+  pointer-events: none;
+  animation: float-up-fade 2.5s ease-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+}
+@keyframes float-up-fade {
+  0%   { opacity: 0; transform: translate(0, 0) scale(.5); }
+  30%  { opacity: 1; transform: translate(-15px, -20px) scale(1); }
+  100% { opacity: 0; transform: translate(-30px, -50px) scale(.7); }
+}
+.mascot-heart { top: -10px; right: 30px; color: #ec4899; }
+.mascot-zzz   { top: -10px; right: 10px; color: #94a3b8; font-size: 16px; }
+.mascot-tear  { top: 20px; right: 20px; color: #60a5fa; animation: tear-drop 2s ease-in infinite; }
+@keyframes tear-drop {
+  0%   { opacity: 0; transform: translate(0,0); }
+  30%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(0, 30px); }
+}
+.mascot-fume  { top: -10px; right: 10px; color: #ef4444; animation: fume-fast 1s infinite; }
+@keyframes fume-fast {
+  0%,100% { opacity: 0; transform: translate(0,0); }
+  50%     { opacity: 1; transform: translate(-10px, -15px); }
+}
+
+/* Celebration rays */
+.mascot-rays {
+  position: absolute;
+  inset: -20px;
+  background:
+    radial-gradient(circle, transparent 30%, rgba(6,182,212,.2) 70%, transparent 100%);
+  border-radius: 50%;
+  animation: rays-pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes rays-pulse {
+  0%, 100% { opacity: .5; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.2); }
+}
+
+/* Confetti burst */
+.mascot-confetti-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.mascot-confetti-piece {
+  position: absolute;
+  top: 50%; left: 50%;
+  font-size: 20px;
+  animation: confetti-burst 1.5s ease-out forwards;
+  animation-delay: calc(var(--i) * 100ms);
+}
+@keyframes confetti-burst {
+  0% { transform: translate(0,0) scale(.5); opacity: 1; }
+  100% {
+    transform: translate(
+      calc(cos(var(--i) * 72deg) * 80px),
+      calc(sin(var(--i) * 72deg) * 80px)
+    ) scale(1.2) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Hover + click feedback */
+.mascot:hover .mascot-body {
+  transform: scale(1.1);
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,.4),
+    0 12px 28px rgba(6,182,212,.45),
+    0 0 0 3px rgba(6,182,212,.2) !important;
+}
+.mascot:active .mascot-body { transform: scale(0.95); }
+
+/* Small screens — make mascot smaller */
+@media (max-width: 600px) {
+  .mascot { width: 56px; height: 56px; }
+  .mascot-body { width: 56px; height: 56px; }
+  .mascot-face { font-size: 32px; }
+  .mascot-bubble { font-size: 12px; max-width: 200px; padding: 8px 12px; }
+}
+
 /* ─── Pre-flight Validation Modal ─────────────────────────────────────────── */
 .validation-modal {
   width: 520px;

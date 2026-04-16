@@ -4,6 +4,7 @@ import {
   Sparkline, BarChart, TrendCard, EmptyState, Skeleton, Icons,
   Sidebar, AdminUsersPage, AdminActivityPage, AdminSystemPage,
   OnboardingTour, WhatsNewModal, SegmentedControl, ProgressBar, Chip, LiveDot,
+  MascotCompanion, emotionForResults,
 } from './Enhancements.jsx';
 
 const API = '';  // proxied via Vite to http://localhost:5000
@@ -1329,6 +1330,70 @@ function QAToolApp({ authUser, onLogout }) {
 
   // ── Validation modal state ───────────────────────────────────────────────
   const [validationOpen, setValidationOpen] = useState(false);
+
+  // ── Mascot companion state ──────────────────────────────────────────────
+  const [mascotEmotion, setMascotEmotion] = useState('waving');
+  const [mascotMsg,     setMascotMsg]     = useState(`Welcome back, ${authUser?.name || 'QA hero'}! 👋`);
+  const [mascotPos,     setMascotPos]     = useState({ x: 'right', y: 'bottom' });
+  const mascotIdleTimer = useRef(null);
+
+  // Helper — set mascot emotion with optional auto-reset to idle
+  const setMascot = useCallback((emotion, message, durationMs = 4000) => {
+    setMascotEmotion(emotion);
+    setMascotMsg(message);
+    clearTimeout(mascotIdleTimer.current);
+    if (durationMs) {
+      mascotIdleTimer.current = setTimeout(() => {
+        setMascotEmotion('idle');
+        setMascotMsg(null);
+      }, durationMs);
+    }
+  }, []);
+
+  // Welcome wave on login
+  useEffect(() => {
+    setMascot('waving', `Welcome, ${authUser?.name || 'friend'}! Ready to test?`, 5000);
+  }, []); // runs once on mount
+
+  // React to test run status changes
+  const prevStatusRef = useRef(status);
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    if (prev !== 'running' && status === 'running') {
+      setMascot('thinking', 'Running your tests... 🧠', 0);
+    } else if (prev !== 'done' && status === 'done' && results) {
+      const { emotion, message } = emotionForResults(results.executionStats);
+      setMascot(emotion, message, 8000);
+    } else if (prev !== 'error' && status === 'error') {
+      setMascot('sad', error || 'Something went wrong...', 6000);
+    }
+    prevStatusRef.current = status;
+  }, [status, results, error, setMascot]);
+
+  // React to page change (walk/fly to new page)
+  useEffect(() => {
+    const pageEmotions = {
+      dashboard:  { emotion: 'proud',    msg: 'Your mission control!' },
+      manual:     { emotion: 'excited',  msg: "Let's run some tests!" },
+      exploratory:{ emotion: 'thinking', msg: 'Upload screenshots and I analyze' },
+      api:        { emotion: 'happy',    msg: 'API testing time!' },
+      security:   { emotion: 'surprised', msg: 'Keep hackers out!' },
+      performance:{ emotion: 'running',  msg: 'Speed is key' },
+      a11y:       { emotion: 'loving',   msg: 'Tests for everyone ♿' },
+      settings:   { emotion: 'happy',    msg: 'Tweak things here' },
+      'admin-users': { emotion: 'proud', msg: `Managing ${page === 'admin-users' ? 'your team' : ''}` },
+    };
+    const entry = pageEmotions[page];
+    if (entry) setMascot(entry.emotion, entry.msg, 3500);
+  }, [page, setMascot]);
+
+  // Idle detection — after 90s with no status changes, mascot sleeps
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (status === 'idle') setMascot('sleeping', 'Zzz... let me know when you need me', 0);
+    }, 90000);
+    return () => clearTimeout(timer);
+  }, [status, page, setMascot]);
 
   // ── Script Generator state ───────────────────────────────────────────────
   const [sgTool,       setSgTool]       = useState('playwright');
@@ -5281,6 +5346,24 @@ function QAToolApp({ authUser, onLogout }) {
     <button className="fab-cmdk" onClick={() => setCmdOpen(true)} title="Command palette">
       <Icons.Command size={22} />
     </button>
+
+    {/* ── Mascot companion (reacts to app state) ──────────────────────────── */}
+    <MascotCompanion
+      emotion={mascotEmotion}
+      message={mascotMsg}
+      position={mascotPos}
+      onClick={() => {
+        const greetings = [
+          'Hi there! Need help?',
+          "Let's make some tests! 🚀",
+          'Press Ctrl+K to jump anywhere',
+          "I'm your QA sidekick!",
+          "Let's catch some bugs! 🐛",
+          'What can I do for you?',
+        ];
+        setMascot('happy', greetings[Math.floor(Math.random() * greetings.length)], 4000);
+      }}
+    />
 
     {/* ── Floating AI Chatbot ──────────────────────────────────────────────── */}
     <ChatBot

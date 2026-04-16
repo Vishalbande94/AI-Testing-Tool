@@ -586,6 +586,117 @@ export const Icons = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// MASCOT COMPANION — emotional AI mascot that reacts to what's happening
+// ═══════════════════════════════════════════════════════════════════════════
+// Emotions: idle | happy | excited | thinking | sad | celebrating | waving
+//           sleeping | running | surprised | loving | farewell
+//
+// Props:
+//   emotion — current emotion (see list above)
+//   message — optional speech bubble text
+//   position — { x: 'right'|'left'|number, y: 'bottom'|'top'|number }
+//   onClick  — callback when user clicks the mascot
+export function MascotCompanion({ emotion = 'idle', message, position, onClick }) {
+  const [show, setShow] = useState(true);
+  const [bubbleVisible, setBubbleVisible] = useState(false);
+
+  // Show bubble when message changes, auto-hide after 5s
+  useEffect(() => {
+    if (!message) { setBubbleVisible(false); return; }
+    setBubbleVisible(true);
+    const t = setTimeout(() => setBubbleVisible(false), 5000);
+    return () => clearTimeout(t);
+  }, [message]);
+
+  if (!show) return null;
+
+  // Emotion → face + body animation class
+  const faces = {
+    idle:        '🤖',
+    happy:       '😊',
+    excited:     '🤩',
+    thinking:    '🤔',
+    sad:         '😢',
+    celebrating: '🎉',
+    waving:      '👋',
+    sleeping:    '😴',
+    running:     '🏃',
+    surprised:   '😮',
+    loving:      '🥰',
+    farewell:    '👋',
+    confused:    '😕',
+    proud:       '😎',
+    angry:       '😤',
+  };
+
+  const moods = {
+    celebrating: { rays: true, confetti: true },
+    excited:     { rays: true },
+    loving:      { hearts: true },
+    sleeping:    { zzz: true },
+    thinking:    { bubble: true },
+    sad:         { tears: true },
+    angry:       { fume: true },
+  };
+
+  const mood = moods[emotion] || {};
+
+  const posStyle = {};
+  if (position?.x === 'left')   posStyle.left = 24;
+  else if (position?.x === 'right') posStyle.right = 24;
+  else if (typeof position?.x === 'number') posStyle.left = position.x;
+  else posStyle.right = 100;
+  if (position?.y === 'top')    posStyle.top = 90;
+  else if (position?.y === 'bottom') posStyle.bottom = 24;
+  else if (typeof position?.y === 'number') posStyle.bottom = position.y;
+  else posStyle.bottom = 100;
+
+  return (
+    <div className={`mascot mascot-${emotion}`} style={posStyle} onClick={onClick}>
+      {mood.confetti && (
+        <div className="mascot-confetti-burst">
+          {'🎉🎊✨🌟⭐'.split('').map((e, i) => (
+            <span key={i} className="mascot-confetti-piece" style={{ '--i': i }}>{e}</span>
+          ))}
+        </div>
+      )}
+      {mood.hearts && <span className="mascot-float mascot-heart">❤️</span>}
+      {mood.zzz && (
+        <>
+          <span className="mascot-float mascot-zzz" style={{ animationDelay: '0s' }}>💤</span>
+          <span className="mascot-float mascot-zzz" style={{ animationDelay: '1s' }}>💤</span>
+        </>
+      )}
+      {mood.fume && <span className="mascot-float mascot-fume">💢</span>}
+      {mood.tears && <span className="mascot-float mascot-tear">💧</span>}
+      {mood.rays && <div className="mascot-rays" />}
+
+      <div className="mascot-body">
+        <div className="mascot-face">{faces[emotion] || faces.idle}</div>
+      </div>
+
+      {message && bubbleVisible && (
+        <div className="mascot-bubble">
+          {message}
+          <div className="mascot-bubble-tail" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Helper: pick an emotion + message based on test-run results
+export function emotionForResults(stats) {
+  if (!stats) return { emotion: 'idle', message: null };
+  const rate = stats.passRate ?? 0;
+  if (rate === 100) return { emotion: 'celebrating', message: `Perfect! ${stats.passed}/${stats.total} tests passed! 🎉` };
+  if (rate >= 80)   return { emotion: 'excited',     message: `Great run! ${rate}% pass rate — looking good!` };
+  if (rate >= 50)   return { emotion: 'thinking',    message: `${rate}% passed — some tests need a look.` };
+  if (rate > 0)     return { emotion: 'sad',         message: `Only ${rate}% passed. Let's fix these issues.` };
+  return { emotion: 'confused', message: 'No tests passed — something went wrong.' };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // VALIDATION MODAL — shows missing required fields with inline fix inputs
 // ═══════════════════════════════════════════════════════════════════════════
 export function ValidationModal({ open, issues, onClose, onContinue }) {
