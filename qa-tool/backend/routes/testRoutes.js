@@ -120,6 +120,21 @@ router.post('/execute', runUpload, async (req, res) => {
     includePerformance:   req.body.includePerformance   === 'true',
   };
 
+  // Auth config for target app (optional) — form login / basic / bearer / cookie
+  if (req.body.authType && req.body.authType !== 'none') {
+    runConfig.auth = {
+      type:           req.body.authType,                   // form | basic | bearer | cookie
+      loginUrl:       req.body.authLoginUrl       || '',
+      username:       req.body.authUsername       || '',
+      password:       req.body.authPassword       || '',
+      userField:      req.body.authUserField      || '',  // CSS selector override
+      passField:      req.body.authPassField      || '',
+      submitSelector: req.body.authSubmitSelector || '',
+      token:          req.body.authToken          || '',
+      cookie:         req.body.authCookie         || '',
+    };
+  }
+
   const jobId = uuidv4();
   const job = {
     jobId,

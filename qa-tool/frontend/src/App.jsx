@@ -1315,6 +1315,18 @@ function QAToolApp({ authUser, onLogout }) {
   const [testcaseFile,         setTestcaseFile]         = useState(null);
   const testcaseFileRef = useRef();
 
+  // ── Target-app Authentication config ────────────────────────────────────
+  const [authEnabled,  setAuthEnabled]  = useState(false);
+  const [authType,     setAuthType]     = useState('form'); // form | basic | bearer | cookie
+  const [authLoginUrl, setAuthLoginUrl] = useState('');
+  const [authUsername, setAuthUsername] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authToken,    setAuthToken]    = useState('');
+  const [authCookie,   setAuthCookie]   = useState('');
+  const [authUserField, setAuthUserField] = useState('');
+  const [authPassField, setAuthPassField] = useState('');
+  const [authSubmitSel, setAuthSubmitSel] = useState('');
+
   // ── Script Generator state ───────────────────────────────────────────────
   const [sgTool,       setSgTool]       = useState('playwright');
   const [sgLang,       setSgLang]       = useState('javascript');
@@ -1759,6 +1771,21 @@ function QAToolApp({ authUser, onLogout }) {
     formData.append('environment',           environment);
     formData.append('includeAccessibility',  String(includeAccessibility));
     formData.append('includePerformance',    String(includePerformance));
+
+    // Target-app authentication (if enabled)
+    if (authEnabled) {
+      formData.append('authType',           authType);
+      if (authLoginUrl)  formData.append('authLoginUrl',       authLoginUrl);
+      if (authUsername)  formData.append('authUsername',       authUsername);
+      if (authPassword)  formData.append('authPassword',       authPassword);
+      if (authToken)     formData.append('authToken',          authToken);
+      if (authCookie)    formData.append('authCookie',         authCookie);
+      if (authUserField) formData.append('authUserField',      authUserField);
+      if (authPassField) formData.append('authPassField',      authPassField);
+      if (authSubmitSel) formData.append('authSubmitSelector', authSubmitSel);
+    } else {
+      formData.append('authType', 'none');
+    }
 
     try {
       const res  = await fetch(`${API}/api/execute`, { method: 'POST', body: formData });
@@ -3758,6 +3785,109 @@ function QAToolApp({ authUser, onLogout }) {
                 </div>
               </div>
             )}
+
+            {/* ── Authentication section (optional) ──────────────────────── */}
+            <div className="auth-section">
+              <label className="auth-toggle">
+                <input
+                  type="checkbox"
+                  checked={authEnabled}
+                  onChange={e => setAuthEnabled(e.target.checked)}
+                />
+                <span className="auth-toggle-slider" />
+                <div className="auth-toggle-content">
+                  <div className="auth-toggle-label">
+                    <Icons.Shield size={16} /> Target app requires login?
+                  </div>
+                  <div className="auth-toggle-hint">
+                    {authEnabled
+                      ? 'Credentials are used only for this run — never stored'
+                      : 'Enable to supply credentials so tests can reach protected pages'}
+                  </div>
+                </div>
+              </label>
+
+              {authEnabled && (
+                <div className="auth-form">
+                  <div className="field">
+                    <label className="field-label">Authentication strategy</label>
+                    <div className="auth-strategy-grid">
+                      {[
+                        { id: 'form',   name: 'Form Login',     desc: 'Username + password into a login form' },
+                        { id: 'basic',  name: 'HTTP Basic',     desc: 'Browser basic-auth dialog' },
+                        { id: 'bearer', name: 'Bearer Token',   desc: 'For API-style apps with a JWT' },
+                        { id: 'cookie', name: 'Session Cookie', desc: 'Paste cookies from a logged-in session' },
+                      ].map(s => (
+                        <label key={s.id} className={`auth-strategy ${authType === s.id ? 'active' : ''}`}>
+                          <input type="radio" checked={authType === s.id} onChange={() => setAuthType(s.id)} />
+                          <div className="auth-strategy-name">{s.name}</div>
+                          <div className="auth-strategy-desc">{s.desc}</div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {(authType === 'form' || authType === 'basic') && (
+                    <div className="auth-credentials-grid">
+                      {authType === 'form' && (
+                        <div className="field">
+                          <label className="field-label">Login URL <span className="field-hint">(optional — defaults to app URL)</span></label>
+                          <input className="field-input" placeholder="https://yourapp.com/login" value={authLoginUrl} onChange={e => setAuthLoginUrl(e.target.value)} />
+                        </div>
+                      )}
+                      <div className="field">
+                        <label className="field-label">Username / Email</label>
+                        <input className="field-input" type="text" value={authUsername} onChange={e => setAuthUsername(e.target.value)} placeholder="test@example.com" autoComplete="off" />
+                      </div>
+                      <div className="field">
+                        <label className="field-label">Password</label>
+                        <input className="field-input" type="password" value={authPassword} onChange={e => setAuthPassword(e.target.value)} placeholder="••••••••" autoComplete="off" />
+                      </div>
+                    </div>
+                  )}
+
+                  {authType === 'form' && (
+                    <details className="auth-advanced">
+                      <summary>Advanced field selectors (optional)</summary>
+                      <div className="auth-credentials-grid">
+                        <div className="field">
+                          <label className="field-label">Username field selector</label>
+                          <input className="field-input" value={authUserField} onChange={e => setAuthUserField(e.target.value)} placeholder="input[name=&quot;email&quot;]" />
+                        </div>
+                        <div className="field">
+                          <label className="field-label">Password field selector</label>
+                          <input className="field-input" value={authPassField} onChange={e => setAuthPassField(e.target.value)} placeholder="input[name=&quot;password&quot;]" />
+                        </div>
+                        <div className="field">
+                          <label className="field-label">Submit button selector</label>
+                          <input className="field-input" value={authSubmitSel} onChange={e => setAuthSubmitSel(e.target.value)} placeholder="button[type=&quot;submit&quot;]" />
+                        </div>
+                      </div>
+                    </details>
+                  )}
+
+                  {authType === 'bearer' && (
+                    <div className="field">
+                      <label className="field-label">Bearer token</label>
+                      <input className="field-input" type="password" value={authToken} onChange={e => setAuthToken(e.target.value)} placeholder="eyJhbGciOiJIUzI1NiIs..." autoComplete="off" />
+                      <div className="field-hint">Prepended to every request as <code>Authorization: Bearer &lt;token&gt;</code></div>
+                    </div>
+                  )}
+
+                  {authType === 'cookie' && (
+                    <div className="field">
+                      <label className="field-label">Session cookie string</label>
+                      <textarea className="field-input" rows="3" value={authCookie} onChange={e => setAuthCookie(e.target.value)} placeholder="session_id=abc; auth_token=xyz" />
+                      <div className="field-hint">Copy from browser DevTools → Network tab → any request → Cookie header</div>
+                    </div>
+                  )}
+
+                  <div className="auth-warning">
+                    ⚠️ <strong>Use a test account — never production credentials.</strong> Credentials are sent once with this run and never persisted anywhere on the server.
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* ── Generic mode info ──────────────────────────────────────── */}
             {inputMode === 'generic' && (

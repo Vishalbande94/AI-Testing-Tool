@@ -18,6 +18,100 @@ function resolvePageUrl(baseUrl, pageName) {
   return baseUrl.replace(/\/$/, '') + '/' + pageName.replace(/^\//, '');
 }
 
+// ── Build login helper based on auth config ─────────────────────────────────
+function buildAuthHook(auth, baseUrl) {
+  if (!auth || !auth.type || auth.type === 'none') return '';
+
+  const esc = (s) => String(s || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+
+  if (auth.type === 'form') {
+    const loginUrl = auth.loginUrl || baseUrl;
+    return `
+// ── Authenticated beforeEach: logs in before every test ──────────────────────
+test.beforeEach(async ({ page }) => {
+  await page.goto('${esc(loginUrl)}', { waitUntil: 'domcontentloaded', timeout: 15000 });
+  // Fill username / email field
+  const userSels = ${JSON.stringify(auth.userField ? [auth.userField] : [
+    'input[name="email"]','input[name="username"]','input[name="user"]',
+    'input[type="email"]','input[id="email"]','input[id="username"]',
+    'input[placeholder*="email" i]','input[placeholder*="user" i]',
+  ])};
+  const passSels = ${JSON.stringify(auth.passField ? [auth.passField] : [
+    'input[name="password"]','input[type="password"]','input[id="password"]',
+    'input[placeholder*="password" i]',
+  ])};
+  const btnSels  = ${JSON.stringify(auth.submitSelector ? [auth.submitSelector] : [
+    'button[type="submit"]','button:has-text("Log In")','button:has-text("Login")',
+    'button:has-text("Sign In")','button:has-text("Submit")','input[type="submit"]',
+  ])};
+  const userFilled = await tryFill(page, userSels, '${esc(auth.username)}');
+  const passFilled = await tryFill(page, passSels, '${esc(auth.password)}');
+  if (!userFilled || !passFilled) {
+    console.warn('[auth] Could not locate username/password fields on', page.url());
+    return;
+  }
+  await tryClick(page, btnSels);
+  // Wait for navigation away from the login page
+  try {
+    await page.waitForURL(u => !/login|signin/i.test(u.toString()), { timeout: 8000 });
+  } catch { /* login may be SPA-style without URL change */ }
+});
+`;
+  }
+
+  if (auth.type === 'basic') {
+    // Playwright supports basic auth via context options. Set via test fixture.
+    return `
+// ── Basic HTTP Auth fixture ──────────────────────────────────────────────────
+test.use({
+  httpCredentials: {
+    username: '${esc(auth.username)}',
+    password: '${esc(auth.password)}',
+  },
+});
+`;
+  }
+
+  if (auth.type === 'bearer') {
+    return `
+// ── Bearer Token fixture ─────────────────────────────────────────────────────
+test.use({
+  extraHTTPHeaders: {
+    Authorization: 'Bearer ${esc(auth.token)}',
+  },
+});
+`;
+  }
+
+  if (auth.type === 'cookie') {
+    return `
+// ── Session Cookie fixture ───────────────────────────────────────────────────
+test.beforeEach(async ({ context }) => {
+  await context.addCookies(${JSON.stringify(parseCookieString(auth.cookie, baseUrl))});
+});
+`;
+  }
+
+  return '';
+}
+
+function parseCookieString(cookieStr, baseUrl) {
+  if (!cookieStr) return [];
+  let host = 'localhost';
+  try { host = new URL(baseUrl).hostname; } catch {}
+  return cookieStr.split(';').map(pair => {
+    const [name, ...rest] = pair.trim().split('=');
+    return {
+      name: name?.trim(),
+      value: rest.join('=').trim(),
+      domain: host,
+      path: '/',
+      httpOnly: false,
+      secure: baseUrl.startsWith('https'),
+    };
+  }).filter(c => c.name);
+}
+
 // ── Generate Playwright Spec File ─────────────────────────────────────────────
 function generateSpec(baseUrl, testCases, runConfig = {}) {
   const isFileUrl  = baseUrl.startsWith('file://');
@@ -109,7 +203,9 @@ async function hasError(page) {
   if (runConfig.includeAccessibility) extras.push(buildAccessibilityTest());
   if (runConfig.includePerformance)   extras.push(buildPerformanceTest());
 
-  return helpers + '\n\n' + tests + (extras.length ? '\n\n' + extras.join('\n\n') : '');
+  const authHook = buildAuthHook(runConfig.auth, baseUrl);
+
+  return helpers + '\n\n' + authHook + '\n\n' + tests + (extras.length ? '\n\n' + extras.join('\n\n') : '');
 }
 
 // ── Built-in: Accessibility Check ─────────────────────────────────────────────
