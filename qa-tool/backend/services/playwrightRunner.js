@@ -2,7 +2,20 @@
 // Generates spec file, runs playwright, captures results
 const fs           = require('fs');
 const path         = require('path');
-const { execSync, spawnSync } = require('child_process');
+const { execSync, spawnSync, spawn } = require('child_process');
+
+// ── Map of jobId → running child process (so cancel can kill it) ───────────
+const runningChildren = new Map();
+
+function cancelRunningJob(jobId) {
+  const child = runningChildren.get(jobId);
+  if (child) {
+    try { child.kill('SIGKILL'); } catch {}
+    runningChildren.delete(jobId);
+    return true;
+  }
+  return false;
+}
 
 const PLAYWRIGHT_DIR = path.join(__dirname, '../../playwright-tests');
 const SPEC_FILE      = path.join(PLAYWRIGHT_DIR, 'tests', 'generated.spec.js');
@@ -813,7 +826,8 @@ module.exports = defineConfig({
 }
 
 // ── Execute Playwright ─────────────────────────────────────────────────────────
-async function execute(specContent, baseUrl, log, runConfig = {}) {
+// Now uses async spawn so the process can be cancelled mid-run via kill().
+async function execute(specContent, baseUrl, log, runConfig = {}, jobId = null) {
   // Write spec file
   const testsDir = path.join(PLAYWRIGHT_DIR, 'tests');
   fs.mkdirSync(testsDir, { recursive: true });
@@ -822,7 +836,7 @@ async function execute(specContent, baseUrl, log, runConfig = {}) {
 
   // Write dynamic playwright config
   const configPath = writePlaywrightConfig(runConfig);
-  const configFile = path.basename(configPath); // 'playwright.config.gen.cjs'
+  const configFile = path.basename(configPath);
   log(`   Config: browsers=[${(runConfig.browsers || ['chromium']).join(',')}] workers=${runConfig.workers || 3} retries=${runConfig.retries || 0}`);
 
   // Ensure results dir exists
@@ -834,30 +848,53 @@ async function execute(specContent, baseUrl, log, runConfig = {}) {
 
   log(`   Running: npx playwright test --config ${configFile} ...`);
 
-  const result = spawnSync(
-    'npx',
-    [
-      'playwright', 'test',
-      '--config', configFile,
-      '--reporter=json',
-    ],
-    {
-      cwd:     PLAYWRIGHT_DIR,
-      timeout: 300000, // 5 min max (multi-browser runs take longer)
-      env:     { ...process.env, BASE_URL: baseUrl, CI: '1' },
-      shell:   true,
-      maxBuffer: 30 * 1024 * 1024,
-    }
-  );
+  // Async spawn so we can kill it mid-run via cancelRunningJob(jobId)
+  return new Promise((resolve) => {
+    const child = spawn(
+      'npx',
+      ['playwright', 'test', '--config', configFile, '--reporter=json'],
+      {
+        cwd:    PLAYWRIGHT_DIR,
+        env:    { ...process.env, BASE_URL: baseUrl, CI: '1' },
+        shell:  true,
+      }
+    );
 
-  log(`   Playwright exit code: ${result.status}`);
-  if (result.stderr) {
-    const errStr = result.stderr.toString().slice(0, 500);
-    if (errStr.trim()) log(`   Stderr: ${errStr}`);
-  }
+    if (jobId) runningChildren.set(jobId, child);
 
-  // Parse results from JSON output file or stdout
-  return parseResults(result, log);
+    let stdoutBuf = '';
+    let stderrBuf = '';
+    child.stdout.on('data', d => { stdoutBuf += d.toString(); });
+    child.stderr.on('data', d => { stderrBuf += d.toString(); });
+
+    // Hard timeout fallback (10 min)
+    const timeoutId = setTimeout(() => {
+      log(`   ⏱️ Timeout (10min) — killing process`);
+      try { child.kill('SIGKILL'); } catch {}
+    }, 600000);
+
+    child.on('close', (code, signal) => {
+      clearTimeout(timeoutId);
+      if (jobId) runningChildren.delete(jobId);
+      log(`   Playwright exit code: ${code}${signal ? ` (signal: ${signal})` : ''}`);
+      const errStr = stderrBuf.slice(0, 500);
+      if (errStr.trim()) log(`   Stderr: ${errStr}`);
+
+      // If killed by cancel, resolve with a cancelled marker
+      if (signal === 'SIGKILL' || signal === 'SIGTERM') {
+        resolve({ cancelled: true, total: 0, passed: 0, failed: 0, skipped: 0, duration: 0, testResults: {} });
+        return;
+      }
+      resolve(parseResults({ status: code, stdout: Buffer.from(stdoutBuf), stderr: Buffer.from(stderrBuf) }, log));
+    });
+
+    child.on('error', (err) => {
+      clearTimeout(timeoutId);
+      if (jobId) runningChildren.delete(jobId);
+      log(`   Spawn error: ${err.message}`);
+      resolve({ total: 0, passed: 0, failed: 0, skipped: 0, duration: 0, testResults: {}, error: err.message });
+    });
+  });
 }
 
 // ── Parse JSON results ─────────────────────────────────────────────────────────
@@ -964,4 +1001,4 @@ function generateSyntheticResults(exitCode) {
   };
 }
 
-module.exports = { generateSpec, execute };
+module.exports = { generateSpec, execute, cancelRunningJob };

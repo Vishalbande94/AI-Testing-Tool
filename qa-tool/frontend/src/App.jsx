@@ -1538,6 +1538,10 @@ function QAToolApp({ authUser, onLogout }) {
           clearInterval(pollRef.current);
           setStatus('error');
           setError(data.error || 'Unknown error occurred');
+        } else if (data.status === 'cancelled') {
+          clearInterval(pollRef.current);
+          setStatus('error');
+          setError('Run cancelled by user');
         }
       } catch (e) {
         console.error('Poll error:', e);
@@ -2042,6 +2046,10 @@ function QAToolApp({ authUser, onLogout }) {
           setExpStatus('error');
           setExpError(data.error || 'Analysis failed');
           toast('Exploratory analysis failed', 'error');
+          clearInterval(interval);
+        } else if (data.status === 'cancelled') {
+          setExpStatus('error');
+          setExpError('Analysis cancelled by user');
           clearInterval(interval);
         }
       } catch {}
@@ -3568,9 +3576,26 @@ function QAToolApp({ authUser, onLogout }) {
             {/* ── Processing state ───────────────────────────────────────────── */}
             {expStatus === 'processing' && (
               <div className="panel">
-                <div className="panel-header">
-                  <h2>🧠 AI Analyzing Your Screens...</h2>
-                  <p>The AI is examining every UI element, interaction pattern, and potential test scenario.</p>
+                <div className="panel-header" style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ flex: 1 }}>
+                    <h2>🧠 AI Analyzing Your Screens...</h2>
+                    <p>The AI is examining every UI element, interaction pattern, and potential test scenario.</p>
+                  </div>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,.3)' }}
+                    onClick={async () => {
+                      if (!window.confirm('Cancel this analysis?')) return;
+                      try {
+                        await fetch(`${API}/api/exploratory/sessions/${expSessionId}/cancel`, { method: 'POST' });
+                        setExpStatus('error');
+                        setExpError('Analysis cancelled by user');
+                        toast('Analysis cancelled', 'info');
+                      } catch (e) { toast('Failed to cancel: ' + e.message, 'error'); }
+                    }}
+                  >
+                    <Icons.XCircle size={14} /> Cancel
+                  </button>
                 </div>
                 <div className="log-box" style={{ maxHeight: 400 }}>
                   {expLogs.map((l, i) => <div key={i} className="log-line">{l}</div>)}
@@ -4340,10 +4365,23 @@ function QAToolApp({ authUser, onLogout }) {
           <div className="panel">
             <div className="running-header">
               <div className="spinner" />
-              <div>
+              <div style={{ flex: 1 }}>
                 <h2>Executing Tests…</h2>
                 <p>Running automated QA pipeline against <strong>{appUrl}</strong></p>
               </div>
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,.3)' }}
+                onClick={async () => {
+                  if (!window.confirm('Cancel this test run? Any in-progress tests will be stopped.')) return;
+                  try {
+                    await fetch(`${API}/api/jobs/${jobId}/cancel`, { method: 'POST' });
+                    toast('Run cancelled', 'info');
+                  } catch (e) { toast('Failed to cancel: ' + e.message, 'error'); }
+                }}
+              >
+                <Icons.XCircle size={14} /> Cancel Run
+              </button>
             </div>
 
             {/* Progress steps */}

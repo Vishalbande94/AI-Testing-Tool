@@ -266,7 +266,13 @@ router.post('/execute', runUpload, async (req, res) => {
       // ── Step 4: Execute Playwright tests ────────────────────────────────
       const execStepNum = aiEnabled ? 5 : 4;
       log(`⚡ Step ${execStepNum}/${totalSteps} — Executing Playwright tests...`);
-      const executionResults = await playwrightRunner.execute(specContent, appUrl, log, runConfig);
+      const executionResults = await playwrightRunner.execute(specContent, appUrl, log, runConfig, jobId);
+      // Honor cancellation — if user clicked Cancel, don't continue the pipeline
+      if (executionResults.cancelled || job.status === 'cancelled') {
+        log(`🛑 Run cancelled by user.`);
+        job.status = 'cancelled';
+        return;
+      }
       log(`   Execution complete — ${executionResults.passed} passed, ${executionResults.failed} failed`);
 
       // ── Step 5: Merge results ───────────────────────────────────────────
@@ -411,6 +417,19 @@ router.post('/execute', runUpload, async (req, res) => {
 });
 
 // ── GET /api/status/:jobId — Poll for status + logs ──────────────────────────
+// ── POST /api/jobs/:jobId/cancel — stop a running test ──────────────────────
+router.post('/jobs/:jobId/cancel', (req, res) => {
+  const job = jobs.get(req.params.jobId);
+  if (!job) return res.status(404).json({ error: 'Job not found' });
+  if (job.status !== 'running') {
+    return res.status(400).json({ error: `Job is ${job.status}, not running` });
+  }
+  job.status = 'cancelled';
+  job.logs.push(`[${new Date().toISOString()}] 🛑 Cancellation requested by user`);
+  const killed = playwrightRunner.cancelRunningJob(req.params.jobId);
+  res.json({ ok: true, killedSubprocess: killed });
+});
+
 router.get('/status/:jobId', (req, res) => {
   const job = jobs.get(req.params.jobId);
   if (!job) return res.status(404).json({ error: 'Job not found' });

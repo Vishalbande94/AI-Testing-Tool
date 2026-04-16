@@ -75,11 +75,33 @@ async function hasError(page) {
 
 
 
+// ── Authenticated beforeEach: logs in before every test ──────────────────────
+test.beforeEach(async ({ page }) => {
+  await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', { waitUntil: 'domcontentloaded', timeout: 15000 });
+  // Fill username / email field
+  const userSels = ["input[name=\"email\"]","input[name=\"username\"]","input[name=\"user\"]","input[type=\"email\"]","input[id=\"email\"]","input[id=\"username\"]","input[placeholder*=\"email\" i]","input[placeholder*=\"user\" i]"];
+  const passSels = ["input[name=\"password\"]","input[type=\"password\"]","input[id=\"password\"]","input[placeholder*=\"password\" i]"];
+  const btnSels  = ["button[type=\"submit\"]","button:has-text(\"Log In\")","button:has-text(\"Login\")","button:has-text(\"Sign In\")","button:has-text(\"Submit\")","input[type=\"submit\"]"];
+  const userFilled = await tryFill(page, userSels, 'Admin');
+  const passFilled = await tryFill(page, passSels, 'admin123');
+  if (!userFilled || !passFilled) {
+    console.warn('[auth] Could not locate username/password fields on', page.url());
+    return;
+  }
+  await tryClick(page, btnSels);
+  // Wait for navigation away from the login page
+  try {
+    await page.waitForURL(u => !/login|signin/i.test(u.toString()), { timeout: 8000 });
+  } catch { /* login may be SPA-style without URL change */ }
+});
+
+
+
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_001 | Navigation | Positive
+// P01_276 | Navigation | Positive
 // All navigation links are functional
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_001 | All navigation links are functional', async ({ page }) => {
+test('P01_276 | All navigation links are functional', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Navigation' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'nav_links' });
@@ -102,10 +124,10 @@ test('P01_001 | All navigation links are functional', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P02_002 | Navigation | Positive
+// P02_277 | Navigation | Positive
 // Application loads successfully at base URL
 // ─────────────────────────────────────────────────────────────────────────────
-test('P02_002 | Application loads successfully at base URL', async ({ page }) => {
+test('P02_277 | Application loads successfully at base URL', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Navigation' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'nav_base_load' });
@@ -122,10 +144,10 @@ test('P02_002 | Application loads successfully at base URL', async ({ page }) =>
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_003 | Authentication — Login | Positive
+// P01_278 | Authentication — Login | Positive
 // Login with valid credentials
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_003 | Login with valid credentials', async ({ page }) => {
+test('P01_278 | Login with valid credentials', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Authentication — Login' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'login_positive' });
@@ -160,10 +182,10 @@ test('P01_003 | Login with valid credentials', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_004 | Authentication — Login | Negative
+// N01_279 | Authentication — Login | Negative
 // Login with incorrect password
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_004 | Login with incorrect password', async ({ page }) => {
+test('N01_279 | Login with incorrect password', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Authentication — Login' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'login_negative_pwd' });
@@ -196,10 +218,10 @@ test('N01_004 | Login with incorrect password', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// E01_005 | Authentication — Login | Edge
+// E01_280 | Authentication — Login | Edge
 // Login with empty fields
 // ─────────────────────────────────────────────────────────────────────────────
-test('E01_005 | Login with empty fields', async ({ page }) => {
+test('E01_280 | Login with empty fields', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Authentication — Login' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'login_edge_empty' });
@@ -223,10 +245,10 @@ test('E01_005 | Login with empty fields', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_006 | User Registration | Positive
+// P01_281 | User Registration | Positive
 // Register a new user with valid details
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_006 | Register a new user with valid details', async ({ page }) => {
+test('P01_281 | Register a new user with valid details', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Registration' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'register_positive' });
@@ -295,10 +317,10 @@ test('P01_006 | Register a new user with valid details', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_007 | User Registration | Negative
+// N01_282 | User Registration | Negative
 // Register with an already-registered email
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_007 | Register with an already-registered email', async ({ page }) => {
+test('N01_282 | Register with an already-registered email', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Registration' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'register_negative_dup' });
@@ -319,10 +341,10 @@ test('N01_007 | Register with an already-registered email', async ({ page }) => 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// E01_008 | User Registration | Edge
+// E01_283 | User Registration | Edge
 // Register with missing mandatory fields
 // ─────────────────────────────────────────────────────────────────────────────
-test('E01_008 | Register with missing mandatory fields', async ({ page }) => {
+test('E01_283 | Register with missing mandatory fields', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Registration' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'register_edge_empty' });
@@ -341,10 +363,10 @@ test('E01_008 | Register with missing mandatory fields', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_009 | Payment & Checkout | Positive
+// P01_284 | Payment & Checkout | Positive
 // Complete payment with valid card details
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_009 | Complete payment with valid card details', async ({ page }) => {
+test('P01_284 | Complete payment with valid card details', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Payment & Checkout' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'payment_positive' });
@@ -380,10 +402,10 @@ test('P01_009 | Complete payment with valid card details', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_010 | Payment & Checkout | Negative
+// N01_285 | Payment & Checkout | Negative
 // Payment with expired card
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_010 | Payment with expired card', async ({ page }) => {
+test('N01_285 | Payment with expired card', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Payment & Checkout' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'payment_negative_expired' });
@@ -405,10 +427,10 @@ test('N01_010 | Payment with expired card', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// E01_011 | Payment & Checkout | Edge
+// E01_286 | Payment & Checkout | Edge
 // Payment with empty card fields
 // ─────────────────────────────────────────────────────────────────────────────
-test('E01_011 | Payment with empty card fields', async ({ page }) => {
+test('E01_286 | Payment with empty card fields', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Payment & Checkout' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'payment_edge_empty' });
@@ -427,10 +449,10 @@ test('E01_011 | Payment with empty card fields', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_012 | Form Validation | Positive
+// P01_287 | Form Validation | Positive
 // Submit form with all valid data
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_012 | Submit form with all valid data', async ({ page }) => {
+test('P01_287 | Submit form with all valid data', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Form Validation' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'form_positive' });
@@ -450,10 +472,10 @@ test('P01_012 | Submit form with all valid data', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_013 | Form Validation | Negative
+// N01_288 | Form Validation | Negative
 // Submit form with invalid email format
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_013 | Submit form with invalid email format', async ({ page }) => {
+test('N01_288 | Submit form with invalid email format', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Form Validation' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'form_negative_email' });
@@ -470,10 +492,10 @@ test('N01_013 | Submit form with invalid email format', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// E01_014 | Form Validation | Edge
+// E01_289 | Form Validation | Edge
 // Submit completely empty form
 // ─────────────────────────────────────────────────────────────────────────────
-test('E01_014 | Submit completely empty form', async ({ page }) => {
+test('E01_289 | Submit completely empty form', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Form Validation' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'form_edge_empty' });
@@ -489,10 +511,10 @@ test('E01_014 | Submit completely empty form', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_015 | Search & Filter | Positive
+// P01_290 | Search & Filter | Positive
 // Search with valid keyword returns results
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_015 | Search with valid keyword returns results', async ({ page }) => {
+test('P01_290 | Search with valid keyword returns results', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Search & Filter' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'search_positive' });
@@ -512,10 +534,10 @@ test('P01_015 | Search with valid keyword returns results', async ({ page }) => 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_016 | Search & Filter | Negative
+// N01_291 | Search & Filter | Negative
 // Search with no results keyword shows empty state
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_016 | Search with no results keyword shows empty state', async ({ page }) => {
+test('N01_291 | Search with no results keyword shows empty state', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Search & Filter' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'search_negative_empty' });
@@ -538,10 +560,10 @@ test('N01_016 | Search with no results keyword shows empty state', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_017 | Session Management — Logout | Positive
+// P01_292 | Session Management — Logout | Positive
 // User can logout successfully
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_017 | User can logout successfully', async ({ page }) => {
+test('P01_292 | User can logout successfully', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Session Management — Logout' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'logout_positive' });
@@ -569,10 +591,10 @@ test('P01_017 | User can logout successfully', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// E01_018 | Session Management — Logout | Edge
+// E01_293 | Session Management — Logout | Edge
 // Back button after logout should not access protected pages
 // ─────────────────────────────────────────────────────────────────────────────
-test('E01_018 | Back button after logout should not access protected pages', async ({ page }) => {
+test('E01_293 | Back button after logout should not access protected pages', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Session Management — Logout' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'logout_edge_back' });
@@ -595,10 +617,10 @@ test('E01_018 | Back button after logout should not access protected pages', asy
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_019 | Password Management | Positive
+// P01_294 | Password Management | Positive
 // Forgot password flow sends reset link
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_019 | Forgot password flow sends reset link', async ({ page }) => {
+test('P01_294 | Forgot password flow sends reset link', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Password Management' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'password_forgot_positive' });
@@ -624,10 +646,10 @@ test('P01_019 | Forgot password flow sends reset link', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_020 | Password Management | Negative
+// N01_295 | Password Management | Negative
 // Forgot password with unregistered email
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_020 | Forgot password with unregistered email', async ({ page }) => {
+test('N01_295 | Forgot password with unregistered email', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Password Management' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'password_forgot_negative' });
@@ -648,10 +670,10 @@ test('N01_020 | Forgot password with unregistered email', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_021 | Dashboard | Positive
+// P01_296 | Dashboard | Positive
 // Dashboard loads with all required sections
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_021 | Dashboard loads with all required sections', async ({ page }) => {
+test('P01_296 | Dashboard loads with all required sections', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Dashboard' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'dashboard_load' });
@@ -670,10 +692,10 @@ test('P01_021 | Dashboard loads with all required sections', async ({ page }) =>
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P02_022 | Dashboard | Positive
+// P02_297 | Dashboard | Positive
 // Dashboard page load time within performance budget
 // ─────────────────────────────────────────────────────────────────────────────
-test('P02_022 | Dashboard page load time within performance budget', async ({ page }) => {
+test('P02_297 | Dashboard page load time within performance budget', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Dashboard' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'dashboard_perf' });
@@ -688,10 +710,10 @@ test('P02_022 | Dashboard page load time within performance budget', async ({ pa
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_023 | User Profile & Settings | Positive
+// P01_298 | User Profile & Settings | Positive
 // User profile page loads with correct information
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_023 | User profile page loads with correct information', async ({ page }) => {
+test('P01_298 | User profile page loads with correct information', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Profile & Settings' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'profile_load' });
@@ -715,10 +737,10 @@ test('P01_023 | User profile page loads with correct information', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_024 | User Profile & Settings | Negative
+// N01_299 | User Profile & Settings | Negative
 // Access profile without login redirects to login
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_024 | Access profile without login redirects to login', async ({ page }) => {
+test('N01_299 | Access profile without login redirects to login', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Profile & Settings' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'profile_auth_guard' });
@@ -739,10 +761,10 @@ test('N01_024 | Access profile without login redirects to login', async ({ page 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC01_025 | Security — OWASP | Security
+// SEC01_300 | Security — OWASP | Security
 // XSS — Reflected script injection in input fields
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC01_025 | XSS — Reflected script injection in input fields', async ({ page }) => {
+test('SEC01_300 | XSS — Reflected script injection in input fields', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_xss_reflected' });
@@ -757,10 +779,10 @@ test('SEC01_025 | XSS — Reflected script injection in input fields', async ({ 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC02_026 | Security — OWASP | Security
+// SEC02_301 | Security — OWASP | Security
 // XSS — Stored script injection via saved data
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC02_026 | XSS — Stored script injection via saved data', async ({ page }) => {
+test('SEC02_301 | XSS — Stored script injection via saved data', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_xss_stored' });
@@ -775,10 +797,10 @@ test('SEC02_026 | XSS — Stored script injection via saved data', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC03_027 | Security — OWASP | Security
+// SEC03_302 | Security — OWASP | Security
 // SQL Injection — Authentication bypass attempt
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC03_027 | SQL Injection — Authentication bypass attempt', async ({ page }) => {
+test('SEC03_302 | SQL Injection — Authentication bypass attempt', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_sqli_login' });
@@ -793,10 +815,10 @@ test('SEC03_027 | SQL Injection — Authentication bypass attempt', async ({ pag
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC04_028 | Security — OWASP | Security
+// SEC04_303 | Security — OWASP | Security
 // IDOR — Access another user's resource by manipulating ID
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC04_028 | IDOR — Access another user\'s resource by manipulating ID', async ({ page }) => {
+test('SEC04_303 | IDOR — Access another user\'s resource by manipulating ID', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_idor' });
@@ -811,10 +833,10 @@ test('SEC04_028 | IDOR — Access another user\'s resource by manipulating ID', 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC05_029 | Security — OWASP | Security
+// SEC05_304 | Security — OWASP | Security
 // CSRF — State-changing action without token
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC05_029 | CSRF — State-changing action without token', async ({ page }) => {
+test('SEC05_304 | CSRF — State-changing action without token', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_csrf' });
@@ -829,10 +851,10 @@ test('SEC05_029 | CSRF — State-changing action without token', async ({ page }
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC06_030 | Security — OWASP | Security
+// SEC06_305 | Security — OWASP | Security
 // Brute Force — Rate limiting on login attempts
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC06_030 | Brute Force — Rate limiting on login attempts', async ({ page }) => {
+test('SEC06_305 | Brute Force — Rate limiting on login attempts', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_brute_force' });
@@ -847,10 +869,10 @@ test('SEC06_030 | Brute Force — Rate limiting on login attempts', async ({ pag
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC07_031 | Security — OWASP | Security
+// SEC07_306 | Security — OWASP | Security
 // Sensitive Data Exposure — HTTPS & security headers
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC07_031 | Sensitive Data Exposure — HTTPS & security headers', async ({ page }) => {
+test('SEC07_306 | Sensitive Data Exposure — HTTPS & security headers', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_headers' });
@@ -865,10 +887,10 @@ test('SEC07_031 | Sensitive Data Exposure — HTTPS & security headers', async (
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC08_032 | Security — OWASP | Security
+// SEC08_307 | Security — OWASP | Security
 // Session — Session fixation and logout invalidation
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC08_032 | Session — Session fixation and logout invalidation', async ({ page }) => {
+test('SEC08_307 | Session — Session fixation and logout invalidation', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_session_fixation' });
@@ -883,10 +905,10 @@ test('SEC08_032 | Session — Session fixation and logout invalidation', async (
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y01_033 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y01_308 | Accessibility — WCAG 2.1 | Accessibility
 // Keyboard navigation — Tab order and focus trap
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y01_033 | Keyboard navigation — Tab order and focus trap', async ({ page }) => {
+test('A11Y01_308 | Keyboard navigation — Tab order and focus trap', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_keyboard_nav' });
@@ -901,10 +923,10 @@ test('A11Y01_033 | Keyboard navigation — Tab order and focus trap', async ({ p
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y02_034 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y02_309 | Accessibility — WCAG 2.1 | Accessibility
 // Screen reader — Labels and ARIA for form controls
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y02_034 | Screen reader — Labels and ARIA for form controls', async ({ page }) => {
+test('A11Y02_309 | Screen reader — Labels and ARIA for form controls', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_screen_reader' });
@@ -919,10 +941,10 @@ test('A11Y02_034 | Screen reader — Labels and ARIA for form controls', async (
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y03_035 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y03_310 | Accessibility — WCAG 2.1 | Accessibility
 // Color contrast — Text meets 4.5:1 (normal) / 3:1 (large)
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y03_035 | Color contrast — Text meets 4.5:1 (normal) / 3:1 (large)', async ({ page }) => {
+test('A11Y03_310 | Color contrast — Text meets 4.5:1 (normal) / 3:1 (large)', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_contrast' });
@@ -937,10 +959,10 @@ test('A11Y03_035 | Color contrast — Text meets 4.5:1 (normal) / 3:1 (large)', 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y04_036 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y04_311 | Accessibility — WCAG 2.1 | Accessibility
 // Images — Alt text presence and accuracy
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y04_036 | Images — Alt text presence and accuracy', async ({ page }) => {
+test('A11Y04_311 | Images — Alt text presence and accuracy', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_alt_text' });
@@ -955,10 +977,10 @@ test('A11Y04_036 | Images — Alt text presence and accuracy', async ({ page }) 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y05_037 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y05_312 | Accessibility — WCAG 2.1 | Accessibility
 // Heading hierarchy and landmark regions
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y05_037 | Heading hierarchy and landmark regions', async ({ page }) => {
+test('A11Y05_312 | Heading hierarchy and landmark regions', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_headings' });
@@ -973,10 +995,10 @@ test('A11Y05_037 | Heading hierarchy and landmark regions', async ({ page }) => 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF01_038 | Performance — Core Web Vitals | Performance
+// PERF01_313 | Performance — Core Web Vitals | Performance
 // LCP — Largest Contentful Paint under 2.5s
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF01_038 | LCP — Largest Contentful Paint under 2.5s', async ({ page }) => {
+test('PERF01_313 | LCP — Largest Contentful Paint under 2.5s', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_lcp' });
@@ -991,10 +1013,10 @@ test('PERF01_038 | LCP — Largest Contentful Paint under 2.5s', async ({ page }
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF02_039 | Performance — Core Web Vitals | Performance
+// PERF02_314 | Performance — Core Web Vitals | Performance
 // CLS — Cumulative Layout Shift under 0.1
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF02_039 | CLS — Cumulative Layout Shift under 0.1', async ({ page }) => {
+test('PERF02_314 | CLS — Cumulative Layout Shift under 0.1', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_cls' });
@@ -1009,10 +1031,10 @@ test('PERF02_039 | CLS — Cumulative Layout Shift under 0.1', async ({ page }) 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF03_040 | Performance — Core Web Vitals | Performance
+// PERF03_315 | Performance — Core Web Vitals | Performance
 // INP — Interaction to Next Paint under 200ms
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF03_040 | INP — Interaction to Next Paint under 200ms', async ({ page }) => {
+test('PERF03_315 | INP — Interaction to Next Paint under 200ms', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_inp' });
@@ -1027,10 +1049,10 @@ test('PERF03_040 | INP — Interaction to Next Paint under 200ms', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF04_041 | Performance — Core Web Vitals | Performance
+// PERF04_316 | Performance — Core Web Vitals | Performance
 // Bundle size — JS payload under 250KB compressed
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF04_041 | Bundle size — JS payload under 250KB compressed', async ({ page }) => {
+test('PERF04_316 | Bundle size — JS payload under 250KB compressed', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_bundle' });
@@ -1045,10 +1067,10 @@ test('PERF04_041 | Bundle size — JS payload under 250KB compressed', async ({ 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF05_042 | Performance — Core Web Vitals | Performance
+// PERF05_317 | Performance — Core Web Vitals | Performance
 // API response time — p95 under 1s
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF05_042 | API response time — p95 under 1s', async ({ page }) => {
+test('PERF05_317 | API response time — p95 under 1s', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_api_p95' });
@@ -1063,10 +1085,10 @@ test('PERF05_042 | API response time — p95 under 1s', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESP01_043 | Responsive & Mobile | UI/UX
+// RESP01_318 | Responsive & Mobile | UI/UX
 // Mobile viewport — 375×667 layout integrity
 // ─────────────────────────────────────────────────────────────────────────────
-test('RESP01_043 | Mobile viewport — 375×667 layout integrity', async ({ page }) => {
+test('RESP01_318 | Mobile viewport — 375×667 layout integrity', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Responsive & Mobile' });
   test.info().annotations.push({ type: 'type',   description: 'UI/UX' });
   test.info().annotations.push({ type: 'key',    description: 'resp_mobile_375' });
@@ -1081,10 +1103,10 @@ test('RESP01_043 | Mobile viewport — 375×667 layout integrity', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESP02_044 | Responsive & Mobile | UI/UX
+// RESP02_319 | Responsive & Mobile | UI/UX
 // Tablet viewport — 768×1024 portrait and landscape
 // ─────────────────────────────────────────────────────────────────────────────
-test('RESP02_044 | Tablet viewport — 768×1024 portrait and landscape', async ({ page }) => {
+test('RESP02_319 | Tablet viewport — 768×1024 portrait and landscape', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Responsive & Mobile' });
   test.info().annotations.push({ type: 'type',   description: 'UI/UX' });
   test.info().annotations.push({ type: 'key',    description: 'resp_tablet' });
@@ -1099,10 +1121,10 @@ test('RESP02_044 | Tablet viewport — 768×1024 portrait and landscape', async 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESP03_045 | Responsive & Mobile | UI/UX
+// RESP03_320 | Responsive & Mobile | UI/UX
 // Touch interactions — Tap, swipe, long-press
 // ─────────────────────────────────────────────────────────────────────────────
-test('RESP03_045 | Touch interactions — Tap, swipe, long-press', async ({ page }) => {
+test('RESP03_320 | Touch interactions — Tap, swipe, long-press', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Responsive & Mobile' });
   test.info().annotations.push({ type: 'type',   description: 'UI/UX' });
   test.info().annotations.push({ type: 'key',    description: 'resp_touch' });
@@ -1117,10 +1139,10 @@ test('RESP03_045 | Touch interactions — Tap, swipe, long-press', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESP04_046 | Responsive & Mobile | UI/UX
+// RESP04_321 | Responsive & Mobile | UI/UX
 // Orientation change — Portrait ↔ Landscape preserves state
 // ─────────────────────────────────────────────────────────────────────────────
-test('RESP04_046 | Orientation change — Portrait ↔ Landscape preserves state', async ({ page }) => {
+test('RESP04_321 | Orientation change — Portrait ↔ Landscape preserves state', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Responsive & Mobile' });
   test.info().annotations.push({ type: 'type',   description: 'UI/UX' });
   test.info().annotations.push({ type: 'key',    description: 'resp_orientation' });
@@ -1135,10 +1157,10 @@ test('RESP04_046 | Orientation change — Portrait ↔ Landscape preserves state
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BV01_047 | Boundary & Data Validation | Boundary
+// BV01_322 | Boundary & Data Validation | Boundary
 // Numeric field — min, min-1, max, max+1
 // ─────────────────────────────────────────────────────────────────────────────
-test('BV01_047 | Numeric field — min, min-1, max, max+1', async ({ page }) => {
+test('BV01_322 | Numeric field — min, min-1, max, max+1', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
   test.info().annotations.push({ type: 'type',   description: 'Boundary' });
   test.info().annotations.push({ type: 'key',    description: 'bv_numeric' });
@@ -1153,10 +1175,10 @@ test('BV01_047 | Numeric field — min, min-1, max, max+1', async ({ page }) => 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BV02_048 | Boundary & Data Validation | Boundary
+// BV02_323 | Boundary & Data Validation | Boundary
 // Text field — length 0, 1, max, max+1
 // ─────────────────────────────────────────────────────────────────────────────
-test('BV02_048 | Text field — length 0, 1, max, max+1', async ({ page }) => {
+test('BV02_323 | Text field — length 0, 1, max, max+1', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
   test.info().annotations.push({ type: 'type',   description: 'Boundary' });
   test.info().annotations.push({ type: 'key',    description: 'bv_text_length' });
@@ -1171,10 +1193,10 @@ test('BV02_048 | Text field — length 0, 1, max, max+1', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BV03_049 | Boundary & Data Validation | Boundary
+// BV03_324 | Boundary & Data Validation | Boundary
 // Date field — past, today, future, invalid
 // ─────────────────────────────────────────────────────────────────────────────
-test('BV03_049 | Date field — past, today, future, invalid', async ({ page }) => {
+test('BV03_324 | Date field — past, today, future, invalid', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
   test.info().annotations.push({ type: 'type',   description: 'Boundary' });
   test.info().annotations.push({ type: 'key',    description: 'bv_date' });
@@ -1189,10 +1211,10 @@ test('BV03_049 | Date field — past, today, future, invalid', async ({ page }) 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BV04_050 | Boundary & Data Validation | Boundary
+// BV04_325 | Boundary & Data Validation | Boundary
 // Email — RFC 5321 format edge cases
 // ─────────────────────────────────────────────────────────────────────────────
-test('BV04_050 | Email — RFC 5321 format edge cases', async ({ page }) => {
+test('BV04_325 | Email — RFC 5321 format edge cases', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
   test.info().annotations.push({ type: 'type',   description: 'Boundary' });
   test.info().annotations.push({ type: 'key',    description: 'bv_email' });
@@ -1207,10 +1229,10 @@ test('BV04_050 | Email — RFC 5321 format edge cases', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BV05_051 | Boundary & Data Validation | Boundary
+// BV05_326 | Boundary & Data Validation | Boundary
 // Unicode — Multi-byte chars, emojis, RTL in text fields
 // ─────────────────────────────────────────────────────────────────────────────
-test('BV05_051 | Unicode — Multi-byte chars, emojis, RTL in text fields', async ({ page }) => {
+test('BV05_326 | Unicode — Multi-byte chars, emojis, RTL in text fields', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
   test.info().annotations.push({ type: 'type',   description: 'Boundary' });
   test.info().annotations.push({ type: 'key',    description: 'bv_unicode' });
@@ -1225,10 +1247,10 @@ test('BV05_051 | Unicode — Multi-byte chars, emojis, RTL in text fields', asyn
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONC01_052 | Concurrency & State | Negative
+// CONC01_327 | Concurrency & State | Negative
 // Double-click submission — no duplicate records
 // ─────────────────────────────────────────────────────────────────────────────
-test('CONC01_052 | Double-click submission — no duplicate records', async ({ page }) => {
+test('CONC01_327 | Double-click submission — no duplicate records', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Concurrency & State' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'conc_double_submit' });
@@ -1243,10 +1265,10 @@ test('CONC01_052 | Double-click submission — no duplicate records', async ({ p
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONC02_053 | Concurrency & State | Negative
+// CONC02_328 | Concurrency & State | Negative
 // Concurrent edit — two tabs editing same resource
 // ─────────────────────────────────────────────────────────────────────────────
-test('CONC02_053 | Concurrent edit — two tabs editing same resource', async ({ page }) => {
+test('CONC02_328 | Concurrent edit — two tabs editing same resource', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Concurrency & State' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'conc_concurrent_edit' });
@@ -1261,10 +1283,10 @@ test('CONC02_053 | Concurrent edit — two tabs editing same resource', async ({
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONC03_054 | Concurrency & State | Edge
+// CONC03_329 | Concurrency & State | Edge
 // Back button after state-changing action
 // ─────────────────────────────────────────────────────────────────────────────
-test('CONC03_054 | Back button after state-changing action', async ({ page }) => {
+test('CONC03_329 | Back button after state-changing action', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Concurrency & State' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'conc_back_button' });
@@ -1279,10 +1301,10 @@ test('CONC03_054 | Back button after state-changing action', async ({ page }) =>
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONC04_055 | Concurrency & State | Edge
+// CONC04_330 | Concurrency & State | Edge
 // Session expiry — Action after token expiry
 // ─────────────────────────────────────────────────────────────────────────────
-test('CONC04_055 | Session expiry — Action after token expiry', async ({ page }) => {
+test('CONC04_330 | Session expiry — Action after token expiry', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Concurrency & State' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'conc_session_expiry' });

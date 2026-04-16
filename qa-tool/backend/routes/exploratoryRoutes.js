@@ -277,6 +277,22 @@ router.post('/exploratory/analyze', uploadMiddleware, async (req, res) => {
   })();
 });
 
+// ── POST /api/exploratory/sessions/:id/cancel — abort an in-flight session ─
+router.post('/exploratory/sessions/:id/cancel', (req, res) => {
+  const session = sessions.get(req.params.id);
+  if (!session) return res.status(404).json({ error: 'Session not found' });
+  if (session.status !== 'processing') {
+    return res.status(400).json({ error: `Session is ${session.status}` });
+  }
+  session.status = 'cancelled';
+  session.logs.push(`[${new Date().toISOString()}] 🛑 Cancellation requested by user`);
+  // Note: the in-flight Claude API call can't be physically cancelled, but the
+  // session status change will stop the frontend polling and the UI will show
+  // "cancelled" immediately. When the API call eventually returns, the result
+  // will be discarded because status !== 'processing'.
+  res.json({ ok: true });
+});
+
 // ── GET /api/exploratory/status/:sessionId — Poll for status ─────────────────
 router.get('/exploratory/status/:sessionId', (req, res) => {
   const session = sessions.get(req.params.sessionId);
