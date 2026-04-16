@@ -4661,14 +4661,17 @@ function QAToolApp({ authUser, onLogout }) {
               </div>
             </div>
             <div className="action-bar" style={{ marginTop: 20 }}>
-              <button className="btn btn-primary" onClick={handleReset}>
+              <button
+                className="btn btn-primary"
+                onClick={() => { handleReset(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              >
                 <Icons.Play size={14} /> Start New Run
               </button>
               <button className="btn btn-ghost" onClick={() => setPage('dashboard')}>
                 <Icons.Activity size={14} /> Go to Dashboard
               </button>
-              <button className="btn btn-ghost" onClick={() => setPage('manual')}>
-                <Icons.ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Back to Manual Test
+              <button className="btn btn-ghost" onClick={() => window.location.reload()}>
+                <Icons.ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Reload Page
               </button>
             </div>
           </div>
