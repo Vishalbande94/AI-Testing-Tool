@@ -1331,6 +1331,12 @@ function QAToolApp({ authUser, onLogout }) {
   const [urlPreviewLoading, setUrlPreviewLoading] = useState(false);
   const [urlPreviewError,   setUrlPreviewError]   = useState('');
 
+  // ── Output mode: full execution vs generate-only (Excel + JSON) ────────
+  const [generateOnly,     setGenerateOnly]     = useState(false);
+  const [genOnlyResult,    setGenOnlyResult]    = useState(null);
+  const [genOnlyLoading,   setGenOnlyLoading]   = useState(false);
+  const [genOnlyError,     setGenOnlyError]     = useState('');
+
   // ── Target-app Authentication config ────────────────────────────────────
   const [authEnabled,  setAuthEnabled]  = useState(false);
   const [authType,     setAuthType]     = useState('form'); // form | basic | bearer | cookie
@@ -1996,7 +2002,68 @@ function QAToolApp({ authUser, onLogout }) {
       setValidationOpen(true);
       return;
     }
-    await runExecute();
+
+    // ── Auto-detect login-required URL (only when not already generating-only
+    //    and auth isn't already enabled) ────────────────────────────────
+    if (!generateOnly && !authEnabled && /^https?:\/\//.test(appUrl.trim())) {
+      try {
+        const res = await fetch(`${API}/api/analyze-url`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: appUrl.trim() }),
+        });
+        const data = await res.json();
+        if (res.ok && data.detected?.login) {
+          const shouldContinue = window.confirm(
+            `⚠️ This page has a login form. Playwright tests will fail on protected pages without credentials.\n\n` +
+            `• Click OK to switch to "Generate Only" mode (exports test cases to Excel without executing — you can run them manually after logging in)\n\n` +
+            `• Click Cancel to go back and enable "Target app requires login?" to provide credentials`
+          );
+          if (shouldContinue) {
+            setGenerateOnly(true);
+            toast('Switched to Generate-Only mode — credentials not needed', 'info');
+            await runGenerateOnly();
+            return;
+          }
+          // User clicked Cancel → stay on page so they can enable auth
+          toast('Enable "Target app requires login?" and provide credentials', 'info');
+          return;
+        }
+      } catch { /* analysis failed — just proceed */ }
+    }
+    if (generateOnly) {
+      await runGenerateOnly();
+    } else {
+      await runExecute();
+    }
+  };
+
+  const runGenerateOnly = async () => {
+    setGenOnlyLoading(true);
+    setGenOnlyError('');
+    setGenOnlyResult(null);
+
+    const fd = new FormData();
+    fd.append('appUrl', appUrl.trim());
+    fd.append('genericMode', String(inputMode === 'generic'));
+    fd.append('urlOnlyMode', String(inputMode === 'url-only'));
+    if (inputMode === 'requirement' && file) fd.append('requirementFile', file);
+    if (inputMode === 'testcase' && testcaseFile) fd.append('testcaseFile', testcaseFile);
+    fd.append('testScope', testScope);
+    fd.append('priorityFilter', priorityFilter);
+
+    try {
+      const res = await fetch(`${API}/api/generate-testcases-only`, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Generation failed');
+      setGenOnlyResult(data);
+      toast(`Generated ${data.testCaseCount} test cases!`, 'success');
+    } catch (e) {
+      setGenOnlyError(e.message);
+      toast(e.message, 'error');
+    } finally {
+      setGenOnlyLoading(false);
+    }
   };
 
   const runExecute = async () => {
@@ -4534,15 +4601,68 @@ function QAToolApp({ authUser, onLogout }) {
               )}
             </div>
 
-            {/* Execute button */}
+            {/* Output mode toggle — execute vs generate-only */}
+            <label className="output-mode-toggle">
+              <input type="checkbox" checked={generateOnly} onChange={e => setGenerateOnly(e.target.checked)} />
+              <span className="output-mode-slider" />
+              <div className="output-mode-text">
+                <div className="output-mode-title">
+                  📋 Generate test cases only (skip execution)
+                </div>
+                <div className="output-mode-hint">
+                  {generateOnly
+                    ? "ON — I'll generate test cases and export them as Excel & JSON. No Playwright execution."
+                    : 'OFF — Full pipeline: generate + run Playwright + HTML report (default)'}
+                </div>
+              </div>
+            </label>
+
+            {/* Execute / Generate button */}
             <button
               className="btn btn-execute"
               onClick={handleExecute}
-              disabled={!appUrl || (inputMode === 'requirement' && !file) || (inputMode === 'testcase' && !testcaseFile)}
+              disabled={!appUrl || (inputMode === 'requirement' && !file) || (inputMode === 'testcase' && !testcaseFile) || genOnlyLoading}
             >
-              ⚡ Execute Testing
-              <span className="kbd-hint">Ctrl+↵</span>
+              {generateOnly
+                ? (genOnlyLoading ? '⏳ Generating...' : '📋 Generate Test Cases (Excel + JSON)')
+                : <>⚡ Execute Testing <span className="kbd-hint">Ctrl+↵</span></>}
             </button>
+
+            {/* Generate-only result */}
+            {genOnlyError && (
+              <div style={{ marginTop: 14, padding: '12px 16px', background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 10, color: '#ef4444' }}>
+                ❌ {genOnlyError}
+              </div>
+            )}
+            {genOnlyResult && (
+              <div className="panel" style={{ marginTop: 16, border: '2px solid #10b981', background: 'linear-gradient(135deg, rgba(16,185,129,.06), rgba(6,182,212,.03))' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800 }}>✓</div>
+                  <div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)' }}>
+                      {genOnlyResult.testCaseCount} test cases generated
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                      Across {genOnlyResult.modules.length} modules: {genOnlyResult.modules.slice(0, 4).join(', ')}{genOnlyResult.modules.length > 4 ? '…' : ''}
+                    </div>
+                  </div>
+                </div>
+                <div className="action-bar">
+                  <a className="btn btn-primary" href={`${API}${genOnlyResult.excelUrl}`} download>
+                    <Icons.Download size={14} /> Download Excel (.xlsx)
+                  </a>
+                  <a className="btn btn-ghost" href={`${API}${genOnlyResult.jsonUrl}`} download>
+                    <Icons.FileText size={14} /> Download JSON
+                  </a>
+                  <button className="btn btn-ghost" onClick={() => setGenOnlyResult(null)}>
+                    <Icons.Plus size={14} /> Generate Another
+                  </button>
+                </div>
+                <p style={{ marginTop: 12, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+                  💡 The Excel has Summary / All Test Cases / Module breakdown sheets. Import the JSON later via the Test Case Sheet mode to execute these.
+                </p>
+              </div>
+            )}
 
             {/* Feature grid */}
             <div className="feature-grid">

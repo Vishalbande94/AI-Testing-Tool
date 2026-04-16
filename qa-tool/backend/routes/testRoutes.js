@@ -61,6 +61,102 @@ router.get('/history', (req, res) => {
   res.json(historyStore.getHistory());
 });
 
+// ── POST /api/generate-testcases-only ───────────────────────────────────────
+// Generates test cases + Excel WITHOUT running Playwright.
+// Useful for QA teams that want documentation/deliverables, not execution.
+router.post('/generate-testcases-only', runUpload, async (req, res) => {
+  const { appUrl } = req.body;
+  const genericMode = req.body.genericMode === 'true';
+  const urlOnlyMode = req.body.urlOnlyMode === 'true';
+  const reqFile   = req.files?.requirementFile?.[0] || null;
+  const sheetFile = req.files?.testcaseFile?.[0]    || null;
+
+  if (!appUrl) return res.status(400).json({ error: 'appUrl is required' });
+
+  const inputMode = sheetFile   ? 'testcase-sheet'
+                   : reqFile    ? 'requirement-doc'
+                   : urlOnlyMode ? 'url-only'
+                   : genericMode ? 'generic'
+                   : null;
+  if (!inputMode) return res.status(400).json({ error: 'Provide requirementFile, testcaseFile, urlOnlyMode, or genericMode' });
+
+  const jobId = uuidv4();
+  const reportDir = path.join(__dirname, '../reports', jobId);
+  fs.mkdirSync(reportDir, { recursive: true });
+
+  try {
+    let testCases = null;
+    let requirementText = '';
+
+    // 1. Get test cases based on input mode
+    if (inputMode === 'testcase-sheet') {
+      testCases = await testCaseSheetParser.parse(sheetFile.path);
+    } else if (inputMode === 'url-only') {
+      try {
+        const analysis = await urlAnalyzer.analyze(appUrl);
+        requirementText = analysis.keywords.join(' ') + ' ' + (analysis.summary.title || '');
+      } catch {
+        requirementText = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
+      }
+    } else if (inputMode === 'generic') {
+      requirementText = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
+    } else {
+      requirementText = await parser.extractText(reqFile.path);
+    }
+
+    // 2. Generate test cases if we have text (not already loaded from sheet)
+    if (!testCases) {
+      const runConfig = {
+        testScope: req.body.testScope || 'regression',
+        priorityFilter: req.body.priorityFilter || 'all',
+      };
+      // Try AI first, fall back to rule-based
+      if (claudeClient.isConfigured()) {
+        try {
+          testCases = await testArchitectAgent.generate(requirementText, runConfig);
+        } catch {
+          testCases = testGenerator.generate(requirementText, runConfig);
+        }
+      } else {
+        testCases = testGenerator.generate(requirementText, runConfig);
+      }
+    }
+
+    // 3. Save test cases as JSON
+    fs.writeFileSync(path.join(reportDir, 'testcases.json'), JSON.stringify(testCases, null, 2));
+
+    // 4. Generate Excel (empty stats since no execution)
+    const emptyStats = {
+      total: testCases.length, passed: 0, failed: 0, skipped: testCases.length,
+      duration: 0, passRate: 0,
+    };
+    const excelPath = await excelGenerator.generate(testCases, emptyStats, appUrl, reportDir);
+
+    res.json({
+      success: true,
+      jobId,
+      testCaseCount: testCases.length,
+      modules: [...new Set(testCases.map(t => t.module))],
+      excelUrl: `/api/download/${jobId}/excel`,
+      jsonUrl:  `/api/download/${jobId}/testcases-only`,
+      message: `Generated ${testCases.length} test cases. Download Excel or JSON to use.`,
+    });
+  } catch (err) {
+    console.error('generate-testcases-only error:', err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    if (reqFile)   { try { fs.unlinkSync(reqFile.path);   } catch {} }
+    if (sheetFile) { try { fs.unlinkSync(sheetFile.path); } catch {} }
+  }
+});
+
+// ── GET /api/download/:jobId/testcases-only — JSON download for generate-only
+router.get('/download/:jobId/testcases-only', (req, res) => {
+  const jsonPath = path.join(__dirname, '../reports', req.params.jobId, 'testcases.json');
+  if (!fs.existsSync(jsonPath)) return res.status(404).json({ error: 'File not found' });
+  res.download(jsonPath, 'test-cases.json');
+});
+
 // ── POST /api/analyze-url — preview what tests would be generated ───────────
 router.post('/analyze-url', express.json(), async (req, res) => {
   const { url } = req.body || {};
