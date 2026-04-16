@@ -3128,53 +3128,56 @@ button:focus-visible, .btn:focus-visible { outline-offset: 3px; }
 
 .mascot {
   position: fixed;
-  z-index: 9000;
-  width: 72px;
-  height: 72px;
+  z-index: 9500;
+  width: 84px;
+  height: 84px;
   cursor: pointer;
   user-select: none;
-  transition: bottom .8s cubic-bezier(.34,1.56,.64,1),
-              right .8s cubic-bezier(.34,1.56,.64,1),
-              left .8s cubic-bezier(.34,1.56,.64,1);
-  filter: drop-shadow(0 6px 16px rgba(6,182,212,.25));
+  transition: bottom 1s cubic-bezier(.34,1.56,.64,1),
+              right 1s cubic-bezier(.34,1.56,.64,1),
+              left 1s cubic-bezier(.34,1.56,.64,1),
+              top 1s cubic-bezier(.34,1.56,.64,1);
+  filter: drop-shadow(0 6px 20px rgba(6,182,212,.45));
+  pointer-events: auto;
 }
 
 .mascot-body {
-  width: 72px;
-  height: 72px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
-  background: linear-gradient(145deg, rgba(6,182,212,.25), rgba(139,92,246,.15));
+  background: linear-gradient(145deg, rgba(6,182,212,.35), rgba(139,92,246,.25));
   backdrop-filter: blur(12px);
-  border: 2px solid rgba(6,182,212,.4);
+  border: 3px solid rgba(6,182,212,.55);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow:
-    inset 0 2px 4px rgba(255,255,255,.3),
-    0 8px 20px rgba(6,182,212,.3),
-    0 0 0 1px rgba(6,182,212,.15);
+    inset 0 2px 6px rgba(255,255,255,.4),
+    0 12px 30px rgba(6,182,212,.45),
+    0 0 0 2px rgba(6,182,212,.2);
   position: relative;
   overflow: visible;
 }
 
 .mascot-face {
-  font-size: 40px;
+  font-size: 48px;
   line-height: 1;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,.15));
   transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-  animation: mascot-idle-bob 3s ease-in-out infinite;
+  animation: mascot-idle-bob 2.5s ease-in-out infinite;
+  display: block;
 }
 
 @keyframes mascot-idle-bob {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
+  50%      { transform: translateY(-6px); }
 }
 
 /* ─── Per-emotion body animations ───────────────────────────────────────── */
-.mascot-idle .mascot-body { animation: mascot-float 4s ease-in-out infinite; }
+.mascot-idle .mascot-body { animation: mascot-float 3s ease-in-out infinite; }
 @keyframes mascot-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-10px) rotate(2deg); }
 }
 
 .mascot-happy .mascot-body, .mascot-loving .mascot-body {

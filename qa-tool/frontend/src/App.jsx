@@ -1448,22 +1448,24 @@ function QAToolApp({ authUser, onLogout }) {
   const [mascotPos,     setMascotPos]     = useState({ x: 'right', y: 'bottom' });
   const mascotIdleTimer = useRef(null);
 
-  // Helper — set mascot emotion with optional auto-reset to idle
-  const setMascot = useCallback((emotion, message, durationMs = 4000) => {
+  // Helper — set mascot emotion + optional new position + auto-reset
+  const setMascot = useCallback((emotion, message, durationMs = 4000, position = null) => {
     setMascotEmotion(emotion);
     setMascotMsg(message);
+    if (position) setMascotPos(position);
     clearTimeout(mascotIdleTimer.current);
     if (durationMs) {
       mascotIdleTimer.current = setTimeout(() => {
         setMascotEmotion('idle');
         setMascotMsg(null);
+        setMascotPos({ x: 'right', y: 'bottom' });
       }, durationMs);
     }
   }, []);
 
-  // Welcome wave on login (runs once on mount)
+  // Welcome wave on login — flies in from top-right
   useEffect(() => {
-    setMascot('waving', `Welcome, ${authUser?.name || 'friend'}! Ready to test?`, 5000);
+    setMascot('waving', `Welcome, ${authUser?.name || 'friend'}! Ready to test?`, 5000, { x: 'right', y: 'top' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1474,31 +1476,45 @@ function QAToolApp({ authUser, onLogout }) {
   useEffect(() => {
     const prev = prevStatusRef.current;
     if (prev !== 'running' && status === 'running') {
-      setMascot('thinking', 'Running your tests... 🧠', 0);
+      // Running: fly to left edge, thinking
+      setMascot('thinking', 'Running your tests... 🧠 grab a coffee!', 0, { x: 'left', y: 'bottom' });
     } else if (prev !== 'done' && status === 'done' && results) {
       const { emotion, message } = emotionForResults(results.executionStats);
-      setMascot(emotion, message, 8000);
+      // Done: fly to center-top for celebration or near-center for sad
+      const pos = emotion === 'celebrating' || emotion === 'excited'
+        ? { x: Math.round(window.innerWidth / 2 - 42), y: 'top' }
+        : { x: 'right', y: 'top' };
+      setMascot(emotion, message, 8000, pos);
     } else if (prev !== 'error' && status === 'error') {
-      setMascot('sad', error || 'Something went wrong...', 6000);
+      setMascot('sad', error || 'Something went wrong. Let\'s fix it!', 6000, { x: 'right', y: 'top' });
     }
     prevStatusRef.current = status;
   }, [status, results, error, setMascot]);
 
-  // React to page change (walk/fly to new page)
+  // React to page change (walk/fly to new page with fun positioning)
   useEffect(() => {
     const pageEmotions = {
-      dashboard:   { emotion: 'proud',     msg: 'Your mission control!' },
-      manual:      { emotion: 'excited',   msg: "Let's run some tests!" },
-      exploratory: { emotion: 'thinking',  msg: 'Upload screenshots and I analyze' },
-      api:         { emotion: 'happy',     msg: 'API testing time!' },
-      security:    { emotion: 'surprised', msg: 'Keep hackers out!' },
-      performance: { emotion: 'running',   msg: 'Speed is key' },
-      a11y:        { emotion: 'loving',    msg: 'Tests for everyone ♿' },
-      settings:    { emotion: 'happy',     msg: 'Tweak things here' },
-      'admin-users': { emotion: 'proud',   msg: 'Managing your team' },
+      dashboard:     { emotion: 'proud',     msg: 'Your mission control!',            pos: { x: 'right', y: 'top' } },
+      manual:        { emotion: 'excited',   msg: "Let's run some tests!",            pos: { x: 'right', y: 'bottom' } },
+      exploratory:   { emotion: 'thinking',  msg: 'Upload screenshots — I analyze!',  pos: { x: 'left',  y: 'bottom' } },
+      api:           { emotion: 'happy',     msg: 'API testing time!',                pos: { x: 'right', y: 'bottom' } },
+      security:      { emotion: 'surprised', msg: 'Keep hackers out!',                pos: { x: 'left',  y: 'top' } },
+      performance:   { emotion: 'running',   msg: 'Speed is key!',                    pos: { x: 'left',  y: 'bottom' } },
+      a11y:          { emotion: 'loving',    msg: 'Tests for everyone ♿',            pos: { x: 'right', y: 'top' } },
+      visual:        { emotion: 'surprised', msg: 'Spot the difference!',             pos: { x: 'right', y: 'bottom' } },
+      mobile:        { emotion: 'happy',     msg: 'Mobile testing made easy',         pos: { x: 'left',  y: 'top' } },
+      database:      { emotion: 'thinking',  msg: 'Data integrity first!',            pos: { x: 'left',  y: 'bottom' } },
+      cicd:          { emotion: 'excited',   msg: 'Automate all the things!',         pos: { x: 'right', y: 'bottom' } },
+      settings:      { emotion: 'happy',     msg: 'Tweak things here',                pos: { x: 'right', y: 'bottom' } },
+      scripts:       { emotion: 'happy',     msg: 'Scaffold a fresh project!',        pos: { x: 'right', y: 'bottom' } },
+      monitor:       { emotion: 'thinking',  msg: 'Watching your inbox...',           pos: { x: 'left',  y: 'top' } },
+      guide:         { emotion: 'happy',     msg: 'Read up on the features!',         pos: { x: 'right', y: 'bottom' } },
+      'admin-users':    { emotion: 'proud', msg: 'Managing your team',                pos: { x: 'right', y: 'top' } },
+      'admin-activity': { emotion: 'thinking', msg: 'Audit trail at your fingertips', pos: { x: 'right', y: 'top' } },
+      'admin-system':   { emotion: 'proud',    msg: 'System health is great!',        pos: { x: 'right', y: 'top' } },
     };
     const entry = pageEmotions[page];
-    if (entry) setMascot(entry.emotion, entry.msg, 3500);
+    if (entry) setMascot(entry.emotion, entry.msg, 4500, entry.pos);
   }, [page, setMascot]);
 
   // Idle detection — after 90s with no status changes, mascot sleeps
@@ -4609,6 +4625,22 @@ function QAToolApp({ authUser, onLogout }) {
                   📥 Download JSON
                 </a>
               </div>
+            </div>
+
+            {/* Navigation action bar — always visible after a run */}
+            <div className="action-bar results-nav-bar">
+              <button className="btn btn-primary" onClick={handleReset}>
+                <Icons.Play size={14} /> Start New Run
+              </button>
+              <button className="btn btn-ghost" onClick={() => setPage('dashboard')}>
+                <Icons.Activity size={14} /> Go to Dashboard
+              </button>
+              <button className="btn btn-ghost" onClick={() => setPage('history')}>
+                <Icons.Clock size={14} /> View History
+              </button>
+              <button className="btn btn-ghost" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <Icons.ArrowRight size={14} style={{ transform: 'rotate(-90deg)' }} /> Scroll to top
+              </button>
             </div>
 
             {/* Stats */}
