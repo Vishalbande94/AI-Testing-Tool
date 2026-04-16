@@ -4,6 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node scripts/start-all.js",
+    "backend": "cd qa-tool/backend && npm start",
+    "frontend": "cd qa-tool/frontend && npm run dev",
+    "install:all": "cd qa-tool/backend && npm install && cd ../frontend && npm install",
+    "test:all": "cd qa-tool/backend && npm test",
     "perf": "npx playwright test --config=playwright.perf.config.js",
     "perf:load": "npx playwright test tests/performance/page-load.perf.js --config=playwright.perf.config.js",
     "perf:cwv": "npx playwright test tests/performance/core-web-vitals.perf.js --config=playwright.perf.config.js",

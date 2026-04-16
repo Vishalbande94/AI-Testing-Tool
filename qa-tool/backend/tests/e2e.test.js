@@ -7,7 +7,7 @@
 //
 // Prerequisite: backend must be running at BASE_URL.
 
-const { test, describe, before } = require('node:test');
+const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -40,6 +40,18 @@ async function post(path, formOrJson, init = {}) {
   const res = await fetch(`${BASE}${path}`, { method: 'POST', headers, body, ...restInit });
   return { res, body: await j(res) };
 }
+
+// ── Global after-all: clean up test users so the admin panel stays tidy ────
+after(async () => {
+  try {
+    const res = await fetch(`${BASE}/api/auth/test-cleanup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-test-run': '1' },
+    });
+    const data = await res.json();
+    if (data.ok) console.log(`\n[cleanup] Removed ${data.removed} e2e test users`);
+  } catch { /* ignore */ }
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 describe('1 — Health & Infrastructure', () => {

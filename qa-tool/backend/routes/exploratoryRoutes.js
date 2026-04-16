@@ -83,7 +83,7 @@ function imageToBase64(filePath) {
 }
 
 // ── Helper: Extract frames from video using bundled ffmpeg ──────────────────
-async function extractVideoFrames(videoPath, maxFrames = 12) {
+async function extractVideoFrames(videoPath, maxFrames = 20) {
   const { execFileSync, execSync } = require('child_process');
   const framesDir = path.join(path.dirname(videoPath), `frames_${Date.now()}`);
   fs.mkdirSync(framesDir, { recursive: true });
@@ -220,7 +220,7 @@ router.post('/exploratory/analyze', uploadMiddleware, async (req, res) => {
           for (const vf of videoFiles) {
             log(`   Extracting frames from ${vf.originalname}...`);
             try {
-              const frames = await extractVideoFrames(vf.path, 8);
+              const frames = await extractVideoFrames(vf.path, 20);
               allImages.push(...frames);
               log(`   Extracted ${frames.length} frames from ${vf.originalname}`);
             } catch (err) {

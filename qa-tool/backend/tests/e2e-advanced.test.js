@@ -5,7 +5,7 @@
 //   • End-to-end user journeys (multi-step flows)
 //   • Edge cases (unicode, huge inputs, concurrency, malformed data)
 //   • Generator output validation (ZIP structure, README existence)
-const { test, describe } = require('node:test');
+const { test, describe, after } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -32,6 +32,18 @@ async function http(method, path, body = null, token = null) {
 const get  = (p, tok) => http('GET',  p, null, tok);
 const post = (p, b, tok) => http('POST', p, b, tok);
 const del  = (p, tok) => http('DELETE', p, null, tok);
+
+// ── Global after-all: clean up test users so the admin panel stays tidy ────
+after(async () => {
+  try {
+    const res = await fetch(`${BASE}/api/auth/test-cleanup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-test-run': '1' },
+    });
+    const data = await res.json();
+    if (data.ok) console.log(`\n[cleanup] Removed ${data.removed} e2e test users`);
+  } catch { /* ignore — server may be down */ }
+});
 
 // ── Shared: create a fresh admin + regular user, get tokens ────────────────
 async function createUser(email, password, name) {

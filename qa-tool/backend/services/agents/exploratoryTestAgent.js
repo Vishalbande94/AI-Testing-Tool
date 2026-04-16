@@ -94,8 +94,15 @@ OUTPUT JSON SCHEMA:
 async function analyzeScreenshots(images, context = {}) {
   const content = [];
 
-  // Add each image
+  // Add each image with a clear time-ordered label
+  const isVideo = /video recording/i.test(context.notes || '');
   images.forEach((img, idx) => {
+    content.push({
+      type: 'text',
+      text: isVideo
+        ? `━━━ FRAME ${idx + 1} / ${images.length} (t=${((idx / Math.max(images.length - 1, 1)) * 100).toFixed(0)}% through video) ━━━`
+        : `━━━ Screenshot ${idx + 1} / ${images.length} ━━━`,
+    });
     content.push({
       type: 'image',
       source: {
@@ -103,10 +110,6 @@ async function analyzeScreenshots(images, context = {}) {
         media_type: img.type,
         data: img.data,
       },
-    });
-    content.push({
-      type: 'text',
-      text: `[Screenshot ${idx + 1} of ${images.length}]`,
     });
   });
 
@@ -127,12 +130,19 @@ Analyze ALL the screenshots thoroughly. Identify every UI element, every possibl
   const result = await claudeClient.callJSON({
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content }],
-    maxTokens: 8192,
+    maxTokens: 16384,
     temperature: 0.3,
     model: 'claude-sonnet-4-20250514',
   });
 
-  return result.data;
+  // Attach metadata about what was analyzed so the UI can show it
+  return {
+    ...result.data,
+    _analyzed: {
+      frameCount: images.length,
+      mode: isVideo ? 'video' : 'screenshots',
+    },
+  };
 }
 
 /**
@@ -142,10 +152,22 @@ Analyze ALL the screenshots thoroughly. Identify every UI element, every possibl
  * @returns {Promise<Object>} Structured exploratory test plan
  */
 async function analyzeVideoFrames(frames, context = {}) {
-  // Video frames are treated the same as screenshots but with flow-awareness
+  // Video frames need sequence-aware analysis. We explicitly tell the model
+  // these are TIME-ORDERED frames of a user interaction so it tracks the flow.
   const enhancedContext = {
     ...context,
-    notes: `${context.notes || ''} [These are frames extracted from a video recording showing a user flow. Pay attention to the SEQUENCE of screens to identify the complete user journey and generate test cases for the entire flow.]`.trim(),
+    notes: `${context.notes || ''}
+
+🎥 CRITICAL: These ${frames.length} images are TIME-ORDERED FRAMES extracted evenly from a video recording (earliest first, latest last). They show a user performing actions in sequence.
+
+You MUST:
+1. Describe the USER JOURNEY chronologically — what screen/action is shown in EACH frame
+2. Identify ALL state transitions between frames (page navigation, modal opens, form submissions, data changes)
+3. Note which UI elements APPEAR, DISAPPEAR, or CHANGE between consecutive frames
+4. Generate test cases specifically for the ACTIONS AND FLOWS OBSERVED, not generic UI tests
+5. In screenAnalysis.description, write a 3-5 sentence summary of the ENTIRE flow observed
+6. In screenAnalysis.uiElements, list ONLY elements you actually saw in at least one frame
+7. Every test case must reference the actual flow — e.g. "Test the login flow observed in frames 3-7"`.trim(),
   };
   return analyzeScreenshots(frames, enhancedContext);
 }

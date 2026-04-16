@@ -83,6 +83,20 @@ async function authenticate(email, password) {
   return ok ? publicUser(u) : null;
 }
 
+async function changePassword(userId, currentPassword, newPassword) {
+  if (!currentPassword || !newPassword) throw new Error('currentPassword and newPassword are required');
+  if (newPassword.length < 8) throw new Error('new password must be at least 8 characters');
+  const users = loadAll();
+  const idx = users.findIndex(u => u.id === userId);
+  if (idx === -1) throw new Error('user not found');
+  const ok = await bcrypt.compare(currentPassword, users[idx].passwordHash);
+  if (!ok) throw new Error('current password is incorrect');
+  users[idx].passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+  users[idx].updatedAt = new Date().toISOString();
+  saveAll(users);
+  return publicUser(users[idx]);
+}
+
 function getById(id) {
   const users = loadAll();
   const u = users.find(x => x.id === id);
@@ -130,6 +144,16 @@ function setPreferences(userId, prefs) {
 
 function count() { return loadAll().length; }
 
+// ── Bulk delete users matching a pattern (never deletes admins) ────────────
+// Used by e2e test cleanup. The HTTP endpoint gates access to loopback IPs.
+function bulkDeleteByEmailPattern(pattern) {
+  const re = pattern instanceof RegExp ? pattern : new RegExp(pattern);
+  const users = loadAll();
+  const remaining = users.filter(u => !re.test(u.email) || u.role === 'admin');
+  saveAll(remaining);
+  return users.length - remaining.length;
+}
+
 // ── Admin helpers ───────────────────────────────────────────────────────────
 function listAllPublic() {
   return loadAll().map(publicUser);
@@ -159,6 +183,8 @@ function deleteUser(id) {
 }
 
 module.exports = {
-  createUser, authenticate, getById, setSecret, getSecret, deleteSecret,
+  createUser, authenticate, changePassword, getById,
+  setSecret, getSecret, deleteSecret,
   setPreferences, count, listAllPublic, updateRole, deleteUser,
+  bulkDeleteByEmailPattern,
 };

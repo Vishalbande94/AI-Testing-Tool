@@ -670,6 +670,59 @@ function TrendLineChart({ data }) {
 }
 
 // ── Dashboard Page ─────────────────────────────────────────────────────────────
+// ── Change Password card (inside profile section) ───────────────────────
+function ChangePasswordCard({ toast }) {
+  const [current, setCurrent] = useState('');
+  const [next,    setNext]    = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    if (next !== confirm) return toast('New password and confirmation do not match', 'error');
+    if (next.length < 8)   return toast('Password must be at least 8 characters', 'error');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: current, newPassword: next }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      toast('Password changed successfully', 'success');
+      setCurrent(''); setNext(''); setConfirm('');
+    } catch (e) { toast(e.message, 'error'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="settings-card">
+      <h2 className="settings-card-title"><Icons.Shield size={18} /> Change Password</h2>
+      <p className="settings-hint">Your password protects your account and all its stored secrets.</p>
+      <div className="settings-row">
+        <label>Current password</label>
+        <input className="field-input" type="password" value={current} onChange={e => setCurrent(e.target.value)} autoComplete="current-password" />
+      </div>
+      <div className="settings-row">
+        <label>New password</label>
+        <input className="field-input" type="password" value={next} onChange={e => setNext(e.target.value)} autoComplete="new-password" placeholder="min 8 characters" />
+      </div>
+      <div className="settings-row">
+        <label>Confirm new password</label>
+        <input className="field-input" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} autoComplete="new-password" />
+      </div>
+      <button
+        className="btn btn-primary btn-sm"
+        style={{ marginTop: 12 }}
+        disabled={loading || !current || !next || !confirm}
+        onClick={submit}
+      >
+        {loading ? 'Changing...' : 'Change password'}
+      </button>
+    </div>
+  );
+}
+
 // ── Settings Page — profile, notifications, appearance, security ──────────
 function SettingsPage({ authUser, darkMode, onToggleTheme, onLogout, toast, addNotification }) {
   const [section, setSection] = useState('profile');
@@ -758,6 +811,7 @@ function SettingsPage({ authUser, darkMode, onToggleTheme, onLogout, toast, addN
 
         <div className="settings-content">
           {section === 'profile' && (
+            <>
             <div className="settings-card">
               <h2 className="settings-card-title"><Icons.User size={18} /> Profile</h2>
               <div className="settings-row">
@@ -781,6 +835,8 @@ function SettingsPage({ authUser, darkMode, onToggleTheme, onLogout, toast, addN
                 <code className="settings-code">{authUser?.id}</code>
               </div>
             </div>
+            <ChangePasswordCard toast={toast} />
+            </>
           )}
 
           {section === 'appearance' && (
