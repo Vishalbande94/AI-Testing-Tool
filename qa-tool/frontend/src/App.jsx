@@ -1322,9 +1322,14 @@ function QAToolApp({ authUser, onLogout }) {
   const [showAdvanced,         setShowAdvanced]         = useState(false);
   const [runHistory,           setRunHistory]           = useState([]);
   const [genericMode,          setGenericMode]          = useState(false);
-  const [inputMode,            setInputMode]            = useState('requirement'); // 'requirement' | 'testcase' | 'generic'
+  const [inputMode,            setInputMode]            = useState('requirement'); // 'requirement' | 'testcase' | 'generic' | 'url-only'
   const [testcaseFile,         setTestcaseFile]         = useState(null);
   const testcaseFileRef = useRef();
+
+  // ── URL-only analysis preview (fetched when user picks url-only mode) ───
+  const [urlPreview, setUrlPreview] = useState(null);
+  const [urlPreviewLoading, setUrlPreviewLoading] = useState(false);
+  const [urlPreviewError,   setUrlPreviewError]   = useState('');
 
   // ── Target-app Authentication config ────────────────────────────────────
   const [authEnabled,  setAuthEnabled]  = useState(false);
@@ -2018,6 +2023,7 @@ function QAToolApp({ authUser, onLogout }) {
     const formData = new FormData();
     formData.append('appUrl',                normalizedUrl);
     formData.append('genericMode',           String(inputMode === 'generic'));
+    formData.append('urlOnlyMode',           String(inputMode === 'url-only'));
     if (inputMode === 'requirement' && file) {
       formData.append('requirementFile',     file);
     }
@@ -4012,6 +4018,16 @@ function QAToolApp({ authUser, onLogout }) {
                     <div className="input-mode-desc">No file — runs all 17 built-in test modules (smoke to security)</div>
                   </div>
                 </label>
+
+                <label className={`input-mode-card ${inputMode === 'url-only' ? 'selected' : ''}`}>
+                  <input type="radio" name="inputMode" checked={inputMode === 'url-only'}
+                    onChange={() => { setInputMode('url-only'); setGenericMode(false); setUrlPreview(null); }} />
+                  <div className="input-mode-icon" style={{ background: 'linear-gradient(135deg,#06b6d4,#3b82f6)' }}>🌐</div>
+                  <div className="input-mode-meta">
+                    <div className="input-mode-title">Generate from URL only</div>
+                    <div className="input-mode-desc">No file needed — I scan your app's URL and tailor tests to what I find</div>
+                  </div>
+                </label>
               </div>
             </div>
 
@@ -4212,6 +4228,74 @@ function QAToolApp({ authUser, onLogout }) {
                     <span key={m} className="generic-module-chip">{m}</span>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {inputMode === 'url-only' && (
+              <div className="generic-info" style={{ borderColor: 'rgba(6,182,212,.4)' }}>
+                <div className="generic-info-title" style={{ color: '#06b6d4' }}>🌐 URL-only Test Generation</div>
+                <div className="generic-info-desc">
+                  I'll scan <strong>{appUrl || '(enter URL above)'}</strong>, detect forms/inputs/buttons/links,
+                  and generate test cases tailored to what I find. No document needed.
+                </div>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  style={{ marginTop: 8 }}
+                  disabled={!appUrl || urlPreviewLoading}
+                  onClick={async () => {
+                    setUrlPreviewLoading(true);
+                    setUrlPreviewError('');
+                    setUrlPreview(null);
+                    try {
+                      const res = await fetch(`${API}/api/analyze-url`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: appUrl }),
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.error || 'Analysis failed');
+                      setUrlPreview(data);
+                    } catch (e) { setUrlPreviewError(e.message); }
+                    finally { setUrlPreviewLoading(false); }
+                  }}
+                >
+                  {urlPreviewLoading ? '🔍 Scanning...' : '🔍 Preview what I find'}
+                </button>
+
+                {urlPreviewError && (
+                  <div style={{ marginTop: 10, padding: 10, background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 8, fontSize: 12, color: '#ef4444' }}>
+                    ❌ {urlPreviewError} — we'll fall back to generic modules when you execute.
+                  </div>
+                )}
+
+                {urlPreview && (
+                  <div style={{ marginTop: 12, padding: 14, background: 'rgba(6,182,212,.05)', border: '1px solid rgba(6,182,212,.25)', borderRadius: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>
+                      📄 {urlPreview.summary.title || '(no page title)'}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10, lineHeight: 1.5 }}>
+                      {urlPreview.summary.description || 'No meta description found.'}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10, fontSize: 11 }}>
+                      <span className="chip chip-primary">📋 {urlPreview.summary.formsCount} forms</span>
+                      <span className="chip chip-primary">🔤 {urlPreview.summary.inputsCount} inputs</span>
+                      <span className="chip chip-primary">🔘 {urlPreview.summary.buttonsCount} buttons</span>
+                      <span className="chip chip-primary">🔗 {urlPreview.summary.linksCount} links</span>
+                    </div>
+                    {Object.keys(urlPreview.summary.detected || {}).length > 0 && (
+                      <>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Features detected:
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {Object.keys(urlPreview.summary.detected).filter(k => urlPreview.summary.detected[k]).map(k => (
+                            <span key={k} className="chip chip-success" style={{ fontSize: 11 }}>✓ {k}</span>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

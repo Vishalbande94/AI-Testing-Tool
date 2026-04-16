@@ -8,6 +8,7 @@ const parser               = require('../services/parser');
 const testCaseSheetParser   = require('../services/testCaseSheetParser');
 const testGenerator         = require('../services/testGenerator');
 const scriptGenerator       = require('../services/scriptGenerator');
+const urlAnalyzer           = require('../services/urlAnalyzer');
 const claudeClient          = require('../services/agents/claudeClient');
 const testArchitectAgent    = require('../services/agents/testArchitectAgent');
 
@@ -30,8 +31,8 @@ router.post('/generate-scripts', sgUpload, async (req, res) => {
   const sheetFile = req.files?.testcaseFile?.[0]    || null;
 
   if (!appUrl) return res.status(400).json({ error: 'appUrl is required' });
-  if (!reqFile && !sheetFile && genericMode !== 'true') {
-    return res.status(400).json({ error: 'Provide requirementFile, testcaseFile, or enable Generic Mode' });
+  if (!reqFile && !sheetFile && genericMode !== 'true' && req.body.urlOnlyMode !== 'true') {
+    return res.status(400).json({ error: 'Provide requirementFile, testcaseFile, enable Generic Mode, or urlOnlyMode' });
   }
 
   try {
@@ -41,9 +42,18 @@ router.post('/generate-scripts', sgUpload, async (req, res) => {
       // Skip requirement analysis — import test cases directly
       testCases = await testCaseSheetParser.parse(sheetFile.path);
     } else {
-      // Parse requirements text (doc or generic)
+      // Parse requirements text (doc / generic / url-only)
       let requirementText;
-      if (genericMode === 'true') {
+      if (req.body.urlOnlyMode === 'true') {
+        try {
+          const analysis = await urlAnalyzer.analyze(appUrl);
+          requirementText = analysis.keywords.join(' ') + ' ' +
+                            (analysis.summary.title || '') + ' ' +
+                            (analysis.summary.description || '');
+        } catch {
+          requirementText = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
+        }
+      } else if (genericMode === 'true') {
         requirementText = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
       } else {
         requirementText = await parser.extractText(reqFile.path);
