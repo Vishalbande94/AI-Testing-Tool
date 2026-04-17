@@ -94,7 +94,8 @@ router.post('/generate-testcases-only', runUpload, async (req, res) => {
     } else if (inputMode === 'url-only') {
       try {
         const analysis = await urlAnalyzer.analyze(appUrl);
-        requirementText = analysis.keywords.join(' ') + ' ' + (analysis.summary.title || '');
+        const standardKw = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
+        requirementText = analysis.keywords.join(' ') + ' ' + standardKw + ' ' + (analysis.summary.title || '');
       } catch {
         requirementText = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
       }
@@ -295,19 +296,26 @@ router.post('/execute', runUpload, async (req, res) => {
         requirementText = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
         log(`   All 10 test modules will be generated`);
       } else if (inputMode === 'url-only') {
-        log(`🌐 Step 1/${totalSteps} — URL Analysis — inspecting ${appUrl}...`);
+        log(`🌐 Step 1/${totalSteps} — URL Analysis — crawling ${appUrl}...`);
         try {
           const analysis = await urlAnalyzer.analyze(appUrl);
           log(`   📄 Page title: "${analysis.summary.title || '(no title)'}"`);
+          log(`   🕸️ Crawled ${analysis.summary.pagesCrawled || 1} page(s)`);
+          if (analysis.pages?.length > 1) {
+            analysis.pages.forEach(p => log(`      → ${p.url}: ${p.detectedFeatures.join(', ') || 'no features'} (${p.forms} forms, ${p.inputs} inputs)`));
+          }
           log(`   🔍 Found: ${analysis.summary.formsCount} form(s), ${analysis.summary.inputsCount} input(s), ${analysis.summary.buttonsCount} button(s), ${analysis.summary.linksCount} link(s)`);
           const featured = Object.keys(analysis.summary.detected).filter(k => analysis.summary.detected[k]);
-          log(`   ✨ Features detected: ${featured.join(', ') || 'minimal — falling back to common modules'}`);
-          log(`   🏷️ Keywords for test generation: ${analysis.keywords.join(', ')}`);
-          requirementText = analysis.keywords.join(' ') + ' ' + (analysis.summary.title || '') + ' ' + (analysis.summary.description || '');
-          // Stuff the analysis into the runConfig so report generation can show it
+          log(`   ✨ Features detected: ${featured.join(', ') || 'minimal — adding all standard modules'}`);
+          log(`   🏷️ Keywords: ${analysis.keywords.join(', ')}`);
+
+          // Build comprehensive requirement text:
+          // URL-extracted keywords + ALL standard modules for complete coverage
+          const standardKeywords = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
+          requirementText = analysis.keywords.join(' ') + ' ' + standardKeywords + ' ' + (analysis.summary.title || '') + ' ' + (analysis.summary.description || '');
           runConfig.urlAnalysis = analysis.summary;
         } catch (err) {
-          log(`   ⚠️ URL analysis failed (${err.message}), falling back to generic modules`);
+          log(`   ⚠️ URL analysis failed (${err.message}), using all standard modules`);
           requirementText = 'login register signup authentication payment checkout billing form validation submit search filter logout signout session password forgot reset dashboard home overview navigation menu link profile account settings';
         }
       } else {

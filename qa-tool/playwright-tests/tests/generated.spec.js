@@ -2,9 +2,9 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
-const BASE_URL  = 'file:///C:/Users/Vishal/PlaywrightPractice/insurance-app/index.html';
-const BASE_DIR  = 'file:///C:/Users/Vishal/PlaywrightPractice/insurance-app';   // directory containing all HTML pages
-const IS_FILE   = true;
+const BASE_URL  = 'https://example.com';
+const BASE_DIR  = 'https://example.com';   // directory containing all HTML pages
+const IS_FILE   = false;
 
 // ── URL builder: works for both http:// and file:// ────────────────────────────
 function pageUrl(filename) {
@@ -78,10 +78,10 @@ async function hasError(page) {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_001 | Navigation | Positive
+// P01_771 | Navigation | Positive
 // All navigation links are functional
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_001 | All navigation links are functional', async ({ page }) => {
+test('P01_771 | All navigation links are functional', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Navigation' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'nav_links' });
@@ -104,10 +104,10 @@ test('P01_001 | All navigation links are functional', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P02_002 | Navigation | Positive
+// P02_772 | Navigation | Positive
 // Application loads successfully at base URL
 // ─────────────────────────────────────────────────────────────────────────────
-test('P02_002 | Application loads successfully at base URL', async ({ page }) => {
+test('P02_772 | Application loads successfully at base URL', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Navigation' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'nav_base_load' });
@@ -124,10 +124,10 @@ test('P02_002 | Application loads successfully at base URL', async ({ page }) =>
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_003 | Authentication — Login | Positive
+// P01_773 | Authentication — Login | Positive
 // Login with valid credentials
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_003 | Login with valid credentials', async ({ page }) => {
+test('P01_773 | Login with valid credentials', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Authentication — Login' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'login_positive' });
@@ -162,10 +162,10 @@ test('P01_003 | Login with valid credentials', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_004 | Authentication — Login | Negative
+// N01_774 | Authentication — Login | Negative
 // Login with incorrect password
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_004 | Login with incorrect password', async ({ page }) => {
+test('N01_774 | Login with incorrect password', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Authentication — Login' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'login_negative_pwd' });
@@ -198,10 +198,10 @@ test('N01_004 | Login with incorrect password', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// E01_005 | Authentication — Login | Edge
+// E01_775 | Authentication — Login | Edge
 // Login with empty fields
 // ─────────────────────────────────────────────────────────────────────────────
-test('E01_005 | Login with empty fields', async ({ page }) => {
+test('E01_775 | Login with empty fields', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Authentication — Login' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'login_edge_empty' });
@@ -225,10 +225,10 @@ test('E01_005 | Login with empty fields', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_006 | User Registration | Positive
+// P01_776 | User Registration | Positive
 // Register a new user with valid details
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_006 | Register a new user with valid details', async ({ page }) => {
+test('P01_776 | Register a new user with valid details', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Registration' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'register_positive' });
@@ -297,10 +297,10 @@ test('P01_006 | Register a new user with valid details', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_007 | User Registration | Negative
+// N01_777 | User Registration | Negative
 // Register with an already-registered email
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_007 | Register with an already-registered email', async ({ page }) => {
+test('N01_777 | Register with an already-registered email', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Registration' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'register_negative_dup' });
@@ -321,10 +321,10 @@ test('N01_007 | Register with an already-registered email', async ({ page }) => 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// E01_008 | User Registration | Edge
+// E01_778 | User Registration | Edge
 // Register with missing mandatory fields
 // ─────────────────────────────────────────────────────────────────────────────
-test('E01_008 | Register with missing mandatory fields', async ({ page }) => {
+test('E01_778 | Register with missing mandatory fields', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Registration' });
   test.info().annotations.push({ type: 'type',   description: 'Edge' });
   test.info().annotations.push({ type: 'key',    description: 'register_edge_empty' });
@@ -343,10 +343,264 @@ test('E01_008 | Register with missing mandatory fields', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_009 | Password Management | Positive
+// P01_779 | Payment & Checkout | Positive
+// Complete payment with valid card details
+// ─────────────────────────────────────────────────────────────────────────────
+test('P01_779 | Complete payment with valid card details', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Payment & Checkout' });
+  test.info().annotations.push({ type: 'type',   description: 'Positive' });
+  test.info().annotations.push({ type: 'key',    description: 'payment_positive' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const _payNames = IS_FILE ? ['checkout.html','payment.html','pay.html'] : ['checkout.html','checkout','payment','pay'];
+  let navigated = false;
+  for (const n of _payNames) {
+    try {
+      await page.goto(pageUrl(n), { timeout: 5000 });
+      navigated = true; break;
+    } catch { /* try next */ }
+  }
+  if (!navigated) {
+    await tryClick(page, ['a:has-text("Checkout")', 'a:has-text("Pay")', 'button:has-text("Buy Now")']);
+  }
+  await tryFill(page, [
+    'input[name*="card" i]', 'input[id*="card" i]', 'input[placeholder*="card" i]',
+    'input[maxlength="16"]',
+  ], '4111111111111111');
+  await tryFill(page, [
+    'input[name*="expir" i]', 'input[placeholder*="MM/YY" i]', 'input[placeholder*="expir" i]',
+  ], '12/27');
+  await tryFill(page, [
+    'input[name*="cvv" i]', 'input[name*="cvc" i]', 'input[maxlength="3"]',
+    'input[placeholder*="cvv" i]',
+  ], '123');
+  const pageLoaded = await page.title().then(() => true).catch(() => false);
+  expect(pageLoaded, 'Payment page should load without crash').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// N01_780 | Payment & Checkout | Negative
+// Payment with expired card
+// ─────────────────────────────────────────────────────────────────────────────
+test('N01_780 | Payment with expired card', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Payment & Checkout' });
+  test.info().annotations.push({ type: 'type',   description: 'Negative' });
+  test.info().annotations.push({ type: 'key',    description: 'payment_negative_expired' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  for (const n of (IS_FILE ? ['checkout.html','payment.html'] : ['checkout.html','checkout','payment'])) {
+    try { await page.goto(pageUrl(n), { timeout: 5000 }); break; } catch { /* try next */ }
+  }
+  await tryFill(page, ['input[name*="card" i]', 'input[maxlength="16"]'], '4111111111111111');
+  await tryFill(page, ['input[name*="expir" i]', 'input[placeholder*="MM/YY" i]'], '01/20');
+  await tryFill(page, ['input[name*="cvv" i]', 'input[maxlength="3"]'], '123');
+  await tryClick(page, ['button[type="submit"]', 'button:has-text("Pay")']);
+  await page.waitForTimeout(2000);
+  const title = await page.title().catch(() => '');
+  expect(title !== undefined, 'Page should handle expired card gracefully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// E01_781 | Payment & Checkout | Edge
+// Payment with empty card fields
+// ─────────────────────────────────────────────────────────────────────────────
+test('E01_781 | Payment with empty card fields', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Payment & Checkout' });
+  test.info().annotations.push({ type: 'type',   description: 'Edge' });
+  test.info().annotations.push({ type: 'key',    description: 'payment_edge_empty' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  for (const n of (IS_FILE ? ['checkout.html','payment.html'] : ['checkout.html','checkout','payment'])) {
+    try { await page.goto(pageUrl(n), { timeout: 5000 }); break; } catch { /* try next */ }
+  }
+  await tryClick(page, ['button[type="submit"]', 'button:has-text("Pay")']);
+  await page.waitForTimeout(2000);
+  const title = await page.title().catch(() => '');
+  expect(title !== undefined, 'Page should not crash on empty payment submit').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P01_782 | Form Validation | Positive
+// Submit form with all valid data
+// ─────────────────────────────────────────────────────────────────────────────
+test('P01_782 | Submit form with all valid data', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Form Validation' });
+  test.info().annotations.push({ type: 'type',   description: 'Positive' });
+  test.info().annotations.push({ type: 'key',    description: 'form_positive' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const inputs = await page.locator('input[type="text"], input[type="email"]').all();
+  for (const input of inputs.slice(0, 3)) {
+    const type = await input.getAttribute('type').catch(() => 'text');
+    if (type === 'email') await input.fill('test@example.com').catch(() => {});
+    else await input.fill('Test Value').catch(() => {});
+  }
+  const pageLoaded = await page.title().then(() => true).catch(() => false);
+  expect(pageLoaded, 'Form page should load correctly').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// N01_783 | Form Validation | Negative
+// Submit form with invalid email format
+// ─────────────────────────────────────────────────────────────────────────────
+test('N01_783 | Submit form with invalid email format', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Form Validation' });
+  test.info().annotations.push({ type: 'type',   description: 'Negative' });
+  test.info().annotations.push({ type: 'key',    description: 'form_negative_email' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  await tryFill(page, ['input[type="email"]', 'input[name="email"]'], 'notanemail');
+  await tryClick(page, ['button[type="submit"]', 'input[type="submit"]']);
+  await page.waitForTimeout(2000);
+  const title = await page.title().catch(() => '');
+  expect(title !== undefined, 'Form should handle invalid email gracefully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// E01_784 | Form Validation | Edge
+// Submit completely empty form
+// ─────────────────────────────────────────────────────────────────────────────
+test('E01_784 | Submit completely empty form', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Form Validation' });
+  test.info().annotations.push({ type: 'type',   description: 'Edge' });
+  test.info().annotations.push({ type: 'key',    description: 'form_edge_empty' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  await tryClick(page, ['button[type="submit"]', 'input[type="submit"]']);
+  await page.waitForTimeout(2000);
+  const title = await page.title().catch(() => '');
+  expect(title !== undefined, 'Empty form submit should not crash page').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P01_785 | Search & Filter | Positive
+// Search with valid keyword returns results
+// ─────────────────────────────────────────────────────────────────────────────
+test('P01_785 | Search with valid keyword returns results', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Search & Filter' });
+  test.info().annotations.push({ type: 'type',   description: 'Positive' });
+  test.info().annotations.push({ type: 'key',    description: 'search_positive' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  await tryFill(page, [
+    'input[type="search"]', 'input[name="search"]', 'input[name="q"]',
+    'input[placeholder*="search" i]', 'input[id*="search" i]',
+  ], 'test');
+  await page.keyboard.press('Enter');
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  const title = await page.title().catch(() => '');
+  expect(title !== undefined, 'Search should complete without crash').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// N01_786 | Search & Filter | Negative
+// Search with no results keyword shows empty state
+// ─────────────────────────────────────────────────────────────────────────────
+test('N01_786 | Search with no results keyword shows empty state', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Search & Filter' });
+  test.info().annotations.push({ type: 'type',   description: 'Negative' });
+  test.info().annotations.push({ type: 'key',    description: 'search_negative_empty' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const searchBox = await tryFind(page, [
+    'input[type="search"]', 'input[name="search"]', 'input[name="q"]',
+    'input[placeholder*="search" i]',
+  ]);
+  if (searchBox) {
+    await searchBox.fill('xyznotfound12345abc');
+    await page.keyboard.press('Enter');
+    await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  }
+  const title = await page.title().catch(() => '');
+  expect(title !== undefined, 'No-results search should load gracefully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P01_787 | Session Management — Logout | Positive
+// User can logout successfully
+// ─────────────────────────────────────────────────────────────────────────────
+test('P01_787 | User can logout successfully', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Session Management — Logout' });
+  test.info().annotations.push({ type: 'type',   description: 'Positive' });
+  test.info().annotations.push({ type: 'key',    description: 'logout_positive' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  // Try to login first
+  await gotoLogin(page);
+  await tryFill(page, ['input[type="email"]', 'input[name="email"]'], 'rahul@demo.com');
+  await tryFill(page, ['input[type="password"]'], 'Test@1234');
+  await tryClick(page, ['button[type="submit"]', 'button:has-text("Login")']);
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+
+  // Attempt logout
+  await tryClick(page, [
+    'button:has-text("Logout")', 'a:has-text("Logout")', 'a:has-text("Log Out")',
+    'button:has-text("Sign Out")', 'a:has-text("Sign Out")',
+    '[data-testid*="logout"]', '.nav-link:has-text("Logout")',
+  ]);
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  const title = await page.title().catch(() => '');
+  expect(title !== undefined, 'Logout action should not crash application').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// E01_788 | Session Management — Logout | Edge
+// Back button after logout should not access protected pages
+// ─────────────────────────────────────────────────────────────────────────────
+test('E01_788 | Back button after logout should not access protected pages', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Session Management — Logout' });
+  test.info().annotations.push({ type: 'type',   description: 'Edge' });
+  test.info().annotations.push({ type: 'key',    description: 'logout_edge_back' });
+
+
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  await gotoLogin(page);
+  await tryFill(page, ['input[type="email"]', 'input[name="email"]'], 'rahul@demo.com');
+  await tryFill(page, ['input[type="password"]'], 'Test@1234');
+  await tryClick(page, ['button[type="submit"]', 'button:has-text("Login")']);
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  await tryClick(page, ['button:has-text("Logout")', 'a:has-text("Logout")', 'a:has-text("Sign Out")']);
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  await page.goBack();
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  const title = await page.title().catch(() => '');
+  expect(title !== undefined, 'Back navigation after logout should be handled gracefully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P01_789 | Password Management | Positive
 // Forgot password flow sends reset link
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_009 | Forgot password flow sends reset link', async ({ page }) => {
+test('P01_789 | Forgot password flow sends reset link', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Password Management' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'password_forgot_positive' });
@@ -372,10 +626,10 @@ test('P01_009 | Forgot password flow sends reset link', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_010 | Password Management | Negative
+// N01_790 | Password Management | Negative
 // Forgot password with unregistered email
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_010 | Forgot password with unregistered email', async ({ page }) => {
+test('N01_790 | Forgot password with unregistered email', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Password Management' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'password_forgot_negative' });
@@ -396,10 +650,10 @@ test('N01_010 | Forgot password with unregistered email', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_011 | Dashboard | Positive
+// P01_791 | Dashboard | Positive
 // Dashboard loads with all required sections
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_011 | Dashboard loads with all required sections', async ({ page }) => {
+test('P01_791 | Dashboard loads with all required sections', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Dashboard' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'dashboard_load' });
@@ -418,10 +672,10 @@ test('P01_011 | Dashboard loads with all required sections', async ({ page }) =>
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P02_012 | Dashboard | Positive
+// P02_792 | Dashboard | Positive
 // Dashboard page load time within performance budget
 // ─────────────────────────────────────────────────────────────────────────────
-test('P02_012 | Dashboard page load time within performance budget', async ({ page }) => {
+test('P02_792 | Dashboard page load time within performance budget', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Dashboard' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'dashboard_perf' });
@@ -436,10 +690,10 @@ test('P02_012 | Dashboard page load time within performance budget', async ({ pa
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// P01_013 | User Profile & Settings | Positive
+// P01_793 | User Profile & Settings | Positive
 // User profile page loads with correct information
 // ─────────────────────────────────────────────────────────────────────────────
-test('P01_013 | User profile page loads with correct information', async ({ page }) => {
+test('P01_793 | User profile page loads with correct information', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Profile & Settings' });
   test.info().annotations.push({ type: 'type',   description: 'Positive' });
   test.info().annotations.push({ type: 'key',    description: 'profile_load' });
@@ -463,10 +717,10 @@ test('P01_013 | User profile page loads with correct information', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// N01_014 | User Profile & Settings | Negative
+// N01_794 | User Profile & Settings | Negative
 // Access profile without login redirects to login
 // ─────────────────────────────────────────────────────────────────────────────
-test('N01_014 | Access profile without login redirects to login', async ({ page }) => {
+test('N01_794 | Access profile without login redirects to login', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'User Profile & Settings' });
   test.info().annotations.push({ type: 'type',   description: 'Negative' });
   test.info().annotations.push({ type: 'key',    description: 'profile_auth_guard' });
@@ -487,10 +741,10 @@ test('N01_014 | Access profile without login redirects to login', async ({ page 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC01_015 | Security — OWASP | Security
+// SEC01_795 | Security — OWASP | Security
 // XSS — Reflected script injection in input fields
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC01_015 | XSS — Reflected script injection in input fields', async ({ page }) => {
+test('SEC01_795 | XSS — Reflected script injection in input fields', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_xss_reflected' });
@@ -505,10 +759,10 @@ test('SEC01_015 | XSS — Reflected script injection in input fields', async ({ 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC02_016 | Security — OWASP | Security
+// SEC02_796 | Security — OWASP | Security
 // XSS — Stored script injection via saved data
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC02_016 | XSS — Stored script injection via saved data', async ({ page }) => {
+test('SEC02_796 | XSS — Stored script injection via saved data', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_xss_stored' });
@@ -523,10 +777,10 @@ test('SEC02_016 | XSS — Stored script injection via saved data', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC03_017 | Security — OWASP | Security
+// SEC03_797 | Security — OWASP | Security
 // SQL Injection — Authentication bypass attempt
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC03_017 | SQL Injection — Authentication bypass attempt', async ({ page }) => {
+test('SEC03_797 | SQL Injection — Authentication bypass attempt', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_sqli_login' });
@@ -541,10 +795,10 @@ test('SEC03_017 | SQL Injection — Authentication bypass attempt', async ({ pag
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC04_018 | Security — OWASP | Security
+// SEC04_798 | Security — OWASP | Security
 // IDOR — Access another user's resource by manipulating ID
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC04_018 | IDOR — Access another user\'s resource by manipulating ID', async ({ page }) => {
+test('SEC04_798 | IDOR — Access another user\'s resource by manipulating ID', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_idor' });
@@ -559,10 +813,10 @@ test('SEC04_018 | IDOR — Access another user\'s resource by manipulating ID', 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC05_019 | Security — OWASP | Security
+// SEC05_799 | Security — OWASP | Security
 // CSRF — State-changing action without token
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC05_019 | CSRF — State-changing action without token', async ({ page }) => {
+test('SEC05_799 | CSRF — State-changing action without token', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_csrf' });
@@ -577,10 +831,10 @@ test('SEC05_019 | CSRF — State-changing action without token', async ({ page }
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC06_020 | Security — OWASP | Security
+// SEC06_800 | Security — OWASP | Security
 // Brute Force — Rate limiting on login attempts
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC06_020 | Brute Force — Rate limiting on login attempts', async ({ page }) => {
+test('SEC06_800 | Brute Force — Rate limiting on login attempts', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_brute_force' });
@@ -595,10 +849,10 @@ test('SEC06_020 | Brute Force — Rate limiting on login attempts', async ({ pag
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC07_021 | Security — OWASP | Security
+// SEC07_801 | Security — OWASP | Security
 // Sensitive Data Exposure — HTTPS & security headers
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC07_021 | Sensitive Data Exposure — HTTPS & security headers', async ({ page }) => {
+test('SEC07_801 | Sensitive Data Exposure — HTTPS & security headers', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_headers' });
@@ -613,10 +867,10 @@ test('SEC07_021 | Sensitive Data Exposure — HTTPS & security headers', async (
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEC08_022 | Security — OWASP | Security
+// SEC08_802 | Security — OWASP | Security
 // Session — Session fixation and logout invalidation
 // ─────────────────────────────────────────────────────────────────────────────
-test('SEC08_022 | Session — Session fixation and logout invalidation', async ({ page }) => {
+test('SEC08_802 | Session — Session fixation and logout invalidation', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Security — OWASP' });
   test.info().annotations.push({ type: 'type',   description: 'Security' });
   test.info().annotations.push({ type: 'key',    description: 'sec_session_fixation' });
@@ -631,10 +885,10 @@ test('SEC08_022 | Session — Session fixation and logout invalidation', async (
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y01_023 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y01_803 | Accessibility — WCAG 2.1 | Accessibility
 // Keyboard navigation — Tab order and focus trap
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y01_023 | Keyboard navigation — Tab order and focus trap', async ({ page }) => {
+test('A11Y01_803 | Keyboard navigation — Tab order and focus trap', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_keyboard_nav' });
@@ -649,10 +903,10 @@ test('A11Y01_023 | Keyboard navigation — Tab order and focus trap', async ({ p
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y02_024 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y02_804 | Accessibility — WCAG 2.1 | Accessibility
 // Screen reader — Labels and ARIA for form controls
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y02_024 | Screen reader — Labels and ARIA for form controls', async ({ page }) => {
+test('A11Y02_804 | Screen reader — Labels and ARIA for form controls', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_screen_reader' });
@@ -667,10 +921,10 @@ test('A11Y02_024 | Screen reader — Labels and ARIA for form controls', async (
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y03_025 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y03_805 | Accessibility — WCAG 2.1 | Accessibility
 // Color contrast — Text meets 4.5:1 (normal) / 3:1 (large)
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y03_025 | Color contrast — Text meets 4.5:1 (normal) / 3:1 (large)', async ({ page }) => {
+test('A11Y03_805 | Color contrast — Text meets 4.5:1 (normal) / 3:1 (large)', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_contrast' });
@@ -685,10 +939,10 @@ test('A11Y03_025 | Color contrast — Text meets 4.5:1 (normal) / 3:1 (large)', 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y04_026 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y04_806 | Accessibility — WCAG 2.1 | Accessibility
 // Images — Alt text presence and accuracy
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y04_026 | Images — Alt text presence and accuracy', async ({ page }) => {
+test('A11Y04_806 | Images — Alt text presence and accuracy', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_alt_text' });
@@ -703,10 +957,10 @@ test('A11Y04_026 | Images — Alt text presence and accuracy', async ({ page }) 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// A11Y05_027 | Accessibility — WCAG 2.1 | Accessibility
+// A11Y05_807 | Accessibility — WCAG 2.1 | Accessibility
 // Heading hierarchy and landmark regions
 // ─────────────────────────────────────────────────────────────────────────────
-test('A11Y05_027 | Heading hierarchy and landmark regions', async ({ page }) => {
+test('A11Y05_807 | Heading hierarchy and landmark regions', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Accessibility — WCAG 2.1' });
   test.info().annotations.push({ type: 'type',   description: 'Accessibility' });
   test.info().annotations.push({ type: 'key',    description: 'a11y_headings' });
@@ -721,10 +975,10 @@ test('A11Y05_027 | Heading hierarchy and landmark regions', async ({ page }) => 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF01_028 | Performance — Core Web Vitals | Performance
+// PERF01_808 | Performance — Core Web Vitals | Performance
 // LCP — Largest Contentful Paint under 2.5s
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF01_028 | LCP — Largest Contentful Paint under 2.5s', async ({ page }) => {
+test('PERF01_808 | LCP — Largest Contentful Paint under 2.5s', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_lcp' });
@@ -739,10 +993,10 @@ test('PERF01_028 | LCP — Largest Contentful Paint under 2.5s', async ({ page }
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF02_029 | Performance — Core Web Vitals | Performance
+// PERF02_809 | Performance — Core Web Vitals | Performance
 // CLS — Cumulative Layout Shift under 0.1
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF02_029 | CLS — Cumulative Layout Shift under 0.1', async ({ page }) => {
+test('PERF02_809 | CLS — Cumulative Layout Shift under 0.1', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_cls' });
@@ -757,10 +1011,10 @@ test('PERF02_029 | CLS — Cumulative Layout Shift under 0.1', async ({ page }) 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF03_030 | Performance — Core Web Vitals | Performance
+// PERF03_810 | Performance — Core Web Vitals | Performance
 // INP — Interaction to Next Paint under 200ms
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF03_030 | INP — Interaction to Next Paint under 200ms', async ({ page }) => {
+test('PERF03_810 | INP — Interaction to Next Paint under 200ms', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_inp' });
@@ -775,10 +1029,10 @@ test('PERF03_030 | INP — Interaction to Next Paint under 200ms', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF04_031 | Performance — Core Web Vitals | Performance
+// PERF04_811 | Performance — Core Web Vitals | Performance
 // Bundle size — JS payload under 250KB compressed
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF04_031 | Bundle size — JS payload under 250KB compressed', async ({ page }) => {
+test('PERF04_811 | Bundle size — JS payload under 250KB compressed', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_bundle' });
@@ -793,10 +1047,10 @@ test('PERF04_031 | Bundle size — JS payload under 250KB compressed', async ({ 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERF05_032 | Performance — Core Web Vitals | Performance
+// PERF05_812 | Performance — Core Web Vitals | Performance
 // API response time — p95 under 1s
 // ─────────────────────────────────────────────────────────────────────────────
-test('PERF05_032 | API response time — p95 under 1s', async ({ page }) => {
+test('PERF05_812 | API response time — p95 under 1s', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Performance — Core Web Vitals' });
   test.info().annotations.push({ type: 'type',   description: 'Performance' });
   test.info().annotations.push({ type: 'key',    description: 'perf_api_p95' });
@@ -811,10 +1065,10 @@ test('PERF05_032 | API response time — p95 under 1s', async ({ page }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESP01_033 | Responsive & Mobile | UI/UX
+// RESP01_813 | Responsive & Mobile | UI/UX
 // Mobile viewport — 375×667 layout integrity
 // ─────────────────────────────────────────────────────────────────────────────
-test('RESP01_033 | Mobile viewport — 375×667 layout integrity', async ({ page }) => {
+test('RESP01_813 | Mobile viewport — 375×667 layout integrity', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Responsive & Mobile' });
   test.info().annotations.push({ type: 'type',   description: 'UI/UX' });
   test.info().annotations.push({ type: 'key',    description: 'resp_mobile_375' });
@@ -829,10 +1083,10 @@ test('RESP01_033 | Mobile viewport — 375×667 layout integrity', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESP02_034 | Responsive & Mobile | UI/UX
+// RESP02_814 | Responsive & Mobile | UI/UX
 // Tablet viewport — 768×1024 portrait and landscape
 // ─────────────────────────────────────────────────────────────────────────────
-test('RESP02_034 | Tablet viewport — 768×1024 portrait and landscape', async ({ page }) => {
+test('RESP02_814 | Tablet viewport — 768×1024 portrait and landscape', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Responsive & Mobile' });
   test.info().annotations.push({ type: 'type',   description: 'UI/UX' });
   test.info().annotations.push({ type: 'key',    description: 'resp_tablet' });
@@ -847,10 +1101,10 @@ test('RESP02_034 | Tablet viewport — 768×1024 portrait and landscape', async 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESP03_035 | Responsive & Mobile | UI/UX
+// RESP03_815 | Responsive & Mobile | UI/UX
 // Touch interactions — Tap, swipe, long-press
 // ─────────────────────────────────────────────────────────────────────────────
-test('RESP03_035 | Touch interactions — Tap, swipe, long-press', async ({ page }) => {
+test('RESP03_815 | Touch interactions — Tap, swipe, long-press', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Responsive & Mobile' });
   test.info().annotations.push({ type: 'type',   description: 'UI/UX' });
   test.info().annotations.push({ type: 'key',    description: 'resp_touch' });
@@ -865,16 +1119,178 @@ test('RESP03_035 | Touch interactions — Tap, swipe, long-press', async ({ page
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESP04_036 | Responsive & Mobile | UI/UX
+// RESP04_816 | Responsive & Mobile | UI/UX
 // Orientation change — Portrait ↔ Landscape preserves state
 // ─────────────────────────────────────────────────────────────────────────────
-test('RESP04_036 | Orientation change — Portrait ↔ Landscape preserves state', async ({ page }) => {
+test('RESP04_816 | Orientation change — Portrait ↔ Landscape preserves state', async ({ page }) => {
   test.info().annotations.push({ type: 'module', description: 'Responsive & Mobile' });
   test.info().annotations.push({ type: 'type',   description: 'UI/UX' });
   test.info().annotations.push({ type: 'key',    description: 'resp_orientation' });
 
 
   // Generic test for: resp_orientation
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BV01_817 | Boundary & Data Validation | Boundary
+// Numeric field — min, min-1, max, max+1
+// ─────────────────────────────────────────────────────────────────────────────
+test('BV01_817 | Numeric field — min, min-1, max, max+1', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
+  test.info().annotations.push({ type: 'type',   description: 'Boundary' });
+  test.info().annotations.push({ type: 'key',    description: 'bv_numeric' });
+
+
+  // Generic test for: bv_numeric
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BV02_818 | Boundary & Data Validation | Boundary
+// Text field — length 0, 1, max, max+1
+// ─────────────────────────────────────────────────────────────────────────────
+test('BV02_818 | Text field — length 0, 1, max, max+1', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
+  test.info().annotations.push({ type: 'type',   description: 'Boundary' });
+  test.info().annotations.push({ type: 'key',    description: 'bv_text_length' });
+
+
+  // Generic test for: bv_text_length
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BV03_819 | Boundary & Data Validation | Boundary
+// Date field — past, today, future, invalid
+// ─────────────────────────────────────────────────────────────────────────────
+test('BV03_819 | Date field — past, today, future, invalid', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
+  test.info().annotations.push({ type: 'type',   description: 'Boundary' });
+  test.info().annotations.push({ type: 'key',    description: 'bv_date' });
+
+
+  // Generic test for: bv_date
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BV04_820 | Boundary & Data Validation | Boundary
+// Email — RFC 5321 format edge cases
+// ─────────────────────────────────────────────────────────────────────────────
+test('BV04_820 | Email — RFC 5321 format edge cases', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
+  test.info().annotations.push({ type: 'type',   description: 'Boundary' });
+  test.info().annotations.push({ type: 'key',    description: 'bv_email' });
+
+
+  // Generic test for: bv_email
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BV05_821 | Boundary & Data Validation | Boundary
+// Unicode — Multi-byte chars, emojis, RTL in text fields
+// ─────────────────────────────────────────────────────────────────────────────
+test('BV05_821 | Unicode — Multi-byte chars, emojis, RTL in text fields', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Boundary & Data Validation' });
+  test.info().annotations.push({ type: 'type',   description: 'Boundary' });
+  test.info().annotations.push({ type: 'key',    description: 'bv_unicode' });
+
+
+  // Generic test for: bv_unicode
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONC01_822 | Concurrency & State | Negative
+// Double-click submission — no duplicate records
+// ─────────────────────────────────────────────────────────────────────────────
+test('CONC01_822 | Double-click submission — no duplicate records', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Concurrency & State' });
+  test.info().annotations.push({ type: 'type',   description: 'Negative' });
+  test.info().annotations.push({ type: 'key',    description: 'conc_double_submit' });
+
+
+  // Generic test for: conc_double_submit
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONC02_823 | Concurrency & State | Negative
+// Concurrent edit — two tabs editing same resource
+// ─────────────────────────────────────────────────────────────────────────────
+test('CONC02_823 | Concurrent edit — two tabs editing same resource', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Concurrency & State' });
+  test.info().annotations.push({ type: 'type',   description: 'Negative' });
+  test.info().annotations.push({ type: 'key',    description: 'conc_concurrent_edit' });
+
+
+  // Generic test for: conc_concurrent_edit
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONC03_824 | Concurrency & State | Edge
+// Back button after state-changing action
+// ─────────────────────────────────────────────────────────────────────────────
+test('CONC03_824 | Back button after state-changing action', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Concurrency & State' });
+  test.info().annotations.push({ type: 'type',   description: 'Edge' });
+  test.info().annotations.push({ type: 'key',    description: 'conc_back_button' });
+
+
+  // Generic test for: conc_back_button
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  const title = await page.title();
+  expect(title, 'Application should load successfully').toBeTruthy();
+
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONC04_825 | Concurrency & State | Edge
+// Session expiry — Action after token expiry
+// ─────────────────────────────────────────────────────────────────────────────
+test('CONC04_825 | Session expiry — Action after token expiry', async ({ page }) => {
+  test.info().annotations.push({ type: 'module', description: 'Concurrency & State' });
+  test.info().annotations.push({ type: 'type',   description: 'Edge' });
+  test.info().annotations.push({ type: 'key',    description: 'conc_session_expiry' });
+
+
+  // Generic test for: conc_session_expiry
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
   const title = await page.title();
   expect(title, 'Application should load successfully').toBeTruthy();

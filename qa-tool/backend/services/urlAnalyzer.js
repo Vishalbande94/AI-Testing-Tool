@@ -17,29 +17,111 @@ const MAX_BODY_BYTES     = 2_000_000; // 2 MB cap on fetched HTML
 // ── Public API ───────────────────────────────────────────────────────────────
 /**
  * Analyze a URL or a local file:// path.
+ * Crawls up to MAX_PAGES internal pages for thorough feature discovery.
  * @param {string} url
- * @returns {Promise<{keywords: string[], summary: object, detected: object}>}
+ * @returns {Promise<{keywords: string[], summary: object, detected: object, pages: object[]}>}
  */
+const MAX_PAGES = 15; // max pages to crawl
+
 async function analyze(url) {
   if (!url) throw new Error('url is required');
 
-  let html = '';
+  let mainHtml = '';
   try {
-    html = await fetchContent(url);
+    mainHtml = await fetchContent(url);
   } catch (err) {
-    // Networking failure — return empty analysis; caller will fall back to
-    // generic mode (all 17 modules).
     return {
-      keywords: ['login', 'register', 'signup', 'form', 'submit', 'navigation', 'dashboard'],
-      summary: {
-        title: 'Unable to fetch URL',
-        fetchError: err.message,
-      },
+      keywords: allStandardKeywords(),
+      summary: { title: 'Unable to fetch URL', fetchError: err.message },
       detected: {},
+      pages: [],
     };
   }
 
-  return extractFeatures(html, url);
+  // Crawl internal links from the main page
+  const visited = new Set([normalizeUrl(url)]);
+  const pages = [{ url, html: mainHtml }];
+  const internalLinks = extractInternalLinks(mainHtml, url);
+
+  for (const link of internalLinks.slice(0, MAX_PAGES - 1)) {
+    const norm = normalizeUrl(link);
+    if (visited.has(norm)) continue;
+    visited.add(norm);
+    try {
+      const html = await fetchContent(link);
+      pages.push({ url: link, html });
+    } catch { /* skip unreachable pages */ }
+  }
+
+  // Combine features from all pages
+  const combined = combinePageFeatures(pages, url);
+  return combined;
+}
+
+function normalizeUrl(u) {
+  try { const p = new URL(u); return (p.origin + p.pathname).replace(/\/$/, '').toLowerCase(); }
+  catch { return u.toLowerCase(); }
+}
+
+function extractInternalLinks(html, baseUrl) {
+  let origin;
+  try { origin = new URL(baseUrl).origin; } catch { return []; }
+  const links = [];
+  const re = /<a\b[^>]*href=["']([^"'#]+)["']/gi;
+  let match;
+  while ((match = re.exec(html)) !== null) {
+    let href = match[1];
+    if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) continue;
+    try {
+      const full = new URL(href, baseUrl);
+      if (full.origin === origin && !links.includes(full.href)) links.push(full.href);
+    } catch { /* invalid URL */ }
+  }
+  return links;
+}
+
+function combinePageFeatures(pages, baseUrl) {
+  const allKeywords = new Set();
+  const allDetected = {};
+  const pageSummaries = [];
+
+  for (const p of pages) {
+    const features = extractFeatures(p.html, p.url);
+    features.keywords.forEach(k => allKeywords.add(k));
+    Object.assign(allDetected, features.detected);
+    pageSummaries.push({
+      url: p.url,
+      title: features.summary.title,
+      forms: features.summary.formsCount,
+      inputs: features.summary.inputsCount,
+      buttons: features.summary.buttonsCount,
+      detectedFeatures: Object.keys(features.summary.detected).filter(k => features.summary.detected[k]),
+    });
+  }
+
+  // Always include standard cross-cutting QA concerns for comprehensive coverage
+  const standardExtras = [
+    'navigation', 'menu', 'page', 'link',  // navigation
+    'form', 'validation', 'submit',          // form testing
+  ];
+  standardExtras.forEach(k => allKeywords.add(k));
+
+  const mainFeatures = extractFeatures(pages[0].html, baseUrl);
+
+  return {
+    keywords: [...allKeywords],
+    summary: {
+      ...mainFeatures.summary,
+      pagesCrawled: pages.length,
+      detected: allDetected,
+    },
+    detected: allDetected,
+    pages: pageSummaries,
+  };
+}
+
+function allStandardKeywords() {
+  return 'login register signup authentication password form validation submit search filter logout signout session forgot reset dashboard home overview navigation menu link profile account settings payment checkout billing'.split(' ');
 }
 
 // ── Fetch (http/https/file://) ──────────────────────────────────────────────
